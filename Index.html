@@ -70,6 +70,11 @@
       cursor:pointer;
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
     }
+    .nav-button[disabled]{
+      opacity:.4;
+      cursor:not-allowed;
+      pointer-events:none;
+    }
     .nav-button .nav-label {
       line-height:1;
     }
@@ -115,6 +120,109 @@
       display:flex;
       flex-direction:column;
       gap:.75rem;
+    }
+
+    .revive-wrap{
+      width:min(100%, var(--grid-max));
+      margin:0 auto;
+    }
+    .revive-card{
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.85rem, 2vh, 1.2rem);
+    }
+    .revive-heading{
+      margin:0;
+      font-size:clamp(1.2rem, 2.6vw, 1.8rem);
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .revive-intro{
+      margin:0;
+      font-size:clamp(.85rem, 1.3vw, 1.05rem);
+      opacity:.8;
+    }
+    .revive-stats{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));
+      gap:clamp(.6rem, 1.8vh, 1rem);
+    }
+    .revive-stat{
+      background:var(--card);
+      border-radius:14px;
+      padding:clamp(.6rem, 1.6vh, .9rem) clamp(.9rem, 2vw, 1.2rem);
+      display:flex;
+      flex-direction:column;
+      gap:.35rem;
+    }
+    .revive-stat span{
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      font-size:clamp(.65rem, .9vw, .8rem);
+      opacity:.65;
+    }
+    .revive-stat strong{
+      font-size:clamp(1rem, 1.8vw, 1.4rem);
+    }
+    .revive-offer{
+      display:flex;
+      flex-wrap:wrap;
+      gap:clamp(.8rem, 2vh, 1.2rem);
+      justify-content:space-between;
+      align-items:center;
+      padding:clamp(.9rem, 2vh, 1.3rem);
+      border-radius:14px;
+      background:var(--pill);
+    }
+    .revive-offer-details{
+      display:flex;
+      flex-direction:column;
+      gap:.45rem;
+    }
+    .revive-offer-line{
+      display:flex;
+      justify-content:space-between;
+      gap:1.2rem;
+      font-size:clamp(.85rem, 1.3vw, 1.05rem);
+    }
+    .revive-offer-line span{
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      opacity:.7;
+    }
+    .revive-offer button{
+      padding:clamp(.6rem, 1.8vh, 1rem) clamp(1.2rem, 3vw, 2rem);
+      border:none;
+      border-radius:999px;
+      background:linear-gradient(135deg, rgba(120,220,255,.4), rgba(60,120,255,.75));
+      color:#fff;
+      font-family:'Orbitron',sans-serif;
+      font-size:clamp(.85rem, 1.3vw, 1.1rem);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      cursor:pointer;
+      transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+      white-space:nowrap;
+    }
+    .revive-offer button:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+    .revive-offer button:not(:disabled):hover{
+      transform:translateY(-1px);
+      box-shadow:0 10px 24px rgba(0,0,0,.28);
+    }
+    .revive-locked{
+      margin:0;
+      font-size:clamp(.8rem, 1.2vw, .95rem);
+      opacity:.75;
+      text-align:center;
+    }
+    .revive-note{
+      margin:0;
+      font-size:clamp(.78rem, 1.15vw, .95rem);
+      opacity:.75;
     }
     .placeholder-card h2 {
       margin:0;
@@ -1101,8 +1209,11 @@
         <article class="info-card">
           <h2>Progression globale</h2>
           <div class="info-metrics">
+            <div class="info-row"><span>Atoms (revive en cours)</span><strong id="infosReviveAtoms">0</strong></div>
             <div class="info-row"><span>Total d'Atoms</span><strong id="infosLifetimeAtoms">0</strong></div>
+            <div class="info-row"><span>Clics (revive en cours)</span><strong id="infosReviveClicks">0</strong></div>
             <div class="info-row"><span>Clics totaux</span><strong id="infosLifetimeClicks">0</strong></div>
+            <div class="info-row"><span>Revives complétés</span><strong id="infosReviveCount">0</strong></div>
             <div class="info-row"><span>Temps depuis le début</span><strong id="infosTotalRuntime">0 h 0 min</strong></div>
           </div>
         </article>
@@ -1138,10 +1249,25 @@
     <!-- PAGE REVIVE -->
     <section id="revivePage" class="page" aria-labelledby="reviveTitle">
       <h1 id="reviveTitle" class="sr-only">Revive</h1>
-      <div class="placeholder-card">
-        <h2>Module de renaissance</h2>
-        <p>Cette section accueillera tes idées de reset avancé : mécaniques de prestige, bonus temporaires ou missions spéciales.</p>
-        <p>Ajoute-y les variables importantes dès que tu définiras le fonctionnement précis de la renaissance.</p>
+      <div class="revive-wrap">
+        <article class="card revive-card">
+          <h2 class="revive-heading">Module de renaissance</h2>
+          <p class="revive-intro">Sacrifie ta progression actuelle pour recommencer une partie avec des bases plus solides et des bonus permanents.</p>
+          <div class="revive-stats">
+            <div class="revive-stat"><span>Revives réalisés</span><strong id="reviveCountStat">0</strong></div>
+            <div class="revive-stat"><span>Base de départ APC/APS</span><strong id="reviveBaseStat">+0</strong></div>
+            <div class="revive-stat"><span>Bonus par achat</span><strong id="reviveShopStat">+1</strong></div>
+          </div>
+          <div id="reviveOffer" class="revive-offer">
+            <div class="revive-offer-details">
+              <div class="revive-offer-line"><span>Coût</span><strong id="reviveCostValue">1.000b</strong></div>
+              <div class="revive-offer-line"><span>Récompense</span><strong id="reviveRewardValue">+200 APC / APS</strong></div>
+            </div>
+            <button id="reviveBuyBtn" type="button">Déclencher la renaissance</button>
+          </div>
+          <p class="revive-note">Chaque renaissance remet à zéro tes Atoms, isotopes, bonus et améliorations, mais offre un bonus permanent d'APC/APS affiché ci-dessus et augmente le gain par achat du shop.</p>
+          <p id="reviveLockedMessage" class="revive-locked hidden">Accumule suffisamment d'Atoms pour débloquer cette renaissance.</p>
+        </article>
       </div>
     </section>
   </main>
@@ -1346,6 +1472,10 @@
       return map;
     }, {});
 
+    const REVIVE_BASE_COST = 1_000_000_000_000;
+    const REVIVE_COST_MULTIPLIER = 1000;
+    const REVIVE_REWARDS = [200,500,1000,1500,2000,2500,3000,3500,4000,4500];
+
     // Tailles de set (pour les bonus de “set complet”)
     const FAMILY_SET_SIZES = {};
     for (const f of Object.keys(FAMILIES)) FAMILY_SET_SIZES[f] = ELEMENTS.filter(e=>e.family===f && !e.frow).length
@@ -1362,7 +1492,16 @@
     let apsMultiLvl = toNonNegativeInt(S0.apsMultiLvl ?? 0);
     let totalAtoms = toNonNegativeInt(S0.totalAtoms ?? atoms);
     let manualClicksTotal = toNonNegativeInt(S0.manualClicks ?? 0);
+    let reviveCount = toNonNegativeInt(S0.reviveCount ?? 0);
+    let reviveRunAtoms = toNonNegativeInt(S0.reviveAtoms ?? totalAtoms);
+    let reviveRunClicks = toNonNegativeInt(S0.reviveClicks ?? manualClicksTotal);
+    let reviveUnlocked = (S0.reviveUnlocked === true) || reviveCount > 0;
     let gameStart = Number.isFinite(S0.gameStart) ? Math.max(0, Math.floor(S0.gameStart)) : Date.now();
+    const reviveBaseValues = getReviveBaseStartValue(reviveCount);
+    if (reviveBaseValues){
+      baseApc = Math.max(baseApc, reviveBaseValues.apc);
+      baseAps = Math.max(baseAps, reviveBaseValues.aps);
+    }
     let trophies = {};
     if (S0.trophies && typeof S0.trophies === "object"){
       for (const trophy of AUTO_GACHA_TROPHIES){
@@ -1413,7 +1552,24 @@
     // Thème
 
     function saveAll(){
-      localStorage.setItem("miniAtomState", JSON.stringify({ atoms, apc: baseApc, aps: baseAps, apcLvl, autoLvl, apcMultiLvl, apsMultiLvl, totalAtoms, trophies, manualClicks: manualClicksTotal, gameStart, last: Date.now() }));
+      localStorage.setItem("miniAtomState", JSON.stringify({
+        atoms,
+        apc: baseApc,
+        aps: baseAps,
+        apcLvl,
+        autoLvl,
+        apcMultiLvl,
+        apsMultiLvl,
+        totalAtoms,
+        trophies,
+        manualClicks: manualClicksTotal,
+        gameStart,
+        last: Date.now(),
+        reviveCount,
+        reviveAtoms: reviveRunAtoms,
+        reviveClicks: reviveRunClicks,
+        reviveUnlocked
+      }));
       localStorage.setItem("gacha", JSON.stringify(gacha));
     }
 
@@ -1428,6 +1584,16 @@
     const infosPageEl = document.getElementById("infosPage");
     const revivePageEl = document.getElementById("revivePage");
     const navButtons = Array.from(document.querySelectorAll(".nav-button[data-page-target]"));
+    const reviveNavButton = navButtons.find(btn => btn.dataset.pageTarget === "revivePage");
+
+    const reviveOfferEl = document.getElementById("reviveOffer");
+    const reviveBuyBtn = document.getElementById("reviveBuyBtn");
+    const reviveCostValueEl = document.getElementById("reviveCostValue");
+    const reviveRewardValueEl = document.getElementById("reviveRewardValue");
+    const reviveLockedMessageEl = document.getElementById("reviveLockedMessage");
+    const reviveCountStatEl = document.getElementById("reviveCountStat");
+    const reviveBaseStatEl = document.getElementById("reviveBaseStat");
+    const reviveShopStatEl = document.getElementById("reviveShopStat");
 
     const elAtoms = document.getElementById("atoms");
     const elAps = document.getElementById("aps");
@@ -1468,8 +1634,11 @@
     const infosSessionAtomsEl = document.getElementById("infosSessionAtoms");
     const infosSessionClicksEl = document.getElementById("infosSessionClicks");
     const infosSessionDurationEl = document.getElementById("infosSessionDuration");
+    const infosReviveAtomsEl = document.getElementById("infosReviveAtoms");
     const infosLifetimeAtomsEl = document.getElementById("infosLifetimeAtoms");
+    const infosReviveClicksEl = document.getElementById("infosReviveClicks");
     const infosLifetimeClicksEl = document.getElementById("infosLifetimeClicks");
+    const infosReviveCountEl = document.getElementById("infosReviveCount");
     const infosTotalRuntimeEl = document.getElementById("infosTotalRuntime");
     const infosApcBaseEl = document.getElementById("infosApcBase");
     const infosApcFlatEl = document.getElementById("infosApcFlat");
@@ -1600,11 +1769,21 @@
       return intVal < 0 ? 0 : intVal;
     }
 
+    function checkReviveUnlock(){
+      if (!reviveUnlocked && atoms >= getReviveCostValue(0)){
+        reviveUnlocked = true;
+        updateReviveNavState();
+        updateReviveUI();
+      }
+    }
+
     function addAtoms(amount, { silent = false } = {}){
       const gain = Math.max(0, toNonNegativeInt(amount));
       if (!gain) return false;
       atoms = Math.max(0, atoms + gain);
       totalAtoms = Math.max(0, totalAtoms + gain);
+      reviveRunAtoms = Math.max(0, reviveRunAtoms + gain);
+      checkReviveUnlock();
       checkTrophies({ silent });
       return true;
     }
@@ -1643,6 +1822,78 @@
 
     function formatNumber(value){
       return formatWithSuffix(toInteger(value));
+    }
+
+    function getReviveRewardValue(index){
+      const idx = Math.max(0, Math.floor(Number.isFinite(index) ? index : Number(index) || 0));
+      if (idx < REVIVE_REWARDS.length){
+        return Math.max(0, Math.floor(REVIVE_REWARDS[idx] || 0));
+      }
+      const lastValue = REVIVE_REWARDS.length
+        ? Math.max(0, Math.floor(REVIVE_REWARDS[REVIVE_REWARDS.length - 1] || 0))
+        : 0;
+      const extra = Math.max(0, idx - (REVIVE_REWARDS.length - 1));
+      const value = lastValue + extra * 500;
+      if (!Number.isFinite(value) || value > Number.MAX_SAFE_INTEGER) return Number.MAX_SAFE_INTEGER;
+      return Math.max(0, Math.floor(value));
+    }
+
+    function getReviveCostValue(index){
+      const idx = Math.max(0, Math.floor(Number.isFinite(index) ? index : Number(index) || 0));
+      let cost = REVIVE_BASE_COST;
+      for (let i = 0; i < idx; i++){
+        cost *= REVIVE_COST_MULTIPLIER;
+        if (!Number.isFinite(cost) || cost > Number.MAX_VALUE){
+          return Number.MAX_VALUE;
+        }
+      }
+      if (!Number.isFinite(cost)) return Number.MAX_VALUE;
+      return Math.max(1, Math.floor(cost));
+    }
+
+    function getReviveTotalBonus(count = reviveCount){
+      const c = Math.max(0, Math.floor(Number.isFinite(count) ? count : Number(count) || 0));
+      if (c <= 0) return 0;
+      let total = 0;
+      for (let i = 0; i < c; i++){
+        total += getReviveRewardValue(i);
+        if (!Number.isFinite(total) || total > Number.MAX_SAFE_INTEGER){
+          return Number.MAX_SAFE_INTEGER;
+        }
+      }
+      return Math.max(0, Math.floor(total));
+    }
+
+    function getReviveBaseStartValue(count = reviveCount){
+      const c = Math.max(0, Math.floor(Number.isFinite(count) ? count : Number(count) || 0));
+      if (c <= 0) return { apc: 1, aps: 0 };
+      const total = getReviveTotalBonus(c);
+      if (!Number.isFinite(total) || total > Number.MAX_SAFE_INTEGER){
+        return { apc: Number.MAX_SAFE_INTEGER, aps: Number.MAX_SAFE_INTEGER };
+      }
+      const base = Math.max(0, Math.floor(total));
+      return { apc: Math.max(1, base), aps: Math.max(0, base) };
+    }
+
+    function getReviveShopIncrementValue(count = reviveCount){
+      const c = Math.max(0, Math.floor(Number.isFinite(count) ? count : Number(count) || 0));
+      let increment = 1;
+      for (let i = 0; i < c; i++){
+        if (!Number.isFinite(increment) || increment > Number.MAX_SAFE_INTEGER / 2){
+          return Number.MAX_SAFE_INTEGER;
+        }
+        increment *= 2;
+      }
+      return Math.max(1, Math.floor(increment));
+    }
+
+    function getReviveTier(index = reviveCount){
+      const idx = Math.max(0, Math.floor(Number.isFinite(index) ? index : Number(index) || 0));
+      return {
+        index: idx,
+        cost: getReviveCostValue(idx),
+        reward: getReviveRewardValue(idx)
+      };
     }
 
     function scaledToPercent(value){
@@ -2685,10 +2936,66 @@
       if (resetConfirmBtn) resetConfirmBtn.disabled = true;
     }
 
+    function performRevive(){
+      const tier = getReviveTier(reviveCount);
+      if (!tier) return false;
+      const cost = tier.cost;
+      if (!Number.isFinite(cost) || cost <= 0) return false;
+      if (atoms < cost) return false;
+      atoms = Math.max(0, atoms - cost);
+      reviveCount += 1;
+      reviveUnlocked = true;
+      const baseValues = getReviveBaseStartValue(reviveCount);
+      baseApc = baseValues.apc;
+      baseAps = baseValues.aps;
+      apcLvl = 0;
+      autoLvl = 0;
+      apcMultiLvl = 0;
+      apsMultiLvl = 0;
+      trophies = {};
+      const now = Date.now();
+      last = now;
+      sessionStartTime = now;
+      sessionManualClicks = 0;
+      sessionAtomsBaseline = totalAtoms;
+      reviveRunAtoms = 0;
+      reviveRunClicks = 0;
+      currentElement = null;
+      currentIsoDiscount = 0;
+      currentRollDiscount = 0;
+      apcFrenzyEffects = [];
+      apsFrenzyEffects = [];
+      currentFrenzyMultiplierBase = 5;
+      hideApcFrenzyOrb();
+      hideApsFrenzyOrb();
+      resetAutoGachaCooldown();
+      lastAutoResult = null;
+      updateAutoGachaHeader();
+      gacha = createDefaultGachaState();
+      syncTotalIsotopes();
+      if (autoGachaPanel) autoGachaPanel.classList.add("hidden");
+      if (lastLootBox) lastLootBox.classList.add("hidden");
+      if (lastLootName) lastLootName.textContent = "—";
+      if (lastLootFam) lastLootFam.textContent = "—";
+      setLootResultClass(null);
+      if (lastLootType) lastLootType.textContent = "—";
+      atoms = 0;
+      buildPeriodicGrids();
+      updateReviveNavState();
+      saveAll();
+      updateUI();
+      return true;
+    }
+
     function performReset(){
       atoms = 0;
-      baseApc = 1;
-      baseAps = 0;
+      reviveCount = 0;
+      reviveRunAtoms = 0;
+      reviveRunClicks = 0;
+      reviveUnlocked = false;
+      const baseValues = getReviveBaseStartValue(0);
+      baseApc = baseValues.apc;
+      baseAps = baseValues.aps;
       apcLvl = 0;
       autoLvl = 0;
       apcMultiLvl = 0;
@@ -2723,6 +3030,7 @@
       localStorage.removeItem("miniAtomState");
       localStorage.removeItem("gacha");
       buildPeriodicGrids();
+      updateReviveNavState();
       saveAll();
       updateUI();
     }
@@ -2732,6 +3040,7 @@
       mainPageEl.addEventListener("click", ()=>{
         manualClicksTotal += 1;
         sessionManualClicks += 1;
+        reviveRunClicks += 1;
         const { APC, critChance, critDamagePercent } = computeDerivedStats();
         let gain = Math.max(0, toNonNegativeInt(APC));
         let isCrit = false;
@@ -2832,13 +3141,21 @@
     btnBuyApc.addEventListener("click", ()=>{
       const cost = apcCost(apcLvl);
       if (atoms >= cost){
-        atoms -= cost; baseApc += 1; apcLvl++; saveAndUpdate();
+        const increment = getReviveShopIncrementValue();
+        atoms -= cost;
+        baseApc += increment;
+        apcLvl++;
+        saveAndUpdate();
       }
     });
     btnBuyAuto.addEventListener("click", ()=>{
       const cost = autoCost(autoLvl);
       if (atoms >= cost){
-        atoms -= cost; baseAps += 1; autoLvl++; saveAndUpdate();
+        const increment = getReviveShopIncrementValue();
+        atoms -= cost;
+        baseAps += increment;
+        autoLvl++;
+        saveAndUpdate();
       }
     });
     btnBuyApcMulti.addEventListener("click", ()=>{
@@ -2853,6 +3170,12 @@
         atoms -= cost; apsMultiLvl++; saveAndUpdate();
       }
     });
+
+    if (reviveBuyBtn){
+      reviveBuyBtn.addEventListener("click", ()=>{
+        performRevive();
+      });
+    }
 
     // Tirage
     rollBtn.addEventListener("click", ()=>{
@@ -2876,6 +3199,9 @@
      * éviter les oublis lors de l'ajout de nouvelles pages.
      */
     function activatePage(pageId){
+      if (pageId === "revivePage" && !reviveUnlocked){
+        pageId = "mainPage";
+      }
       if (!pageElements.has(pageId)) return;
       pageElements.forEach((pageEl, id)=>{
         if (!pageEl) return;
@@ -2904,7 +3230,9 @@
 
     navButtons.forEach(btn=>{
       btn.addEventListener("click", ()=>{
+        if (btn.disabled) return;
         const target = btn.dataset.pageTarget;
+        if (target === "revivePage" && !reviveUnlocked) return;
         if (target) activatePage(target);
       });
     });
@@ -2997,12 +3325,73 @@
     // Rendu + autosave
     setInterval(()=>{ saveAll(); updateUI(); }, 1000);
 
+    function updateReviveNavState(){
+      if (reviveNavButton){
+        reviveNavButton.disabled = !reviveUnlocked;
+      }
+    }
+
+    function updateReviveUI(){
+      const baseBonus = getReviveTotalBonus(reviveCount);
+      if (reviveCountStatEl) reviveCountStatEl.textContent = formatNumber(reviveCount);
+      if (reviveBaseStatEl){
+        const bonusText = reviveCount > 0 ? `+${formatNumber(baseBonus)}` : "+0";
+        reviveBaseStatEl.textContent = bonusText;
+      }
+      const shopIncrement = getReviveShopIncrementValue();
+      if (reviveShopStatEl) reviveShopStatEl.textContent = `+${formatNumber(shopIncrement)} / achat`;
+      const accessible = reviveUnlocked;
+      if (reviveOfferEl) reviveOfferEl.classList.toggle("hidden", !accessible);
+      if (reviveLockedMessageEl){
+        if (!accessible){
+          const unlockCostText = formatNumber(getReviveCostValue(0));
+          reviveLockedMessageEl.textContent = `Atteins ${unlockCostText} Atoms simultanément pour débloquer la renaissance.`;
+          reviveLockedMessageEl.classList.remove("hidden");
+        } else {
+          reviveLockedMessageEl.classList.add("hidden");
+        }
+      }
+      if (!reviveBuyBtn) return;
+      const tier = getReviveTier(reviveCount);
+      const hasTier = accessible && tier && Number.isFinite(tier.cost) && tier.cost > 0 && tier.cost < Number.MAX_VALUE;
+      if (reviveCostValueEl){
+        if (hasTier){
+          reviveCostValueEl.textContent = `${formatNumber(tier.cost)} Atoms`;
+        } else {
+          reviveCostValueEl.textContent = "—";
+        }
+      }
+      if (reviveRewardValueEl){
+        if (hasTier){
+          reviveRewardValueEl.textContent = `+${formatNumber(tier.reward)} APC / APS`;
+        } else if (!accessible){
+          reviveRewardValueEl.textContent = "+0 APC / APS";
+        } else {
+          reviveRewardValueEl.textContent = "Bonus maximal atteint";
+        }
+      }
+      if (!accessible){
+        reviveBuyBtn.disabled = true;
+        return;
+      }
+      if (!hasTier){
+        reviveBuyBtn.disabled = true;
+        reviveBuyBtn.textContent = "Renaissance maximale";
+        return;
+      }
+      const costText = formatNumber(tier.cost);
+      const canAfford = atoms >= tier.cost;
+      reviveBuyBtn.disabled = !canAfford;
+      reviveBuyBtn.textContent = canAfford ? `Déclencher (${costText})` : `Coût : ${costText}`;
+    }
+
     function updateUI(){
       const derived = computeDerivedStats();
       const { APC, APS, isoDiscount = 0, inflRed = 0, apcFrenzyMultiplier = 1, apsFrenzyMultiplier = 1, frenzyBase = currentFrenzyMultiplierBase } = derived;
       currentIsoDiscount = isoDiscount;
       currentRollDiscount = clampRollDiscount(inflRed);
       updateAutoGachaHeader();
+      updateReviveNavState();
 
       const atomsText = formatNumber(atoms);
       const apsText = formatNumber(APS);
@@ -3056,8 +3445,11 @@
       }
       if (infosSessionClicksEl) infosSessionClicksEl.textContent = formatNumber(sessionManualClicks);
       if (infosSessionDurationEl) infosSessionDurationEl.textContent = formatSessionDuration(now - sessionStartTime);
+      if (infosReviveAtomsEl) infosReviveAtomsEl.textContent = formatNumber(reviveRunAtoms);
       if (infosLifetimeAtomsEl) infosLifetimeAtomsEl.textContent = formatNumber(totalAtoms);
+      if (infosReviveClicksEl) infosReviveClicksEl.textContent = formatNumber(reviveRunClicks);
       if (infosLifetimeClicksEl) infosLifetimeClicksEl.textContent = formatNumber(manualClicksTotal);
+      if (infosReviveCountEl) infosReviveCountEl.textContent = formatNumber(reviveCount);
       if (infosTotalRuntimeEl) infosTotalRuntimeEl.textContent = formatRuntimeDuration(Math.max(0, now - gameStart));
 
       if (infosApcBaseEl) infosApcBaseEl.textContent = formatNumber(derived.apcBaseValue);
@@ -3085,9 +3477,11 @@
       ]);
 
       // Boutons de base
-      btnBuyApc.textContent = `↑ APC (+1) – Coût ${formatNumber(apcCost(apcLvl))}`;
+      const shopIncrement = getReviveShopIncrementValue();
+      const shopIncrementText = formatNumber(shopIncrement);
+      btnBuyApc.textContent = `↑ APC (+${shopIncrementText}) – Coût ${formatNumber(apcCost(apcLvl))}`;
       infoApc.textContent = `Niveau ${apcLvl}`;
-      btnBuyAuto.textContent = `↑ Auto (+1 APS) – Coût ${formatNumber(autoCost(autoLvl))}`;
+      btnBuyAuto.textContent = `↑ Auto (+${shopIncrementText} APS) – Coût ${formatNumber(autoCost(autoLvl))}`;
       infoAuto.textContent = `Niveau ${autoLvl}`;
       btnBuyApcMulti.textContent = `×2 APC – Coût ${formatNumber(computeMultiplierCost(apcMultiLvl))}`;
       const apcMultiTotal = applyBinaryMultiplier(1, apcMultiLvl);
@@ -3103,6 +3497,7 @@
 
       refreshBonusList();
       refreshAwakenHighlights();
+      updateReviveUI();
       refreshElementPanel();
       updateAutoGachaPanel();
     }
@@ -3113,6 +3508,8 @@
     updateAutoGachaHeader();
     updateAutoGachaPanel();
     buildPeriodicGrids();
+    updateReviveNavState();
+    updateReviveUI();
     activatePage("mainPage");
   </script>
 </body>
