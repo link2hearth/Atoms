@@ -32,15 +32,185 @@
     .page.active { display:flex; flex-direction:column; align-items:center; gap:clamp(1rem, 3vh, 2.5rem); justify-content:space-between; flex:1; }
 
     /* Boutons navigation / barre du haut */
-    #shopBtn, #backBtn, #gachaBtn, #backFromGacha, #bonusBtn, #backFromBonus {
-      position:absolute; padding:clamp(.55rem,1.2vw,.95rem) clamp(.85rem,1.8vw,1.5rem); font-size:clamp(.8rem,1.4vw,1rem); border:none; border-radius:10px; cursor:pointer;
-      background:var(--pill); color:var(--fg);
+    .app-header {
+      position:sticky;
+      top:0;
+      z-index:150;
+      background:var(--bg);
+      box-shadow:0 8px 20px rgba(0,0,0,.22);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.08);
     }
-    #gachaBtn { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
-    #shopBtn { top:clamp(1rem,3vh,2rem); right:clamp(1rem,3vw,2.5rem); }
-    #backBtn, #backFromGacha { top:clamp(1rem,3vh,2rem); right:clamp(1rem,3vw,2.5rem); }
-    #bonusBtn { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
-    #backFromBonus { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
+    .nav-menu {
+      width:100%;
+      max-width:var(--grid-max);
+      margin:0 auto;
+      padding:clamp(.6rem, 2vh, 1rem) clamp(1.2rem, 4vw, 2.4rem);
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(.45rem, 1.5vw, .9rem);
+      list-style:none;
+    }
+    .nav-button {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(.45rem, 1.2vh, .8rem) clamp(.9rem, 2.1vw, 1.4rem);
+      border:none;
+      border-radius:999px;
+      background:var(--pill);
+      color:var(--fg);
+      font-family:'Orbitron',sans-serif;
+      font-size:clamp(.68rem, 1vw, .85rem);
+      font-weight:600;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      cursor:pointer;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+    }
+    .nav-button .nav-label {
+      line-height:1;
+    }
+    .nav-button:hover,
+    .nav-button:focus-visible {
+      transform:translateY(-1px);
+      box-shadow:0 10px 22px rgba(0,0,0,.26);
+    }
+    .nav-button.active {
+      background:var(--accent);
+      color:var(--bg);
+      box-shadow:0 12px 24px rgba(0,0,0,.28);
+    }
+    main {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+    }
+    #pageContainer {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+    .sr-only {
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0;
+    }
+    .placeholder-card {
+      width:min(100%, var(--grid-max));
+      margin:0 auto;
+      background:var(--card);
+      border-radius:18px;
+      padding:clamp(1.2rem, 3vh, 2rem) clamp(1.2rem, 4vw, 2.2rem);
+      box-shadow:0 14px 28px rgba(0,0,0,.28);
+      display:flex;
+      flex-direction:column;
+      gap:.75rem;
+    }
+    .placeholder-card h2 {
+      margin:0;
+      font-size:clamp(1.1rem, 2.4vw, 1.6rem);
+      letter-spacing:.08em;
+    }
+    .placeholder-card p {
+      margin:0;
+      font-size:clamp(.85rem, 1.3vw, 1.05rem);
+      opacity:.8;
+    }
+
+    .info-grid {
+      width:min(100%, var(--grid-max));
+      margin:0 auto;
+      display:grid;
+      gap:clamp(.9rem, 2.4vh, 1.6rem);
+    }
+    .info-card {
+      background:var(--card);
+      border-radius:18px;
+      padding:clamp(1rem, 2.4vh, 1.6rem) clamp(1.2rem, 3vw, 2.1rem);
+      box-shadow:0 12px 26px rgba(0,0,0,.24);
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.6rem, 1.6vh, 1rem);
+    }
+    .info-card h2 {
+      margin:0;
+      font-size:clamp(.85rem, 1.3vw, 1.05rem);
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      opacity:.85;
+    }
+    .info-metrics {
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.5rem, 1.4vh, .85rem);
+    }
+    .info-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:clamp(.75rem, 2vw, 1.2rem);
+      font-size:clamp(.78rem, 1.1vw, .95rem);
+      flex-wrap:wrap;
+    }
+    .info-row span {
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      opacity:.7;
+      flex:1 1 auto;
+    }
+    .info-row strong {
+      font-size:clamp(.95rem, 1.6vw, 1.3rem);
+      font-weight:700;
+      letter-spacing:.08em;
+      margin-left:auto;
+      text-align:right;
+    }
+    .info-row.total {
+      border-top:1px solid rgba(255,255,255,.12);
+      padding-top:clamp(.45rem, 1.2vh, .75rem);
+      margin-top:clamp(.45rem, 1.2vh, .75rem);
+    }
+    .info-row-multi {
+      align-items:flex-start;
+    }
+    .info-row-multi span {
+      padding-top:.2rem;
+    }
+    .multiplier-list {
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:.35rem;
+      flex:1;
+    }
+    .multiplier-item {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      font-size:clamp(.75rem, 1.05vw, .9rem);
+    }
+    .multiplier-item span {
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      opacity:.68;
+    }
+    .multiplier-item strong {
+      font-size:clamp(.9rem, 1.4vw, 1.1rem);
+      letter-spacing:.08em;
+    }
 
     /* Sélecteur de thème (boutons shop) */
     .theme-selector {
@@ -468,7 +638,7 @@
     .hidden { display:none; }
 
     /* Layout spécifiques par page */
-    #mainPage.page.active { justify-content:center; }
+    #mainPage.page.active { justify-content:flex-start; }
     #mainPage .atomsCluster { order:1; margin-bottom:clamp(1.2rem, 4vh, 3rem); }
     #mainPage .atom { order:2; margin:0 auto; }
 
@@ -626,8 +796,14 @@
       opacity:.7;
     }
 
+    @media (min-width: 960px) {
+      .info-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+
     @media (max-width: 900px) {
       .page { padding:clamp(1.25rem,5vh,2.5rem) clamp(1rem,5vw,2rem); }
+      .nav-menu { justify-content:flex-start; }
+      .nav-button { flex:1 1 calc(50% - clamp(.55rem, 2vw, 1rem)); justify-content:center; }
       .theme-selector {
         width:100%;
         flex-direction:column;
@@ -654,6 +830,8 @@
     }
 
     @media (max-width: 720px) {
+      .nav-menu { justify-content:center; }
+      .nav-button { flex:1 1 100%; }
       .gacha-info .info-lines { grid-template-columns:1fr; }
     }
 
@@ -661,12 +839,6 @@
       .atom { width:clamp(7.5rem,20vmin,15rem); }
       .gacha-grid { --cell-size: clamp(32px, min(3.6vw, 5.5vh), 48px); }
       .gacha-info { min-height:clamp(32px, min(3.6vw, 5.5vh), 48px); }
-    }
-
-    @media (max-height: 620px) {
-      #shopBtn, #backBtn, #gachaBtn, #backFromGacha, #bonusBtn, #backFromBonus {
-        top:clamp(.5rem,2vh,1.25rem);
-      }
     }
 
     .modal-overlay {
@@ -748,146 +920,224 @@
 </head>
 <body class="theme-rainbow">
   <div id="confettiLayer" aria-hidden="true"></div>
-  <!-- PAGE PRINCIPALE -->
-  <div id="mainPage" class="page active">
-    <button id="gachaBtn">Atomes</button>
-    <button id="shopBtn">Shop</button>
+  <header class="app-header" role="banner">
+    <nav class="nav-menu" aria-label="Navigation principale">
+      <button class="nav-button active" type="button" data-page-target="mainPage">
+        <span class="nav-label">Atoms</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="shopPage">
+        <span class="nav-label">Shop</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="gachaPage">
+        <span class="nav-label">Tableau</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="bonusPage">
+        <span class="nav-label">Bonus</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="infosPage">
+        <span class="nav-label">Infos</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="revivePage">
+        <span class="nav-label">Revive</span>
+      </button>
+    </nav>
+  </header>
+  <main id="pageContainer">
+    <!-- PAGE PRINCIPALE -->
+    <section id="mainPage" class="page active" aria-labelledby="mainTitle">
+      <h1 id="mainTitle" class="sr-only">ATOMS</h1>
 
-    <div class="atomsCluster">
-      <div class="statPill statPill-apc">
-        <span class="statLabel">APC</span>
-        <span class="statValue" id="apc">1.0</span>
-        <span class="frenzyStatus" id="frenzyStatus" aria-live="polite">Frénésie ×1.0</span>
-      </div>
-      <div class="atomsBox">
-        <span class="atomsLabel">Atoms</span>
-        <strong class="atomsValue" id="atoms">0.0</strong>
-      </div>
-      <div class="statPill statPill-aps">
-        <span class="statLabel">APS</span>
-        <span class="statValue" id="aps">0.0</span>
-      </div>
-    </div>
-
-    <img class="atom" id="atomIcon" src="Assets/Image/Atom.png" alt="Icône d'atome" />
-
-    <button id="frenzyOrb" type="button" aria-label="Activer le Multiplicateur Frénésie" disabled></button>
-
-    <div id="autoGachaPanel" class="auto-gacha-panel hidden" aria-live="polite">
-      <div id="autoGachaHeader" class="auto-gacha-header">Tirage auto</div>
-      <div class="auto-gacha-content">
-        <span id="autoGachaName" class="auto-gacha-name">—</span>
-        <span id="autoGachaResult" class="loot-result auto-gacha-result" data-base-class="loot-result auto-gacha-result">—</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- PAGE SHOP -->
-  <div id="shopPage" class="page">
-    <button id="backBtn">Retour</button>
-    <div class="atomsCluster">
-      <div class="statPill statPill-apc">
-        <span class="statLabel">APC</span>
-        <span class="statValue" id="apcShop">1.0</span>
-      </div>
-      <div class="atomsBox">
-        <span class="atomsLabel">Atoms</span>
-        <strong class="atomsValue" id="atomsShop">0.0</strong>
-      </div>
-      <div class="statPill statPill-aps">
-        <span class="statLabel">APS</span>
-        <span class="statValue" id="apsShop">0.0</span>
-      </div>
-    </div>
-    <div class="shop-wrap">
-      <div class="card gacha-card">
-        <div class="gacha-card-header">
-          <span class="card-title">Capsule Gacha</span>
-          <button id="rollBtn">🎲 Tirage (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
+      <div class="atomsCluster">
+        <div class="statPill statPill-apc">
+          <span class="statLabel">APC</span>
+          <span class="statValue" id="apc">1.0</span>
+          <span class="frenzyStatus" id="frenzyStatus" aria-live="polite">Frénésie ×1.0</span>
         </div>
-        <div class="gacha-card-meta">
-          <span class="muted">Isotopes</span>
-          <div class="info-pill"><span id="isotopes">0</span></div>
+        <div class="atomsBox">
+          <span class="atomsLabel">Atoms</span>
+          <strong class="atomsValue" id="atoms">0.0</strong>
         </div>
-        <div class="loot hidden" id="lastLootBox">
-          <div class="loot-detail">
-            <span id="lastLootName" class="loot-name">—</span>
-            <span id="lastLootFam" class="loot-family">—</span>
+        <div class="statPill statPill-aps">
+          <span class="statLabel">APS</span>
+          <span class="statValue" id="aps">0.0</span>
+        </div>
+      </div>
+
+      <img class="atom" id="atomIcon" src="Assets/Image/Atom.png" alt="Icône d'atome" />
+
+      <button id="frenzyOrb" type="button" aria-label="Activer le Multiplicateur Frénésie" disabled></button>
+
+      <div id="autoGachaPanel" class="auto-gacha-panel hidden" aria-live="polite">
+        <div id="autoGachaHeader" class="auto-gacha-header">Tirage auto</div>
+        <div class="auto-gacha-content">
+          <span id="autoGachaName" class="auto-gacha-name">—</span>
+          <span id="autoGachaResult" class="loot-result auto-gacha-result" data-base-class="loot-result auto-gacha-result">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE SHOP -->
+    <section id="shopPage" class="page" aria-labelledby="shopTitle">
+      <h1 id="shopTitle" class="sr-only">Shop</h1>
+      <div class="atomsCluster">
+        <div class="statPill statPill-apc">
+          <span class="statLabel">APC</span>
+          <span class="statValue" id="apcShop">1.0</span>
+        </div>
+        <div class="atomsBox">
+          <span class="atomsLabel">Atoms</span>
+          <strong class="atomsValue" id="atomsShop">0.0</strong>
+        </div>
+        <div class="statPill statPill-aps">
+          <span class="statLabel">APS</span>
+          <span class="statValue" id="apsShop">0.0</span>
+        </div>
+      </div>
+      <div class="shop-wrap">
+        <div class="card gacha-card">
+          <div class="gacha-card-header">
+            <span class="card-title">Capsule Gacha</span>
+            <button id="rollBtn">🎲 Tirage (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
           </div>
-          <span id="lastLootType" class="loot-result" data-base-class="loot-result">—</span>
+          <div class="gacha-card-meta">
+            <span class="muted">Isotopes</span>
+            <div class="info-pill"><span id="isotopes">0</span></div>
+          </div>
+          <div class="loot hidden" id="lastLootBox">
+            <div class="loot-detail">
+              <span id="lastLootName" class="loot-name">—</span>
+              <span id="lastLootFam" class="loot-family">—</span>
+            </div>
+            <span id="lastLootType" class="loot-result" data-base-class="loot-result">—</span>
+          </div>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="muted">Améliorations de base</div>
-        <div class="shop-row">
-          <button id="buyApc"></button>
-          <span id="apcInfo"></span>
+        <div class="card">
+          <div class="muted">Améliorations de base</div>
+          <div class="shop-row">
+            <button id="buyApc"></button>
+            <span id="apcInfo"></span>
+          </div>
+          <div class="shop-row">
+            <button id="buyAuto"></button>
+            <span id="autoInfo"></span>
+          </div>
+          <div class="shop-row">
+            <button id="buyApcMulti"></button>
+            <span id="apcMultiInfo"></span>
+          </div>
+          <div class="shop-row">
+            <button id="buyApsMulti"></button>
+            <span id="apsMultiInfo"></span>
+          </div>
         </div>
-        <div class="shop-row">
-          <button id="buyAuto"></button>
-          <span id="autoInfo"></span>
-        </div>
-        <div class="shop-row">
-          <button id="buyApcMulti"></button>
-          <span id="apcMultiInfo"></span>
-        </div>
-        <div class="shop-row">
-          <button id="buyApsMulti"></button>
-          <span id="apsMultiInfo"></span>
-        </div>
-      </div>
 
-      <div class="card">
-        <div class="muted">Gestion de la partie</div>
-        <div class="shop-row">
-          <button id="resetBtn" class="danger" type="button">Réinitialiser la partie</button>
-          <div class="theme-selector" role="group" aria-label="Gestion du thème">
-            <span class="theme-label">Thème</span>
-            <div id="themeControls" aria-label="Sélecteur de thème">
-              <button type="button" data-theme="light" aria-label="Activer le thème clair" title="Thème clair"></button>
-              <button type="button" data-theme="dark" aria-label="Activer le thème sombre" title="Thème sombre"></button>
-              <button type="button" data-theme="rainbow" aria-label="Activer le thème arc-en-ciel" title="Thème arc-en-ciel"></button>
+        <div class="card">
+          <div class="muted">Gestion de la partie</div>
+          <div class="shop-row">
+            <button id="resetBtn" class="danger" type="button">Réinitialiser la partie</button>
+            <div class="theme-selector" role="group" aria-label="Gestion du thème">
+              <span class="theme-label">Thème</span>
+              <div id="themeControls" aria-label="Sélecteur de thème">
+                <button type="button" data-theme="light" aria-label="Activer le thème clair" title="Thème clair"></button>
+                <button type="button" data-theme="dark" aria-label="Activer le thème sombre" title="Thème sombre"></button>
+                <button type="button" data-theme="rainbow" aria-label="Activer le thème arc-en-ciel" title="Thème arc-en-ciel"></button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- PAGE GACHA -->
-  <div id="gachaPage" class="page">
-    <button id="backFromGacha">Retour</button>
-    <button id="bonusBtn">Bonus</button>
-
-    <div class="gacha-wrap">
-      <!-- grille périodique réelle + panneau d'infos -->
-      <div id="periodicGrid" class="gacha-grid">
-        <div id="gachaInfo" class="gacha-info">
-          <div id="elementTitle" class="info-title">
-            <span id="elementName">Clique un élément dans la grille</span>
-            <span id="elementIsoCount" class="iso-count">—</span>
+    <!-- PAGE GACHA -->
+    <section id="gachaPage" class="page" aria-labelledby="gachaTitle">
+      <h1 id="gachaTitle" class="sr-only">Tableau</h1>
+      <div class="gacha-wrap">
+        <div id="periodicGrid" class="gacha-grid">
+          <div id="gachaInfo" class="gacha-info">
+            <div id="elementTitle" class="info-title">
+              <span id="elementName">Clique un élément dans la grille</span>
+              <span id="elementIsoCount" class="iso-count">—</span>
+            </div>
+            <div class="info-lines">
+              <div class="info-line" id="elementFamily">Famille : —</div>
+            </div>
           </div>
-          <div class="info-lines">
-            <div class="info-line" id="elementFamily">Famille : —</div>
+          <div id="awakenWrapper" class="awaken-box hidden">
+            <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
           </div>
-        </div>
-        <div id="awakenWrapper" class="awaken-box hidden">
-          <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- PAGE BONUS -->
-  <div id="bonusPage" class="page">
-    <button id="backFromBonus">Retour</button>
-    <div class="bonus-wrap">
-      <h2 class="bonus-title">Bonus débloqués</h2>
-      <div id="bonusList"><p>Aucun bonus actif pour le moment.</p></div>
-    </div>
-  </div>
+    <!-- PAGE BONUS -->
+    <section id="bonusPage" class="page" aria-labelledby="bonusTitle">
+      <h1 id="bonusTitle" class="sr-only">Bonus</h1>
+      <div class="bonus-wrap">
+        <h2 class="bonus-title">Bonus débloqués</h2>
+        <div id="bonusList"><p>Aucun bonus actif pour le moment.</p></div>
+      </div>
+    </section>
+
+    <!-- PAGE INFOS -->
+    <section id="infosPage" class="page" aria-labelledby="infosTitle">
+      <h1 id="infosTitle" class="sr-only">Infos</h1>
+      <div class="info-grid">
+        <article class="info-card">
+          <h2>Session en cours</h2>
+          <div class="info-metrics">
+            <div class="info-row"><span>Total d'Atoms gagnés</span><strong id="infosSessionAtoms">0</strong></div>
+            <div class="info-row"><span>Clics manuels</span><strong id="infosSessionClicks">0</strong></div>
+            <div class="info-row"><span>Durée en ligne</span><strong id="infosSessionDuration">00:00:00</strong></div>
+          </div>
+        </article>
+        <article class="info-card">
+          <h2>Progression globale</h2>
+          <div class="info-metrics">
+            <div class="info-row"><span>Total d'Atoms</span><strong id="infosLifetimeAtoms">0</strong></div>
+            <div class="info-row"><span>Clics totaux</span><strong id="infosLifetimeClicks">0</strong></div>
+            <div class="info-row"><span>Temps depuis le début</span><strong id="infosTotalRuntime">0 h 0 min</strong></div>
+          </div>
+        </article>
+        <article class="info-card">
+          <h2>Détails APC</h2>
+          <div class="info-metrics">
+            <div class="info-row"><span>Base</span><strong id="infosApcBase">0</strong></div>
+            <div class="info-row"><span>Bonus plat</span><strong id="infosApcFlat">0</strong></div>
+            <div class="info-row"><span>Après bonus</span><strong id="infosApcAfterFlat">0</strong></div>
+            <div class="info-row info-row-multi">
+              <span>Multiplicateurs</span>
+              <ul class="multiplier-list" id="infosApcMultipliers"></ul>
+            </div>
+            <div class="info-row total"><span>Total APC</span><strong id="infosApcTotal">0</strong></div>
+          </div>
+        </article>
+        <article class="info-card">
+          <h2>Détails APS</h2>
+          <div class="info-metrics">
+            <div class="info-row"><span>Base</span><strong id="infosApsBase">0</strong></div>
+            <div class="info-row"><span>Bonus plat</span><strong id="infosApsFlat">0</strong></div>
+            <div class="info-row"><span>Après bonus</span><strong id="infosApsAfterFlat">0</strong></div>
+            <div class="info-row info-row-multi">
+              <span>Multiplicateurs</span>
+              <ul class="multiplier-list" id="infosApsMultipliers"></ul>
+            </div>
+            <div class="info-row total"><span>Total APS</span><strong id="infosApsTotal">0</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- PAGE REVIVE -->
+    <section id="revivePage" class="page" aria-labelledby="reviveTitle">
+      <h1 id="reviveTitle" class="sr-only">Revive</h1>
+      <div class="placeholder-card">
+        <h2>Module de renaissance</h2>
+        <p>Cette section accueillera tes idées de reset avancé : mécaniques de prestige, bonus temporaires ou missions spéciales.</p>
+        <p>Ajoute-y les variables importantes dès que tu définiras le fonctionnement précis de la renaissance.</p>
+      </div>
+    </section>
+  </main>
 
   <div id="resetModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
     <div class="modal-content">
@@ -1104,6 +1354,8 @@
     let apcMultiLvl = toNonNegativeInt(S0.apcMultiLvl ?? 0);
     let apsMultiLvl = toNonNegativeInt(S0.apsMultiLvl ?? 0);
     let totalAtoms = toNonNegativeInt(S0.totalAtoms ?? atoms);
+    let manualClicksTotal = toNonNegativeInt(S0.manualClicks ?? 0);
+    let gameStart = Number.isFinite(S0.gameStart) ? Math.max(0, Math.floor(S0.gameStart)) : Date.now();
     let trophies = {};
     if (S0.trophies && typeof S0.trophies === "object"){
       for (const trophy of AUTO_GACHA_TROPHIES){
@@ -1111,6 +1363,9 @@
       }
     }
     let last = S0.last ?? null;
+    let sessionStartTime = Date.now();
+    let sessionAtomsBaseline = totalAtoms;
+    let sessionManualClicks = 0;
     let frenzyEffects = [];
     let currentFrenzyBase = 5;
     let frenzyOrbTimeout = null;
@@ -1148,7 +1403,7 @@
     // Thème
 
     function saveAll(){
-      localStorage.setItem("miniAtomState", JSON.stringify({ atoms, apc: baseApc, aps: baseAps, apcLvl, autoLvl, apcMultiLvl, apsMultiLvl, totalAtoms, trophies, last: Date.now() }));
+      localStorage.setItem("miniAtomState", JSON.stringify({ atoms, apc: baseApc, aps: baseAps, apcLvl, autoLvl, apcMultiLvl, apsMultiLvl, totalAtoms, trophies, manualClicks: manualClicksTotal, gameStart, last: Date.now() }));
       localStorage.setItem("gacha", JSON.stringify(gacha));
     }
 
@@ -1160,6 +1415,9 @@
     const shopPageEl = document.getElementById("shopPage");
     const gachaPageEl = document.getElementById("gachaPage");
     const bonusPageEl = document.getElementById("bonusPage");
+    const infosPageEl = document.getElementById("infosPage");
+    const revivePageEl = document.getElementById("revivePage");
+    const navButtons = Array.from(document.querySelectorAll(".nav-button[data-page-target]"));
 
     const elAtoms = document.getElementById("atoms");
     const elAps = document.getElementById("aps");
@@ -1172,11 +1430,6 @@
     const elAtomsGacha = document.getElementById("atomsGacha");
     const elApsGacha = document.getElementById("apsGacha");
     const elApcGacha = document.getElementById("apcGacha");
-
-    const btnShop = document.getElementById("shopBtn");
-    const btnBack = document.getElementById("backBtn");
-    const btnGacha = document.getElementById("gachaBtn");
-    const btnBackGacha = document.getElementById("backFromGacha");
 
     const btnBuyApc = document.getElementById("buyApc");
     const btnBuyAuto = document.getElementById("buyAuto");
@@ -1200,9 +1453,24 @@
     const awakenBtn = document.getElementById("awakenBtn");
     const awakenWrapper = document.getElementById("awakenWrapper");
 
-    const bonusBtn = document.getElementById("bonusBtn");
-    const backBonusBtn = document.getElementById("backFromBonus");
     const bonusList = document.getElementById("bonusList");
+
+    const infosSessionAtomsEl = document.getElementById("infosSessionAtoms");
+    const infosSessionClicksEl = document.getElementById("infosSessionClicks");
+    const infosSessionDurationEl = document.getElementById("infosSessionDuration");
+    const infosLifetimeAtomsEl = document.getElementById("infosLifetimeAtoms");
+    const infosLifetimeClicksEl = document.getElementById("infosLifetimeClicks");
+    const infosTotalRuntimeEl = document.getElementById("infosTotalRuntime");
+    const infosApcBaseEl = document.getElementById("infosApcBase");
+    const infosApcFlatEl = document.getElementById("infosApcFlat");
+    const infosApcAfterFlatEl = document.getElementById("infosApcAfterFlat");
+    const infosApcMultipliersEl = document.getElementById("infosApcMultipliers");
+    const infosApcTotalEl = document.getElementById("infosApcTotal");
+    const infosApsBaseEl = document.getElementById("infosApsBase");
+    const infosApsFlatEl = document.getElementById("infosApsFlat");
+    const infosApsAfterFlatEl = document.getElementById("infosApsAfterFlat");
+    const infosApsMultipliersEl = document.getElementById("infosApsMultipliers");
+    const infosApsTotalEl = document.getElementById("infosApsTotal");
 
     const resetBtn = document.getElementById("resetBtn");
     const resetModal = document.getElementById("resetModal");
@@ -1371,6 +1639,47 @@
 
     function chanceScaledToPercent(value){
       return Math.floor((value * 100 + Math.floor(CHANCE_SCALE / 2)) / CHANCE_SCALE);
+    }
+    function formatSessionDuration(ms){
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function formatRuntimeDuration(ms){
+      const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+      const totalHours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      if (totalHours >= 24){
+        const days = Math.floor(totalHours / 24);
+        const hours = totalHours % 24;
+        return `${days} j ${hours} h ${minutes} min`;
+      }
+      return `${totalHours} h ${minutes} min`;
+    }
+
+    function formatMultiplier(value){
+      if (!Number.isFinite(value) || value <= 0) return '×0';
+      let precision = 2;
+      if (value >= 1000) precision = 0;
+      else if (value >= 10) precision = 1;
+      return `×${value.toFixed(precision)}`;
+    }
+
+    function renderMultiplierList(target, items){
+      if (!target) return;
+      if (!Array.isArray(items) || items.length === 0){
+        target.innerHTML = '<li class="multiplier-item"><span>Aucun bonus</span><strong>×1.00</strong></li>';
+        return;
+      }
+      target.innerHTML = items.map(item => {
+        const data = item || {};
+        const label = data.label || '';
+        const value = Number.isFinite(data.value) ? data.value : 1;
+        return `<li class="multiplier-item"><span>${label}</span><strong>${formatMultiplier(value)}</strong></li>`;
+      }).join("");
     }
     const normalizeWord = str => (str || "").trim().toLowerCase();
 
@@ -1817,20 +2126,59 @@
       const { critChance, critDamagePercent, apcMul, apsMul, apcFlat, apsFlat, inflRed, offlineBonus, globalMul, isoDiscount, hybridAPC, hybridAPS, frenzyBase } = computeFamilyEffects();
       currentFrenzyBase = Math.max(1, frenzyBase);
       const frenzyMultiplier = Math.max(1, getActiveFrenzyMultiplier());
-      const apcBase = Math.max(0, baseApc + apcFlat);
-      const apsBase = Math.max(0, baseAps + apsFlat);
-      let APC = applyMultiplier(apcBase, apcMul);
+
+      const apcBaseValue = Math.max(0, baseApc);
+      const apsBaseValue = Math.max(0, baseAps);
+      const apcFlatBonus = Math.max(0, apcFlat);
+      const apsFlatBonus = Math.max(0, apsFlat);
+      const apcAfterFlat = Math.max(0, apcBaseValue + apcFlatBonus);
+      const apsAfterFlat = Math.max(0, apsBaseValue + apsFlatBonus);
+
+      const apcFamilyMultiplier = Math.max(0, apcMul) / MULTIPLIER_SCALE;
+      let APC = applyMultiplier(apcAfterFlat, apcMul);
+      const apcHybridMultiplier = (MULTIPLIER_SCALE + Math.max(0, hybridAPC)) / MULTIPLIER_SCALE;
       APC = applyMultiplier(APC, MULTIPLIER_SCALE + hybridAPC);
+      const apcGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
       APC = applyMultiplier(APC, globalMul);
       APC = Math.max(0, APC * frenzyMultiplier);
+      const apcBinaryMultiplier = Math.max(1, applyBinaryMultiplier(1, apcMultiLvl));
       APC = applyBinaryMultiplier(APC, apcMultiLvl);
 
-      let APS = applyMultiplier(apsBase, apsMul);
+      const apsFamilyMultiplier = Math.max(0, apsMul) / MULTIPLIER_SCALE;
+      let APS = applyMultiplier(apsAfterFlat, apsMul);
+      const apsHybridMultiplier = (MULTIPLIER_SCALE + Math.max(0, hybridAPS)) / MULTIPLIER_SCALE;
       APS = applyMultiplier(APS, MULTIPLIER_SCALE + hybridAPS);
+      const apsGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
       APS = applyMultiplier(APS, globalMul);
+      const apsBinaryMultiplier = Math.max(1, applyBinaryMultiplier(1, apsMultiLvl));
       APS = applyBinaryMultiplier(APS, apsMultiLvl);
 
-      return { APC, APS, critChance, critDamagePercent, inflRed, offlineBonus, globalMul, isoDiscount, apcFlat, apsFlat, frenzyMultiplier, frenzyBase };
+      return {
+        APC,
+        APS,
+        critChance,
+        critDamagePercent,
+        inflRed,
+        offlineBonus,
+        globalMul,
+        isoDiscount,
+        apcFlat: apcFlatBonus,
+        apsFlat: apsFlatBonus,
+        frenzyMultiplier,
+        frenzyBase,
+        apcBaseValue,
+        apsBaseValue,
+        apcAfterFlat,
+        apsAfterFlat,
+        apcFamilyMultiplier,
+        apcHybridMultiplier,
+        apcGlobalMultiplier,
+        apcBinaryMultiplier,
+        apsFamilyMultiplier,
+        apsHybridMultiplier,
+        apsGlobalMultiplier,
+        apsBinaryMultiplier
+      };
     }
 
     function getBonusLines(){
@@ -2246,6 +2594,11 @@
       totalAtoms = 0;
       trophies = {};
       last = Date.now();
+      manualClicksTotal = 0;
+      sessionManualClicks = 0;
+      sessionAtomsBaseline = totalAtoms;
+      sessionStartTime = Date.now();
+      gameStart = sessionStartTime;
       gacha = createDefaultGachaState();
       syncTotalIsotopes();
       currentElement = null;
@@ -2273,6 +2626,8 @@
     // Clic partout sur la page principale
     if (mainPageEl){
       mainPageEl.addEventListener("click", ()=>{
+        manualClicksTotal += 1;
+        sessionManualClicks += 1;
         const { APC, critChance, critDamagePercent } = computeDerivedStats();
         let gain = Math.max(0, toNonNegativeInt(APC));
         let isCrit = false;
@@ -2392,48 +2747,52 @@
     });
 
     // Navigation
-    btnShop.addEventListener("click", ()=>{
-      if (!mainPageEl || !shopPageEl) return;
-      hideFrenzyOrb();
-      mainPageEl.classList.remove("active");
-      shopPageEl.classList.add("active");
-      updateUI();
-    });
-    btnBack.addEventListener("click", ()=>{
-      if (!shopPageEl || !mainPageEl) return;
-      shopPageEl.classList.remove("active");
-      mainPageEl.classList.add("active");
-      updateUI();
-    });
-    btnGacha.addEventListener("click", ()=>{
-      if (!mainPageEl || !gachaPageEl) return;
-      hideFrenzyOrb();
-      mainPageEl.classList.remove("active");
-      gachaPageEl.classList.add("active");
-      updateUI();
-    });
-    btnBackGacha.addEventListener("click", ()=>{
-      if (!gachaPageEl || !mainPageEl) return;
-      gachaPageEl.classList.remove("active");
-      mainPageEl.classList.add("active");
-      updateUI();
-    });
-    if (bonusBtn){
-      bonusBtn.addEventListener("click", ()=>{
-        if (!gachaPageEl || !bonusPageEl) return;
-        gachaPageEl.classList.remove("active");
-        bonusPageEl.classList.add("active");
-        updateUI();
+    const pageElements = new Map([
+      ["mainPage", mainPageEl],
+      ["shopPage", shopPageEl],
+      ["gachaPage", gachaPageEl],
+      ["bonusPage", bonusPageEl],
+      ["infosPage", infosPageEl],
+      ["revivePage", revivePageEl]
+    ]);
+
+    /**
+     * Active la page demandée et synchronise l'état du menu.
+     * Cette fonction centralise toute la logique de navigation pour
+     * éviter les oublis lors de l'ajout de nouvelles pages.
+     */
+    function activatePage(pageId){
+      if (!pageElements.has(pageId)) return;
+      pageElements.forEach((pageEl, id)=>{
+        if (!pageEl) return;
+        if (id === pageId){
+          pageEl.classList.add("active");
+        } else {
+          pageEl.classList.remove("active");
+        }
       });
-    }
-    if (backBonusBtn){
-      backBonusBtn.addEventListener("click", ()=>{
-        if (!bonusPageEl || !gachaPageEl) return;
-        bonusPageEl.classList.remove("active");
-        gachaPageEl.classList.add("active");
-        updateUI();
+      navButtons.forEach(btn=>{
+        const target = btn.dataset.pageTarget;
+        const isActive = target === pageId;
+        btn.classList.toggle("active", isActive);
+        if (isActive){
+          btn.setAttribute("aria-current", "page");
+        } else {
+          btn.removeAttribute("aria-current");
+        }
       });
+      if (pageId !== "mainPage"){
+        hideFrenzyOrb();
+      }
+      updateUI();
     }
+
+    navButtons.forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const target = btn.dataset.pageTarget;
+        if (target) activatePage(target);
+      });
+    });
 
     // Thèmes
     themeButtons.forEach(btn=>{
@@ -2557,6 +2916,41 @@
         }
       }
 
+      if (totalAtoms < sessionAtomsBaseline) sessionAtomsBaseline = totalAtoms;
+      const now = Date.now();
+      if (infosSessionAtomsEl){
+        const sessionGain = Math.max(0, totalAtoms - sessionAtomsBaseline);
+        infosSessionAtomsEl.textContent = formatNumber(sessionGain);
+      }
+      if (infosSessionClicksEl) infosSessionClicksEl.textContent = formatNumber(sessionManualClicks);
+      if (infosSessionDurationEl) infosSessionDurationEl.textContent = formatSessionDuration(now - sessionStartTime);
+      if (infosLifetimeAtomsEl) infosLifetimeAtomsEl.textContent = formatNumber(totalAtoms);
+      if (infosLifetimeClicksEl) infosLifetimeClicksEl.textContent = formatNumber(manualClicksTotal);
+      if (infosTotalRuntimeEl) infosTotalRuntimeEl.textContent = formatRuntimeDuration(Math.max(0, now - gameStart));
+
+      if (infosApcBaseEl) infosApcBaseEl.textContent = formatNumber(derived.apcBaseValue);
+      if (infosApcFlatEl) infosApcFlatEl.textContent = formatNumber(derived.apcFlat);
+      if (infosApcAfterFlatEl) infosApcAfterFlatEl.textContent = formatNumber(derived.apcAfterFlat);
+      if (infosApcTotalEl) infosApcTotalEl.textContent = apcText;
+      renderMultiplierList(infosApcMultipliersEl, [
+        { label: 'Bonus APC', value: derived.apcFamilyMultiplier },
+        { label: 'Bonus métalloïdes', value: derived.apcHybridMultiplier },
+        { label: 'Multiplicateur global', value: derived.apcGlobalMultiplier },
+        { label: 'Frénésie', value: derived.frenzyMultiplier },
+        { label: 'Multiplicateur APC ×2', value: derived.apcBinaryMultiplier }
+      ]);
+
+      if (infosApsBaseEl) infosApsBaseEl.textContent = formatNumber(derived.apsBaseValue);
+      if (infosApsFlatEl) infosApsFlatEl.textContent = formatNumber(derived.apsFlat);
+      if (infosApsAfterFlatEl) infosApsAfterFlatEl.textContent = formatNumber(derived.apsAfterFlat);
+      if (infosApsTotalEl) infosApsTotalEl.textContent = apsText;
+      renderMultiplierList(infosApsMultipliersEl, [
+        { label: 'Bonus APS', value: derived.apsFamilyMultiplier },
+        { label: 'Bonus métalloïdes', value: derived.apsHybridMultiplier },
+        { label: 'Multiplicateur global', value: derived.apsGlobalMultiplier },
+        { label: 'Multiplicateur APS ×2', value: derived.apsBinaryMultiplier }
+      ]);
+
       // Boutons de base
       btnBuyApc.textContent = `↑ APC (+1) – Coût ${formatNumber(apcCost(apcLvl))}`;
       infoApc.textContent = `Niveau ${apcLvl}`;
@@ -2586,7 +2980,7 @@
     updateAutoGachaHeader();
     updateAutoGachaPanel();
     buildPeriodicGrids();
-    updateUI();
+    activatePage("mainPage");
   </script>
 </body>
 </html>
