@@ -333,33 +333,38 @@
       filter:drop-shadow(0 0 6px rgba(0,0,0,.2));
     }
 
-    #frenzyOrb {
+    .frenzyOrb {
       position:absolute;
-      width:clamp(2.4rem, 6vmin, 3.8rem);
+      width:clamp(9rem, 22vmin, 18rem);
       aspect-ratio:1;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(120,200,255,.7));
-      box-shadow:0 6px 18px rgba(0,0,0,.25);
-      border:2px solid rgba(255,255,255,.35);
-      color:#0b0b0f;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      border:none;
+      padding:0;
+      background:transparent center/contain no-repeat;
+      box-shadow:0 10px 26px rgba(0,0,0,.28);
       pointer-events:none;
       opacity:0;
       transform:translate(-50%, -50%) scale(.7);
       transition:opacity .25s ease, transform .25s ease;
       z-index:200;
+      cursor:pointer;
     }
-    #frenzyOrb::before {
-      content:"⚛";
-      font-size:clamp(1.2rem, 3.5vmin, 2rem);
-      filter:drop-shadow(0 0 8px rgba(255,255,255,.7));
+    .frenzyOrb:focus-visible {
+      outline:3px solid var(--accent);
+      outline-offset:6px;
     }
-    #frenzyOrb.visible {
+    .frenzyOrb.visible {
       opacity:1;
       pointer-events:auto;
       transform:translate(-50%, -50%) scale(1);
+    }
+    .frenzyOrb:disabled {
+      cursor:default;
+    }
+    #frenzyOrb {
+      background-image:url("Assets/Image/frenesieAPC.png");
+    }
+    #apsFrenzyOrb {
+      background-image:url("Assets/Image/frenesieAPS.png");
     }
 
     .frenzyStatus {
@@ -951,7 +956,7 @@
         <div class="statPill statPill-apc">
           <span class="statLabel">APC</span>
           <span class="statValue" id="apc">1.0</span>
-          <span class="frenzyStatus" id="frenzyStatus" aria-live="polite">Frénésie ×1.0</span>
+          <span class="frenzyStatus" id="apcFrenzyStatus" aria-live="polite">Frénésie APC ×1.0</span>
         </div>
         <div class="atomsBox">
           <span class="atomsLabel">Atoms</span>
@@ -960,12 +965,14 @@
         <div class="statPill statPill-aps">
           <span class="statLabel">APS</span>
           <span class="statValue" id="aps">0.0</span>
+          <span class="frenzyStatus" id="apsFrenzyStatus" aria-live="polite">Frénésie APS ×1.0</span>
         </div>
       </div>
 
       <img class="atom" id="atomIcon" src="Assets/Image/Atom.png" alt="Icône d'atome" />
 
-      <button id="frenzyOrb" type="button" aria-label="Activer le Multiplicateur Frénésie" disabled></button>
+      <button id="frenzyOrb" class="frenzyOrb" type="button" aria-label="Activer la Frénésie APC" disabled></button>
+      <button id="apsFrenzyOrb" class="frenzyOrb" type="button" aria-label="Activer la Frénésie APS" disabled></button>
 
       <div id="autoGachaPanel" class="auto-gacha-panel hidden" aria-live="polite">
         <div id="autoGachaHeader" class="auto-gacha-header">Tirage auto</div>
@@ -1366,10 +1373,13 @@
     let sessionStartTime = Date.now();
     let sessionAtomsBaseline = totalAtoms;
     let sessionManualClicks = 0;
-    let frenzyEffects = [];
-    let currentFrenzyBase = 5;
-    let frenzyOrbTimeout = null;
-    let frenzyOrbVisible = false;
+    let apcFrenzyEffects = [];
+    let apsFrenzyEffects = [];
+    let currentFrenzyMultiplierBase = 5;
+    let apcFrenzyOrbTimeout = null;
+    let apsFrenzyOrbTimeout = null;
+    let apcFrenzyOrbVisible = false;
+    let apsFrenzyOrbVisible = false;
     let autoGachaCooldown = 0;
     let lastAutoResult = null;
 
@@ -1484,8 +1494,10 @@
     const lastLootName = document.getElementById("lastLootName");
     const lastLootFam = document.getElementById("lastLootFam");
     const lastLootType = document.getElementById("lastLootType");
-    const frenzyStatusEl = document.getElementById("frenzyStatus");
-    const frenzyOrbEl = document.getElementById("frenzyOrb");
+    const apcFrenzyStatusEl = document.getElementById("apcFrenzyStatus");
+    const apsFrenzyStatusEl = document.getElementById("apsFrenzyStatus");
+    const apcFrenzyOrbEl = document.getElementById("frenzyOrb");
+    const apsFrenzyOrbEl = document.getElementById("apsFrenzyOrb");
     const autoGachaPanel = document.getElementById("autoGachaPanel");
     const autoGachaHeader = document.getElementById("autoGachaHeader");
     const autoGachaName = document.getElementById("autoGachaName");
@@ -1683,7 +1695,8 @@
     }
     const normalizeWord = str => (str || "").trim().toLowerCase();
 
-    const FRENZY_DURATION_MS = 30_000;
+    const APC_FRENZY_DURATION_MS = 30_000;
+    const APS_FRENZY_DURATION_MS = 60_000;
     const FRENZY_SPAWN_DENOM = 120;
     const FRENZY_ORB_LIFETIME_MS = 8_000;
 
@@ -1862,51 +1875,94 @@
       autoGachaCooldown = interval;
     }
 
-    function pruneFrenzyEffects(now = Date.now()){
-      frenzyEffects = frenzyEffects.filter(effect => effect.expiresAt > now);
+    function pruneApcFrenzyEffects(now = Date.now()){
+      apcFrenzyEffects = apcFrenzyEffects.filter(effect => effect.expiresAt > now);
     }
 
-    function getActiveFrenzyMultiplier(){
-      pruneFrenzyEffects();
-      if (!frenzyEffects.length) return 1;
-      return frenzyEffects.reduce((mul, effect) => mul * effect.multiplier, 1);
+    function pruneApsFrenzyEffects(now = Date.now()){
+      apsFrenzyEffects = apsFrenzyEffects.filter(effect => effect.expiresAt > now);
     }
 
-    function getFrenzyStackCount(){
-      pruneFrenzyEffects();
-      return frenzyEffects.length;
+    function getActiveApcFrenzyMultiplier(){
+      pruneApcFrenzyEffects();
+      if (!apcFrenzyEffects.length) return 1;
+      return apcFrenzyEffects.reduce((mul, effect) => mul * effect.multiplier, 1);
     }
 
-    function getLongestFrenzyRemaining(){
-      pruneFrenzyEffects();
-      if (!frenzyEffects.length) return 0;
+    function getActiveApsFrenzyMultiplier(){
+      pruneApsFrenzyEffects();
+      if (!apsFrenzyEffects.length) return 1;
+      return apsFrenzyEffects.reduce((mul, effect) => mul * effect.multiplier, 1);
+    }
+
+    function getApcFrenzyStackCount(){
+      pruneApcFrenzyEffects();
+      return apcFrenzyEffects.length;
+    }
+
+    function getApsFrenzyStackCount(){
+      pruneApsFrenzyEffects();
+      return apsFrenzyEffects.length;
+    }
+
+    function getLongestApcFrenzyRemaining(){
+      pruneApcFrenzyEffects();
+      if (!apcFrenzyEffects.length) return 0;
       const now = Date.now();
-      return Math.max(...frenzyEffects.map(effect => Math.max(0, effect.expiresAt - now)));
+      return Math.max(...apcFrenzyEffects.map(effect => Math.max(0, effect.expiresAt - now)));
     }
 
-    function triggerFrenzyBonus(){
-      const multiplier = Math.max(1, currentFrenzyBase);
-      const expiresAt = Date.now() + FRENZY_DURATION_MS;
-      frenzyEffects.push({ multiplier, expiresAt });
+    function getLongestApsFrenzyRemaining(){
+      pruneApsFrenzyEffects();
+      if (!apsFrenzyEffects.length) return 0;
+      const now = Date.now();
+      return Math.max(...apsFrenzyEffects.map(effect => Math.max(0, effect.expiresAt - now)));
+    }
+
+    function triggerApcFrenzyBonus(){
+      const multiplier = Math.max(1, currentFrenzyMultiplierBase);
+      const expiresAt = Date.now() + APC_FRENZY_DURATION_MS;
+      apcFrenzyEffects.push({ multiplier, expiresAt });
       spawnConfettiBurst(getAtomCenter(), Math.max(12, Math.floor(CONFETTI_COUNT / 2)));
       updateUI();
     }
 
-    function hideFrenzyOrb(){
-      if (frenzyOrbTimeout){
-        clearTimeout(frenzyOrbTimeout);
-        frenzyOrbTimeout = null;
-      }
-      if (frenzyOrbEl){
-        frenzyOrbEl.classList.remove('visible');
-        frenzyOrbEl.disabled = true;
-        if (document.activeElement === frenzyOrbEl) frenzyOrbEl.blur();
-      }
-      frenzyOrbVisible = false;
+    function triggerApsFrenzyBonus(){
+      const multiplier = Math.max(1, currentFrenzyMultiplierBase);
+      const expiresAt = Date.now() + APS_FRENZY_DURATION_MS;
+      apsFrenzyEffects.push({ multiplier, expiresAt });
+      spawnConfettiBurst(getAtomCenter(), Math.max(12, Math.floor(CONFETTI_COUNT / 2)));
+      updateUI();
     }
 
-    function spawnFrenzyOrb(){
-      if (!frenzyOrbEl || frenzyOrbVisible) return;
+    function hideApcFrenzyOrb(){
+      if (apcFrenzyOrbTimeout){
+        clearTimeout(apcFrenzyOrbTimeout);
+        apcFrenzyOrbTimeout = null;
+      }
+      if (apcFrenzyOrbEl){
+        apcFrenzyOrbEl.classList.remove('visible');
+        apcFrenzyOrbEl.disabled = true;
+        if (document.activeElement === apcFrenzyOrbEl) apcFrenzyOrbEl.blur();
+      }
+      apcFrenzyOrbVisible = false;
+    }
+
+    function hideApsFrenzyOrb(){
+      if (apsFrenzyOrbTimeout){
+        clearTimeout(apsFrenzyOrbTimeout);
+        apsFrenzyOrbTimeout = null;
+      }
+      if (apsFrenzyOrbEl){
+        apsFrenzyOrbEl.classList.remove('visible');
+        apsFrenzyOrbEl.disabled = true;
+        if (document.activeElement === apsFrenzyOrbEl) apsFrenzyOrbEl.blur();
+      }
+      apsFrenzyOrbVisible = false;
+    }
+
+    function spawnApcFrenzyOrb(){
+      if (!apcFrenzyOrbEl || apcFrenzyOrbVisible) return;
       if (!mainPageEl || !mainPageEl.classList.contains('active')) return;
       const mainRect = mainPageEl.getBoundingClientRect();
       const atomRect = atomIcon ? atomIcon.getBoundingClientRect() : null;
@@ -1917,22 +1973,58 @@
       const angle = Math.random() * Math.PI * 2;
       let targetX = centerX + Math.cos(angle) * radius;
       let targetY = centerY + Math.sin(angle) * radius;
-      const margin = Math.min(60, Math.max(24, atomRect.width * 0.3));
-      targetX = Math.min(Math.max(targetX, margin), Math.max(margin, mainRect.width - margin));
-      targetY = Math.min(Math.max(targetY, margin), Math.max(margin, mainRect.height - margin));
-      frenzyOrbEl.style.left = `${targetX}px`;
-      frenzyOrbEl.style.top = `${targetY}px`;
-      frenzyOrbEl.classList.add('visible');
-      frenzyOrbEl.disabled = false;
-      frenzyOrbVisible = true;
-      if (frenzyOrbTimeout) clearTimeout(frenzyOrbTimeout);
-      frenzyOrbTimeout = setTimeout(()=> hideFrenzyOrb(), FRENZY_ORB_LIFETIME_MS);
+      const halfWidth = atomRect.width / 2;
+      const halfHeight = atomRect.height / 2;
+      const marginX = Math.max(halfWidth, Math.max(24, atomRect.width * 0.3));
+      const marginY = Math.max(halfHeight, Math.max(24, atomRect.height * 0.3));
+      targetX = Math.min(Math.max(targetX, marginX), Math.max(marginX, mainRect.width - marginX));
+      targetY = Math.min(Math.max(targetY, marginY), Math.max(marginY, mainRect.height - marginY));
+      apcFrenzyOrbEl.style.left = `${targetX}px`;
+      apcFrenzyOrbEl.style.top = `${targetY}px`;
+      apcFrenzyOrbEl.classList.add('visible');
+      apcFrenzyOrbEl.disabled = false;
+      apcFrenzyOrbVisible = true;
+      if (apcFrenzyOrbTimeout) clearTimeout(apcFrenzyOrbTimeout);
+      apcFrenzyOrbTimeout = setTimeout(()=> hideApcFrenzyOrb(), FRENZY_ORB_LIFETIME_MS);
     }
 
-    function checkFrenzySpawn(){
-      if (frenzyOrbVisible) return;
+    function spawnApsFrenzyOrb(){
+      if (!apsFrenzyOrbEl || apsFrenzyOrbVisible) return;
       if (!mainPageEl || !mainPageEl.classList.contains('active')) return;
-      if (Math.floor(Math.random() * FRENZY_SPAWN_DENOM) === 0) spawnFrenzyOrb();
+      const mainRect = mainPageEl.getBoundingClientRect();
+      const atomRect = atomIcon ? atomIcon.getBoundingClientRect() : null;
+      if (!atomRect) return;
+      const centerX = atomRect.left + atomRect.width / 2 - mainRect.left;
+      const centerY = atomRect.top + atomRect.height / 2 - mainRect.top;
+      const radius = atomRect.width * (0.6 + Math.random() * 0.5);
+      const angle = Math.random() * Math.PI * 2;
+      let targetX = centerX + Math.cos(angle) * radius;
+      let targetY = centerY + Math.sin(angle) * radius;
+      const halfWidth = atomRect.width / 2;
+      const halfHeight = atomRect.height / 2;
+      const marginX = Math.max(halfWidth, Math.max(24, atomRect.width * 0.3));
+      const marginY = Math.max(halfHeight, Math.max(24, atomRect.height * 0.3));
+      targetX = Math.min(Math.max(targetX, marginX), Math.max(marginX, mainRect.width - marginX));
+      targetY = Math.min(Math.max(targetY, marginY), Math.max(marginY, mainRect.height - marginY));
+      apsFrenzyOrbEl.style.left = `${targetX}px`;
+      apsFrenzyOrbEl.style.top = `${targetY}px`;
+      apsFrenzyOrbEl.classList.add('visible');
+      apsFrenzyOrbEl.disabled = false;
+      apsFrenzyOrbVisible = true;
+      if (apsFrenzyOrbTimeout) clearTimeout(apsFrenzyOrbTimeout);
+      apsFrenzyOrbTimeout = setTimeout(()=> hideApsFrenzyOrb(), FRENZY_ORB_LIFETIME_MS);
+    }
+
+    function checkApcFrenzySpawn(){
+      if (apcFrenzyOrbVisible) return;
+      if (!mainPageEl || !mainPageEl.classList.contains('active')) return;
+      if (Math.floor(Math.random() * FRENZY_SPAWN_DENOM) === 0) spawnApcFrenzyOrb();
+    }
+
+    function checkApsFrenzySpawn(){
+      if (apsFrenzyOrbVisible) return;
+      if (!mainPageEl || !mainPageEl.classList.contains('active')) return;
+      if (Math.floor(Math.random() * FRENZY_SPAWN_DENOM) === 0) spawnApsFrenzyOrb();
     }
 
     function rollLootRarity(){
@@ -2124,8 +2216,9 @@
 
     function computeDerivedStats(){
       const { critChance, critDamagePercent, apcMul, apsMul, apcFlat, apsFlat, inflRed, offlineBonus, globalMul, isoDiscount, hybridAPC, hybridAPS, frenzyBase } = computeFamilyEffects();
-      currentFrenzyBase = Math.max(1, frenzyBase);
-      const frenzyMultiplier = Math.max(1, getActiveFrenzyMultiplier());
+      currentFrenzyMultiplierBase = Math.max(1, frenzyBase);
+      const apcFrenzyMultiplier = Math.max(1, getActiveApcFrenzyMultiplier());
+      const apsFrenzyMultiplier = Math.max(1, getActiveApsFrenzyMultiplier());
 
       const apcBaseValue = Math.max(0, baseApc);
       const apsBaseValue = Math.max(0, baseAps);
@@ -2140,7 +2233,7 @@
       APC = applyMultiplier(APC, MULTIPLIER_SCALE + hybridAPC);
       const apcGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
       APC = applyMultiplier(APC, globalMul);
-      APC = Math.max(0, APC * frenzyMultiplier);
+      APC = Math.max(0, APC * apcFrenzyMultiplier);
       const apcBinaryMultiplier = Math.max(1, applyBinaryMultiplier(1, apcMultiLvl));
       APC = applyBinaryMultiplier(APC, apcMultiLvl);
 
@@ -2150,6 +2243,7 @@
       APS = applyMultiplier(APS, MULTIPLIER_SCALE + hybridAPS);
       const apsGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
       APS = applyMultiplier(APS, globalMul);
+      APS = Math.max(0, APS * apsFrenzyMultiplier);
       const apsBinaryMultiplier = Math.max(1, applyBinaryMultiplier(1, apsMultiLvl));
       APS = applyBinaryMultiplier(APS, apsMultiLvl);
 
@@ -2164,7 +2258,8 @@
         isoDiscount,
         apcFlat: apcFlatBonus,
         apsFlat: apsFlatBonus,
-        frenzyMultiplier,
+        apcFrenzyMultiplier,
+        apsFrenzyMultiplier,
         frenzyBase,
         apcBaseValue,
         apsBaseValue,
@@ -2207,7 +2302,7 @@
       if (frenzyReady > 1){
         const extra = frenzyReady - 5;
         const extraText = extra > 0 ? ` (bonus AE +${formatNumber(extra)})` : "";
-        lines.push(`Multiplicateur Frénésie : ×${formatNumber(frenzyReady)} APC pendant 30s${extraText}`);
+        lines.push(`Multiplicateur Frénésie : ×${formatNumber(frenzyReady)} APC pendant 30s / APS pendant 60s${extraText}`);
       }
       return lines;
     }
@@ -2604,9 +2699,11 @@
       currentElement = null;
       currentIsoDiscount = 0;
       currentRollDiscount = 0;
-      frenzyEffects = [];
-      currentFrenzyBase = 5;
-      hideFrenzyOrb();
+      apcFrenzyEffects = [];
+      apsFrenzyEffects = [];
+      currentFrenzyMultiplierBase = 5;
+      hideApcFrenzyOrb();
+      hideApsFrenzyOrb();
       resetAutoGachaCooldown();
       lastAutoResult = null;
       updateAutoGachaHeader();
@@ -2644,13 +2741,23 @@
       });
     }
 
-    if (frenzyOrbEl){
-      frenzyOrbEl.addEventListener("click", event=>{
+    if (apcFrenzyOrbEl){
+      apcFrenzyOrbEl.addEventListener("click", event=>{
         event.preventDefault();
         event.stopPropagation();
         playPopSound();
-        hideFrenzyOrb();
-        triggerFrenzyBonus();
+        hideApcFrenzyOrb();
+        triggerApcFrenzyBonus();
+      });
+    }
+
+    if (apsFrenzyOrbEl){
+      apsFrenzyOrbEl.addEventListener("click", event=>{
+        event.preventDefault();
+        event.stopPropagation();
+        playPopSound();
+        hideApsFrenzyOrb();
+        triggerApsFrenzyBonus();
       });
     }
 
@@ -2782,7 +2889,8 @@
         }
       });
       if (pageId !== "mainPage"){
-        hideFrenzyOrb();
+        hideApcFrenzyOrb();
+        hideApsFrenzyOrb();
       }
       updateUI();
     }
@@ -2874,14 +2982,17 @@
     setInterval(()=> handleAutoGachaTick(1), 1000);
 
     // Apparition du bonus Frénésie
-    setInterval(checkFrenzySpawn, 1000);
+    setInterval(()=>{
+      checkApcFrenzySpawn();
+      checkApsFrenzySpawn();
+    }, 1000);
 
     // Rendu + autosave
     setInterval(()=>{ saveAll(); updateUI(); }, 1000);
 
     function updateUI(){
       const derived = computeDerivedStats();
-      const { APC, APS, isoDiscount = 0, inflRed = 0, frenzyMultiplier = 1, frenzyBase = currentFrenzyBase } = derived;
+      const { APC, APS, isoDiscount = 0, inflRed = 0, apcFrenzyMultiplier = 1, apsFrenzyMultiplier = 1, frenzyBase = currentFrenzyMultiplierBase } = derived;
       currentIsoDiscount = isoDiscount;
       currentRollDiscount = clampRollDiscount(inflRed);
       updateAutoGachaHeader();
@@ -2902,17 +3013,31 @@
       if (elApsGacha) elApsGacha.textContent = apsText;
       if (elApcGacha) elApcGacha.textContent = apcText;
 
-      if (frenzyStatusEl){
-        const stacks = getFrenzyStackCount();
+      if (apcFrenzyStatusEl){
+        const stacks = getApcFrenzyStackCount();
         if (stacks > 0){
-          const remainingMs = getLongestFrenzyRemaining();
+          const remainingMs = getLongestApcFrenzyRemaining();
           const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
           const stackText = stacks > 1 ? ` (${stacks} charges)` : "";
-          frenzyStatusEl.textContent = `Frénésie ×${formatNumber(frenzyMultiplier)}${stackText} – ${remainingSec}s`;
-          frenzyStatusEl.classList.add("active");
+          apcFrenzyStatusEl.textContent = `Frénésie APC ×${formatNumber(apcFrenzyMultiplier)}${stackText} – ${remainingSec}s`;
+          apcFrenzyStatusEl.classList.add("active");
         } else {
-          frenzyStatusEl.textContent = `Frénésie prête : ×${formatNumber(Math.max(1, frenzyBase))}`;
-          frenzyStatusEl.classList.remove("active");
+          apcFrenzyStatusEl.textContent = `Frénésie APC prête : ×${formatNumber(Math.max(1, frenzyBase))}`;
+          apcFrenzyStatusEl.classList.remove("active");
+        }
+      }
+
+      if (apsFrenzyStatusEl){
+        const stacks = getApsFrenzyStackCount();
+        if (stacks > 0){
+          const remainingMs = getLongestApsFrenzyRemaining();
+          const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+          const stackText = stacks > 1 ? ` (${stacks} charges)` : "";
+          apsFrenzyStatusEl.textContent = `Frénésie APS ×${formatNumber(apsFrenzyMultiplier)}${stackText} – ${remainingSec}s`;
+          apsFrenzyStatusEl.classList.add("active");
+        } else {
+          apsFrenzyStatusEl.textContent = `Frénésie APS prête : ×${formatNumber(Math.max(1, frenzyBase))}`;
+          apsFrenzyStatusEl.classList.remove("active");
         }
       }
 
@@ -2936,7 +3061,7 @@
         { label: 'Bonus APC', value: derived.apcFamilyMultiplier },
         { label: 'Bonus métalloïdes', value: derived.apcHybridMultiplier },
         { label: 'Multiplicateur global', value: derived.apcGlobalMultiplier },
-        { label: 'Frénésie', value: derived.frenzyMultiplier },
+        { label: 'Frénésie APC', value: derived.apcFrenzyMultiplier },
         { label: 'Multiplicateur APC ×2', value: derived.apcBinaryMultiplier }
       ]);
 
@@ -2948,6 +3073,7 @@
         { label: 'Bonus APS', value: derived.apsFamilyMultiplier },
         { label: 'Bonus métalloïdes', value: derived.apsHybridMultiplier },
         { label: 'Multiplicateur global', value: derived.apsGlobalMultiplier },
+        { label: 'Frénésie APS', value: derived.apsFrenzyMultiplier },
         { label: 'Multiplicateur APS ×2', value: derived.apsBinaryMultiplier }
       ]);
 
