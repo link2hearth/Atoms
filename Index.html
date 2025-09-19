@@ -531,6 +531,7 @@
     .card { background: var(--card); padding:clamp(1rem,2.5vh,1.5rem); border-radius:12px; width:100%; box-sizing:border-box; }
     .shop-row { display:flex; gap:clamp(.75rem,2vw,1.5rem); align-items:center; justify-content:space-between; flex-wrap:wrap; }
     .shop-row button { padding:clamp(.75rem,1.8vw,1.2rem) clamp(1rem,2.4vw,1.8rem); border:none; border-radius:10px; background:var(--pill); color:var(--fg); cursor:pointer; font-size:clamp(.85rem,1.3vw,1rem); }
+    .shop-actions { display:flex; flex-wrap:wrap; gap:clamp(.4rem,1.2vw,.9rem); }
     .shop-row button.danger {
       background:linear-gradient(135deg, rgba(255,90,90,.35), rgba(190,0,0,.55));
       color:#fff;
@@ -549,6 +550,8 @@
       justify-content:space-between;
       gap:clamp(.6rem,2vw,1.2rem);
     }
+    .gacha-card-actions { display:flex; flex-wrap:wrap; gap:clamp(.4rem,1.2vw,.9rem); justify-content:flex-end; }
+    .gacha-card-actions button { white-space:nowrap; }
     .card-title {
       font-size:clamp(1rem,1.8vw,1.3rem);
       font-weight:700;
@@ -1112,7 +1115,11 @@
         <div class="card gacha-card">
           <div class="gacha-card-header">
             <span class="card-title">Capsule Gacha</span>
-            <button id="rollBtn">🎲 Tirage (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
+            <div class="gacha-card-actions">
+              <button id="rollBtn">🎲 x1 (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
+              <button id="roll10Btn">🎲 x10 (<span id="roll10Cost">—</span> Atoms)</button>
+              <button id="roll100Btn">🎲 x100 (<span id="roll100Cost">—</span> Atoms)</button>
+            </div>
           </div>
           <div class="gacha-card-meta">
             <span class="muted">Isotopes</span>
@@ -1130,11 +1137,19 @@
         <div class="card">
           <div class="muted">Améliorations de base</div>
           <div class="shop-row">
-            <button id="buyApc"></button>
+            <div class="shop-actions">
+              <button id="buyApc"></button>
+              <button id="buyApc10"></button>
+              <button id="buyApc100"></button>
+            </div>
             <span id="apcInfo"></span>
           </div>
           <div class="shop-row">
-            <button id="buyAuto"></button>
+            <div class="shop-actions">
+              <button id="buyAuto"></button>
+              <button id="buyAuto10"></button>
+              <button id="buyAuto100"></button>
+            </div>
             <span id="autoInfo"></span>
           </div>
           <div class="shop-row">
@@ -1608,7 +1623,11 @@
     const elApcGacha = document.getElementById("apcGacha");
 
     const btnBuyApc = document.getElementById("buyApc");
+    const btnBuyApc10 = document.getElementById("buyApc10");
+    const btnBuyApc100 = document.getElementById("buyApc100");
     const btnBuyAuto = document.getElementById("buyAuto");
+    const btnBuyAuto10 = document.getElementById("buyAuto10");
+    const btnBuyAuto100 = document.getElementById("buyAuto100");
     const btnBuyApcMulti = document.getElementById("buyApcMulti");
     const btnBuyApsMulti = document.getElementById("buyApsMulti");
     const infoApc = document.getElementById("apcInfo");
@@ -1617,7 +1636,11 @@
     const infoApsMulti = document.getElementById("apsMultiInfo");
 
     const rollBtn = document.getElementById("rollBtn");
+    const roll10Btn = document.getElementById("roll10Btn");
+    const roll100Btn = document.getElementById("roll100Btn");
     const rollCostOnBtn = document.getElementById("rollCostOnBtn");
+    const roll10CostOnBtn = document.getElementById("roll10Cost");
+    const roll100CostOnBtn = document.getElementById("roll100Cost");
     const isotopesEl = document.getElementById("isotopes");
 
     const gridMain = document.getElementById("periodicGrid");
@@ -2681,6 +2704,22 @@
       return Math.max(1, Math.floor(currentCost * growth / MULTIPLIER_SCALE));
     }
 
+    function computeBulkRollCost(quantity, { baseCost = gacha.rollCost, discount = currentRollDiscount } = {}){
+      const qty = Math.max(0, toNonNegativeInt(quantity));
+      if (qty <= 0) return 0;
+      let total = 0;
+      let cost = Math.max(0, toNonNegativeInt(baseCost));
+      const discountScaled = clampRollDiscount(discount);
+      for (let i = 0; i < qty; i++){
+        const stepCost = getDiscountedRollCost(cost, discountScaled);
+        if (!Number.isFinite(stepCost) || stepCost >= Number.MAX_SAFE_INTEGER) return Number.MAX_SAFE_INTEGER;
+        if (total > Number.MAX_SAFE_INTEGER - stepCost) return Number.MAX_SAFE_INTEGER;
+        total += stepCost;
+        cost = computeNextRollCost(cost);
+      }
+      return total;
+    }
+
     /* ===================== Grille périodique ===================== */
     function buildPeriodicGrids(){
       if (!gridMain) return;
@@ -2856,7 +2895,7 @@
     }
 
     /* ===================== Tirage Gacha ===================== */
-    function rollGacha({ free = false } = {}){
+    function rollGacha({ free = false, displayResult = true } = {}){
       const baseCost = gacha.rollCost;
       const discountScaled = clampRollDiscount(currentRollDiscount);
       const cost = getDiscountedRollCost(baseCost, discountScaled);
@@ -2888,18 +2927,20 @@
       }
 
       // Feedback UI : encart loot + mise à jour grille
-      if (lastLootBox) lastLootBox.classList.remove("hidden");
-      if (lastLootName) lastLootName.textContent = `${el.name} (${el.symbol})`;
-      if (lastLootFam) lastLootFam.textContent = `${FAMILIES[fam]?.label || fam}`;
-      if (first){
-        setLootResultClass("is-new");
-        if (lastLootType) lastLootType.textContent = "Nouveau!";
-      } else if (lootRarity){
-        setLootResultClass(`rarity-${lootRarity.key}`);
-        if (lastLootType) lastLootType.textContent = `Doublons x${lootRarity.multiplier}`;
-      } else {
-        setLootResultClass(null);
-        if (lastLootType) lastLootType.textContent = "—";
+      if (displayResult){
+        if (lastLootBox) lastLootBox.classList.remove("hidden");
+        if (lastLootName) lastLootName.textContent = `${el.name} (${el.symbol})`;
+        if (lastLootFam) lastLootFam.textContent = `${FAMILIES[fam]?.label || fam}`;
+        if (first){
+          setLootResultClass("is-new");
+          if (lastLootType) lastLootType.textContent = "Nouveau!";
+        } else if (lootRarity){
+          setLootResultClass(`rarity-${lootRarity.key}`);
+          if (lastLootType) lastLootType.textContent = `Doublons x${lootRarity.multiplier}`;
+        } else {
+          setLootResultClass(null);
+          if (lastLootType) lastLootType.textContent = "—";
+        }
       }
 
       // Surbrillance de la case
@@ -3128,6 +3169,22 @@
     const apcCost = lvl => computeUpgradeCost(baseApcCost, lvl, baseApcCost);
     const autoCost = lvl => computeUpgradeCost(baseAutoCost, lvl, baseAutoCost);
 
+    function computeBulkUpgradeCost(costFn, startLevel, quantity){
+      if (typeof costFn !== "function") return Number.MAX_SAFE_INTEGER;
+      const qty = Math.max(0, toNonNegativeInt(quantity));
+      if (qty <= 0) return 0;
+      let total = 0;
+      let level = Math.max(0, toNonNegativeInt(startLevel));
+      for (let i = 0; i < qty; i++){
+        const stepCost = toNonNegativeInt(costFn(level));
+        if (!Number.isFinite(stepCost) || stepCost >= Number.MAX_SAFE_INTEGER) return Number.MAX_SAFE_INTEGER;
+        if (total > Number.MAX_SAFE_INTEGER - stepCost) return Number.MAX_SAFE_INTEGER;
+        total += stepCost;
+        level++;
+      }
+      return total;
+    }
+
     const MULTIPLIER_BASE_COST = 1_000_000;
 
     function computeMultiplierCost(level){
@@ -3159,33 +3216,48 @@
       return Math.max(0, Math.floor(result));
     }
 
-    btnBuyApc.addEventListener("click", ()=>{
-      const cost = apcCost(apcLvl);
-      if (atoms >= cost){
-        const increment = getReviveShopIncrementValue();
-        atoms -= cost;
-        baseApc += increment;
-        apcLvl++;
-        saveAndUpdate();
+    function attemptFlatUpgrade(type, quantity){
+      const qty = Math.max(0, toNonNegativeInt(quantity));
+      if (qty <= 0) return false;
+      const costFn = type === "apc" ? apcCost : autoCost;
+      const currentLevel = type === "apc" ? apcLvl : autoLvl;
+      const totalCost = computeBulkUpgradeCost(costFn, currentLevel, qty);
+      if (!Number.isFinite(totalCost) || totalCost <= 0) return false;
+      if (atoms < totalCost) return false;
+      const increment = Math.max(0, toNonNegativeInt(getReviveShopIncrementValue()));
+      if (increment <= 0) return false;
+      const totalIncrement = increment * qty;
+      if (!Number.isFinite(totalIncrement)) return false;
+      if (type === "apc"){
+        const newBase = baseApc + totalIncrement;
+        if (!Number.isFinite(newBase)) return false;
+        atoms = Math.max(0, atoms - totalCost);
+        baseApc = newBase;
+        apcLvl += qty;
+      } else {
+        const newBase = baseAps + totalIncrement;
+        if (!Number.isFinite(newBase)) return false;
+        atoms = Math.max(0, atoms - totalCost);
+        baseAps = newBase;
+        autoLvl += qty;
       }
-    });
-    btnBuyAuto.addEventListener("click", ()=>{
-      const cost = autoCost(autoLvl);
-      if (atoms >= cost){
-        const increment = getReviveShopIncrementValue();
-        atoms -= cost;
-        baseAps += increment;
-        autoLvl++;
-        saveAndUpdate();
-      }
-    });
-    btnBuyApcMulti.addEventListener("click", ()=>{
+      saveAndUpdate();
+      return true;
+    }
+
+    if (btnBuyApc) btnBuyApc.addEventListener("click", ()=>{ attemptFlatUpgrade("apc", 1); });
+    if (btnBuyApc10) btnBuyApc10.addEventListener("click", ()=>{ attemptFlatUpgrade("apc", 10); });
+    if (btnBuyApc100) btnBuyApc100.addEventListener("click", ()=>{ attemptFlatUpgrade("apc", 100); });
+    if (btnBuyAuto) btnBuyAuto.addEventListener("click", ()=>{ attemptFlatUpgrade("aps", 1); });
+    if (btnBuyAuto10) btnBuyAuto10.addEventListener("click", ()=>{ attemptFlatUpgrade("aps", 10); });
+    if (btnBuyAuto100) btnBuyAuto100.addEventListener("click", ()=>{ attemptFlatUpgrade("aps", 100); });
+    if (btnBuyApcMulti) btnBuyApcMulti.addEventListener("click", ()=>{
       const cost = computeMultiplierCost(apcMultiLvl);
       if (atoms >= cost){
         atoms -= cost; apcMultiLvl++; saveAndUpdate();
       }
     });
-    btnBuyApsMulti.addEventListener("click", ()=>{
+    if (btnBuyApsMulti) btnBuyApsMulti.addEventListener("click", ()=>{
       const cost = computeMultiplierCost(apsMultiLvl);
       if (atoms >= cost){
         atoms -= cost; apsMultiLvl++; saveAndUpdate();
@@ -3198,10 +3270,31 @@
       });
     }
 
+    function performBulkRoll(quantity){
+      const qty = Math.max(0, toNonNegativeInt(quantity));
+      if (qty <= 0) return false;
+      const totalCost = computeBulkRollCost(qty, { baseCost: gacha.rollCost, discount: currentRollDiscount });
+      if (!Number.isFinite(totalCost) || atoms < totalCost) return false;
+      let success = false;
+      for (let i = 0; i < qty; i++){
+        const result = rollGacha({ displayResult:false });
+        if (!result) break;
+        success = true;
+      }
+      if (success) saveAndUpdate();
+      return success;
+    }
+
     // Tirage
-    rollBtn.addEventListener("click", ()=>{
+    if (rollBtn) rollBtn.addEventListener("click", ()=>{
       const result = rollGacha();
       if (result) saveAndUpdate();
+    });
+    if (roll10Btn) roll10Btn.addEventListener("click", ()=>{
+      performBulkRoll(10);
+    });
+    if (roll100Btn) roll100Btn.addEventListener("click", ()=>{
+      performBulkRoll(100);
     });
 
     // Navigation
@@ -3500,10 +3593,27 @@
       // Boutons de base
       const shopIncrement = getReviveShopIncrementValue();
       const shopIncrementText = formatNumber(shopIncrement);
-      btnBuyApc.textContent = `↑ APC (+${shopIncrementText}) – Coût ${formatNumber(apcCost(apcLvl))}`;
-      infoApc.textContent = `Niveau ${apcLvl}`;
-      btnBuyAuto.textContent = `↑ Auto (+${shopIncrementText} APS) – Coût ${formatNumber(autoCost(autoLvl))}`;
-      infoAuto.textContent = `Niveau ${autoLvl}`;
+      const apcSingleCost = apcCost(apcLvl);
+      const autoSingleCost = autoCost(autoLvl);
+      const apcBulk10Cost = computeBulkUpgradeCost(apcCost, apcLvl, 10);
+      const apcBulk100Cost = computeBulkUpgradeCost(apcCost, apcLvl, 100);
+      const autoBulk10Cost = computeBulkUpgradeCost(autoCost, autoLvl, 10);
+      const autoBulk100Cost = computeBulkUpgradeCost(autoCost, autoLvl, 100);
+
+      const apcInc10 = shopIncrement * 10;
+      const apcInc100 = shopIncrement * 100;
+      const autoInc10 = shopIncrement * 10;
+      const autoInc100 = shopIncrement * 100;
+
+      if (btnBuyApc) btnBuyApc.textContent = `↑ APC (+${shopIncrementText}) – Coût ${formatNumber(apcSingleCost)}`;
+      if (btnBuyApc10) btnBuyApc10.textContent = `↑ APC ×10 (+${formatNumber(apcInc10)}) – Coût ${formatNumber(apcBulk10Cost)}`;
+      if (btnBuyApc100) btnBuyApc100.textContent = `↑ APC ×100 (+${formatNumber(apcInc100)}) – Coût ${formatNumber(apcBulk100Cost)}`;
+      if (infoApc) infoApc.textContent = `Niveau ${apcLvl}`;
+
+      if (btnBuyAuto) btnBuyAuto.textContent = `↑ Auto (+${shopIncrementText} APS) – Coût ${formatNumber(autoSingleCost)}`;
+      if (btnBuyAuto10) btnBuyAuto10.textContent = `↑ Auto ×10 (+${formatNumber(autoInc10)} APS) – Coût ${formatNumber(autoBulk10Cost)}`;
+      if (btnBuyAuto100) btnBuyAuto100.textContent = `↑ Auto ×100 (+${formatNumber(autoInc100)} APS) – Coût ${formatNumber(autoBulk100Cost)}`;
+      if (infoAuto) infoAuto.textContent = `Niveau ${autoLvl}`;
       btnBuyApcMulti.textContent = `×2 APC – Coût ${formatNumber(computeMultiplierCost(apcMultiLvl))}`;
       const apcMultiTotal = applyBinaryMultiplier(1, apcMultiLvl);
       infoApcMulti.textContent = `Achats ${apcMultiLvl} (×${formatNumber(apcMultiTotal)})`;
@@ -3514,6 +3624,14 @@
       // Gacha infos
       const displayedRollCost = getDiscountedRollCost(gacha.rollCost, currentRollDiscount);
       rollCostOnBtn.textContent = formatNumber(displayedRollCost);
+      if (roll10CostOnBtn){
+        const bulk10Cost = computeBulkRollCost(10, { baseCost: gacha.rollCost, discount: currentRollDiscount });
+        roll10CostOnBtn.textContent = formatNumber(bulk10Cost);
+      }
+      if (roll100CostOnBtn){
+        const bulk100Cost = computeBulkRollCost(100, { baseCost: gacha.rollCost, discount: currentRollDiscount });
+        roll100CostOnBtn.textContent = formatNumber(bulk100Cost);
+      }
       isotopesEl.textContent = formatNumber(gacha.isotopes);
 
       refreshBonusList();
