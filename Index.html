@@ -1,0 +1,2592 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Atomes Clicker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --fg:#ffffff;
+      --bg:#0b0b0f;
+      --card:rgba(255,255,255,.10);
+      --pill:rgba(255,255,255,.18);
+      --accent:rgba(255,255,255,.85);
+      --grid-max:clamp(760px,88vw,1200px);
+    }
+    /* Thèmes */
+    body.theme-dark{ --fg:#f5f7ff; --bg:#0b0b0f; --card:rgba(255,255,255,.10); --pill:rgba(255,255,255,.18); --accent:rgba(255,255,255,.85); }
+    body.theme-light{ --fg:#0b0b0f; --bg:#f6f8ff; --card:rgba(0,0,0,.06); --pill:rgba(0,0,0,.12); --accent:rgba(12,16,32,.85); }
+    body.theme-rainbow{ --fg:#ffffff; --accent:rgba(255,255,255,.85); }
+    html, body {
+      margin:0; padding:0; width:100%; height:100%; min-height:100dvh;
+      font-family:'Orbitron',sans-serif; color:var(--fg);
+      overflow-x:hidden; overflow-y:auto; user-select:none;
+    }
+    body { background: var(--bg); transition: background .4s ease, color .4s ease; min-height:100dvh; display:flex; flex-direction:column; }
+    /* Arc-en-ciel animé uniquement pour le thème rainbow */
+    body.theme-rainbow{ background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet); background-size:1400% 1400%; animation: rainbow 20s linear infinite; }
+    @keyframes rainbow { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
+
+    .page { display:none; width:100%; height:100%; box-sizing:border-box; position:relative; padding:clamp(1.5rem, 6vh, 4rem) clamp(1.2rem, 4vw, 3.5rem); overflow:auto; }
+    .page.active { display:flex; flex-direction:column; align-items:center; gap:clamp(1rem, 3vh, 2.5rem); justify-content:space-between; flex:1; }
+
+    /* Boutons navigation / barre du haut */
+    #shopBtn, #backBtn, #gachaBtn, #backFromGacha, #bonusBtn, #backFromBonus {
+      position:absolute; padding:clamp(.55rem,1.2vw,.95rem) clamp(.85rem,1.8vw,1.5rem); font-size:clamp(.8rem,1.4vw,1rem); border:none; border-radius:10px; cursor:pointer;
+      background:var(--pill); color:var(--fg);
+    }
+    #gachaBtn { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
+    #shopBtn { top:clamp(1rem,3vh,2rem); right:clamp(1rem,3vw,2.5rem); }
+    #backBtn, #backFromGacha { top:clamp(1rem,3vh,2rem); right:clamp(1rem,3vw,2.5rem); }
+    #bonusBtn { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
+    #backFromBonus { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
+
+    /* Sélecteur de thème (boutons shop) */
+    .theme-selector {
+      display:flex;
+      align-items:center;
+      gap:clamp(.55rem, 1.5vw, 1rem);
+      background:var(--pill);
+      padding:clamp(.45rem, 1.3vh, .85rem) clamp(.65rem, 1.9vw, 1.3rem);
+      border-radius:12px;
+      box-shadow:0 6px 16px rgba(0,0,0,.18);
+    }
+    .theme-label {
+      font-size:clamp(.65rem,1vw,.9rem);
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      opacity:.75;
+    }
+    #themeControls {
+      display:flex;
+      align-items:center;
+      gap:clamp(.4rem, 1vw, .7rem);
+    }
+    #themeControls button { width:clamp(2.4rem, 4vw, 3.3rem); height:clamp(2.4rem, 4vw, 3.3rem); border-radius:12px; border:none; cursor:pointer; box-shadow:0 6px 16px rgba(0,0,0,.22); transition:transform .2s ease, box-shadow .2s ease; }
+    #themeControls button:hover { transform:translateY(-2px); box-shadow:0 10px 20px rgba(0,0,0,.28); }
+    #themeControls button.active { box-shadow:0 0 0 4px var(--accent), 0 6px 16px rgba(0,0,0,.22); }
+    #themeControls button[data-theme="light"] { background:#ffffff; }
+    #themeControls button[data-theme="dark"] { background:#0b0b0f; }
+    #themeControls button[data-theme="rainbow"] { background:linear-gradient(135deg, red, orange, yellow, green, cyan, blue, violet); }
+
+    /* Compteurs */
+    .atomsCluster {
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:clamp(.6rem, 2vw, 1.2rem);
+      margin-top:clamp(.5rem, 2.5vh, 1.6rem);
+    }
+    .atomsBox {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:.35rem;
+      font-size:clamp(1.35rem,3vw,2.6rem);
+      padding:clamp(.6rem,1.8vw,1.4rem) clamp(1.1rem,3vw,2.2rem);
+      background:var(--card);
+      border-radius:16px;
+      box-shadow:0 10px 26px rgba(0,0,0,.22);
+      min-width:clamp(10rem, 36vw, 18rem);
+    }
+    .atomsLabel {
+      font-size:clamp(.75rem,1.4vw,1rem);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      opacity:.82;
+    }
+    .atomsValue {
+      font-weight:700;
+    }
+    .statPill {
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      background:var(--pill);
+      padding:clamp(.55rem,1.5vw,1rem) clamp(.75rem,1.9vw,1.3rem);
+      border-radius:14px;
+      min-width:clamp(5.5rem, 16vw, 8rem);
+      box-shadow:0 8px 18px rgba(0,0,0,.18);
+      gap:.2rem;
+    }
+    .statLabel {
+      font-size:clamp(.65rem,1.1vw,.9rem);
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      opacity:.7;
+    }
+    .statValue {
+      font-size:clamp(.95rem,2.2vw,1.5rem);
+      font-weight:700;
+    }
+    .statPill-apc {
+      background:linear-gradient(140deg, rgba(255,140,82,.25), rgba(255,200,160,.18));
+    }
+    .statPill-aps {
+      background:linear-gradient(140deg, rgba(0,210,255,.25), rgba(120,255,220,.18));
+    }
+
+    /* Icône atome */
+    .atom { width:clamp(9rem,22vmin,18rem); aspect-ratio:1; pointer-events:none; transition:transform .18s ease, filter .18s ease; transform-origin:center; }
+    .atom.colorShift { filter:drop-shadow(0 0 18px rgba(255,213,79,.55)) drop-shadow(0 0 32px rgba(255,213,79,.35)); }
+    .atom.enflé { transform:scale(1.22); }
+    .atom.enflé.crit { transform:scale(1.32); }
+    .atom.crit {
+      filter:drop-shadow(0 0 20px rgba(255,255,210,.9)) drop-shadow(0 0 42px rgba(255,220,150,.8)) drop-shadow(0 0 70px rgba(255,190,120,.6));
+      animation:critSpark .55s ease-out;
+    }
+    .nucleus { fill:var(--fg); transition:fill .2s ease, filter .2s ease; }
+    .nucleus.colorShift { fill:#ffd54f; }
+    .atom.crit .nucleus { fill:#ffffff; filter:drop-shadow(0 0 18px rgba(255,255,255,.85)); }
+    .orbit { fill:none; stroke:var(--fg); stroke-width:2; opacity:.9; transition:stroke .2s ease, opacity .2s ease; }
+    .atom.crit .orbit { stroke:rgba(255,244,214,.95); opacity:1; filter:drop-shadow(0 0 14px rgba(255,240,200,.65)); }
+    @keyframes critSpark {
+      0% { filter:drop-shadow(0 0 8px rgba(255,255,255,.8)) drop-shadow(0 0 18px rgba(255,220,150,.75)); }
+      40% { filter:drop-shadow(0 0 26px rgba(255,255,200,1)) drop-shadow(0 0 52px rgba(255,200,140,.85)); }
+      100% { filter:drop-shadow(0 0 14px rgba(255,240,210,.75)) drop-shadow(0 0 30px rgba(255,200,140,.65)); }
+    }
+    #confettiLayer {
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:998;
+    }
+    .confetti-piece {
+      position:absolute;
+      display:block;
+      will-change:transform, opacity;
+      opacity:0;
+      filter:drop-shadow(0 0 6px rgba(0,0,0,.2));
+    }
+
+    #frenzyOrb {
+      position:absolute;
+      width:clamp(2.4rem, 6vmin, 3.8rem);
+      aspect-ratio:1;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(120,200,255,.7));
+      box-shadow:0 6px 18px rgba(0,0,0,.25);
+      border:2px solid rgba(255,255,255,.35);
+      color:#0b0b0f;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      opacity:0;
+      transform:translate(-50%, -50%) scale(.7);
+      transition:opacity .25s ease, transform .25s ease;
+      z-index:200;
+    }
+    #frenzyOrb::before {
+      content:"⚛";
+      font-size:clamp(1.2rem, 3.5vmin, 2rem);
+      filter:drop-shadow(0 0 8px rgba(255,255,255,.7));
+    }
+    #frenzyOrb.visible {
+      opacity:1;
+      pointer-events:auto;
+      transform:translate(-50%, -50%) scale(1);
+    }
+
+    .frenzyStatus {
+      font-size:clamp(.55rem, 1vw, .85rem);
+      opacity:.75;
+      margin-top:.25rem;
+      letter-spacing:.05em;
+    }
+    .frenzyStatus.active {
+      opacity:1;
+      color:var(--accent);
+    }
+
+    .auto-gacha-panel {
+      position:fixed;
+      left:50%;
+      bottom:clamp(1rem, 3vh, 2.4rem);
+      transform:translateX(-50%);
+      background:var(--card);
+      border-radius:14px;
+      box-shadow:0 14px 26px rgba(0,0,0,.32);
+      padding:clamp(.65rem, 1.5vh, 1rem) clamp(.9rem, 2vw, 1.4rem);
+      display:flex;
+      flex-direction:column;
+      gap:.4rem;
+      z-index:120;
+      min-width:clamp(12rem, 42vw, 20rem);
+      border:1px solid rgba(255,255,255,.16);
+    }
+    .auto-gacha-panel.hidden {
+      display:none;
+    }
+    .auto-gacha-header {
+      font-size:clamp(.75rem,1.2vw,.95rem);
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      opacity:.8;
+    }
+    .auto-gacha-content {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:clamp(.6rem, 1.8vw, 1.2rem);
+    }
+    .auto-gacha-name {
+      font-size:clamp(.95rem, 1.8vw, 1.2rem);
+      font-weight:700;
+    }
+    .auto-gacha-result {
+      font-size:clamp(.95rem, 1.6vw, 1.15rem);
+      text-align:right;
+    }
+
+    /* SHOP */
+    .shop-wrap { display:flex; flex-direction:column; align-items:center; gap:clamp(1rem,3vh,2rem); width:min(100%,960px); }
+    .card { background: var(--card); padding:clamp(1rem,2.5vh,1.5rem); border-radius:12px; width:100%; box-sizing:border-box; }
+    .shop-row { display:flex; gap:clamp(.75rem,2vw,1.5rem); align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .shop-row button { padding:clamp(.75rem,1.8vw,1.2rem) clamp(1rem,2.4vw,1.8rem); border:none; border-radius:10px; background:var(--pill); color:var(--fg); cursor:pointer; font-size:clamp(.85rem,1.3vw,1rem); }
+    .shop-row button.danger {
+      background:linear-gradient(135deg, rgba(255,90,90,.35), rgba(190,0,0,.55));
+      color:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.25);
+    }
+    .shop-row button.danger:hover {
+      filter:brightness(1.05);
+      box-shadow:0 10px 22px rgba(0,0,0,.3);
+    }
+    .muted { opacity:.8; }
+    .info-pill { background:var(--pill); border-radius:999px; padding:.4rem .8rem; }
+    .gacha-card-header,
+    .gacha-card-meta {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:clamp(.6rem,2vw,1.2rem);
+    }
+    .card-title {
+      font-size:clamp(1rem,1.8vw,1.3rem);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+    }
+    .gacha-card-meta { margin-top:clamp(.85rem,2vh,1.2rem); }
+
+    /* Loot encart */
+    .loot {
+      margin-top:clamp(.6rem, 2vh, 1rem);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:clamp(.6rem, 2vw, 1.2rem);
+      flex-wrap:wrap;
+      background:var(--pill);
+      padding:clamp(.55rem,1.2vw,.95rem) clamp(.75rem,2vw,1.3rem);
+      border-radius:12px;
+      box-shadow:0 6px 16px rgba(0,0,0,.18);
+    }
+    .loot.hidden { display:none; }
+    .loot-detail { display:flex; flex-direction:column; gap:.2rem; }
+    .loot-name { font-size:clamp(.9rem,1.4vw,1.1rem); font-weight:700; }
+    .loot-family { font-size:clamp(.7rem,1.1vw,.9rem); opacity:.75; }
+    .loot-result {
+      display:inline-block;
+      position:relative;
+      overflow:hidden;
+      font-size:clamp(.95rem,1.6vw,1.2rem);
+      font-weight:700;
+      margin-left:auto;
+      text-align:right;
+    }
+    .loot-result.is-new {
+      color:#ffffff;
+      text-shadow:0 0 12px rgba(255,255,255,.85), 0 0 24px rgba(160,220,255,.75);
+    }
+    .loot-result.is-new::after {
+      content:"";
+      position:absolute;
+      top:0; bottom:0; left:-70%; right:-70%;
+      background:linear-gradient(120deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.9) 45%, rgba(255,255,255,0) 60%);
+      transform:skewX(-15deg);
+      animation:lootShine 1.8s ease-in-out infinite;
+      opacity:.7;
+    }
+    .loot-result.rarity-common { color:#34d058; }
+    .loot-result.rarity-uncommon { color:#1a8f52; }
+    .loot-result.rarity-rare { color:#4ea1ff; }
+    .loot-result.rarity-epic { color:#bb7bff; }
+    .loot-result.rarity-legendary { color:#ffa54b; }
+    .loot-result.rarity-mythic {
+      background:linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet, red);
+      background-size:300% 100%;
+      -webkit-background-clip:text;
+      color:transparent;
+      animation:lootRainbow 3s linear infinite;
+      text-shadow:0 0 18px rgba(255,255,255,.35);
+    }
+    @keyframes lootRainbow {
+      0% { background-position:0% 50%; }
+      100% { background-position:100% 50%; }
+    }
+    @keyframes lootShine {
+      0% { transform:translateX(-80%) skewX(-15deg); }
+      100% { transform:translateX(120%) skewX(-15deg); }
+    }
+
+    /* GACHA PAGE */
+    .gacha-wrap { width:min(100%,var(--grid-max,1200px)); margin:0 auto; box-sizing:border-box; display:flex; flex-direction:column; gap:clamp(1rem,3vh,2rem); align-items:center; justify-content:flex-start; flex:1; }
+
+    .gacha-info {
+      background:var(--card); border-radius:12px; padding:clamp(.6rem,1.5vh,.95rem);
+      display:flex; flex-direction:column; gap:clamp(.45rem,1.1vh,.8rem);
+      align-items:stretch; align-self:stretch;
+      min-height:clamp(48px,3.4vw,56px); box-shadow:0 12px 24px rgba(0,0,0,.18);
+      grid-column:3 / 13; grid-row:1 / 4;
+      width:100%; height:100%; box-sizing:border-box;
+    }
+    .gacha-info .info-title {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:.75rem;
+      background:var(--pill); border-radius:12px; padding:.35rem .85rem;
+      font-size:clamp(.72rem,1vw,.9rem);
+    }
+    .gacha-info .info-title .iso-count {
+      font-size:clamp(.68rem,.95vw,.85rem);
+      opacity:.85;
+    }
+    .gacha-info .info-lines {
+      display:flex;
+      flex-direction:column;
+      width:100%;
+      gap:clamp(.35rem,1vw,.6rem);
+    }
+    .gacha-info .info-line {
+      background:var(--pill); border-radius:999px; padding:.28rem .7rem;
+      font-size:clamp(.66rem,.9vw,.85rem); opacity:.95; text-align:left;
+    }
+    .awaken-box {
+      background:var(--card);
+      border-radius:12px;
+      padding:clamp(.45rem,1.2vh,.75rem);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      grid-column:13 / 18;
+      grid-row:1 / 2;
+      min-height:clamp(48px,3.4vw,56px);
+      box-shadow:0 12px 24px rgba(0,0,0,.18);
+      width:100%;
+      box-sizing:border-box;
+    }
+    .awaken-box .awaken-btn {
+      width:100%;
+      max-width:clamp(11rem, 26vw, 18rem);
+      text-align:center;
+    }
+    @media (max-width: 900px) {
+      .awaken-box {
+        grid-column:1 / -1;
+        grid-row:auto;
+      }
+    }
+    .awaken-btn {
+      padding:clamp(.45rem,1.1vh,.7rem) clamp(.7rem,1.6vw,1rem);
+      border:none;
+      border-radius:12px;
+      background:linear-gradient(135deg, rgba(0,255,255,.35), rgba(0,160,255,.55));
+      color:var(--fg);
+      font-size:clamp(.72rem,1.05vw,.9rem);
+      font-weight:600;
+      cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.25);
+      transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:.35rem;
+    }
+    .awaken-btn:hover:not(:disabled) {
+      transform:translateY(-1px);
+      box-shadow:0 10px 22px rgba(0,0,0,.3);
+    }
+    .awaken-btn:disabled {
+      cursor:not-allowed;
+      opacity:.55;
+      filter:grayscale(.2);
+      box-shadow:none;
+    }
+
+    .gacha-grid {
+      --cell-size: clamp(36px, min(4vw, 6vh), 60px);
+      margin:0 auto;
+      width:min(100%,var(--grid-max,1100px));
+      max-width:var(--grid-max,1100px);
+      display:grid;
+      grid-template-columns: repeat(18, minmax(0, 1fr));
+      grid-auto-rows:var(--cell-size);
+      gap:clamp(.08rem, min(.35vw, .8vh), .25rem);
+      position:relative;
+    }
+    .cell {
+      background:var(--bg-base, var(--card)); border:1px solid rgba(255,255,255,.12); border-radius:10px;
+      padding:clamp(.2rem, min(.45vw, .8vh), .32rem) clamp(.18rem, min(.42vw, .75vh), .3rem);
+      text-align:center; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; transition:background .3s ease, transform .2s ease, border-color .3s ease;
+      color:#0b0b0f; min-height:var(--cell-size);
+      position:relative; overflow:hidden;
+    }
+    .cell:hover { transform:translateY(-2px); }
+    @keyframes awakenSpin {
+      from { transform:rotate(0deg); }
+      to { transform:rotate(360deg); }
+    }
+    .cell.awaken-ready {
+      box-shadow:0 0 18px rgba(255,255,255,.45), 0 0 32px rgba(0,200,255,.25);
+    }
+    .cell.awaken-ready::after {
+      content:"";
+      position:absolute;
+      inset:-3px;
+      border-radius:inherit;
+      background:conic-gradient(from 0deg, rgba(255,255,255,.05) 0deg, rgba(0,255,255,.55) 120deg, rgba(255,255,255,.05) 240deg, rgba(0,255,120,.55) 360deg);
+      animation:awakenSpin 2.4s linear infinite;
+      pointer-events:none;
+      -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      mask:radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+      opacity:.85;
+    }
+    .cell .Z { font-size:clamp(.5rem, min(.95vw, 1.8vh), .75rem); opacity:.75; }
+    .cell .sym { font-size:clamp(.75rem, min(1.35vw, 2.7vh), 1.1rem); font-weight:700; }
+    .cell.owned { background:var(--bg-owned, var(--card)); border-color:rgba(255,255,255,.28); }
+    body.theme-light .cell { border-color:rgba(0,0,0,.08); }
+    body.theme-light .cell.owned { border-color:rgba(0,0,0,.18); }
+
+    .hidden { display:none; }
+
+    /* Layout spécifiques par page */
+    #mainPage.page.active { justify-content:center; }
+    #mainPage .atomsCluster { order:1; margin-bottom:clamp(1.2rem, 4vh, 3rem); }
+    #mainPage .atom { order:2; margin:0 auto; }
+
+    #shopPage { padding-left:clamp(4rem,8vw,6rem); }
+    #shopPage .atomsCluster { order:1; }
+    #shopPage .shop-wrap { order:2; margin:clamp(1rem,3vh,2rem) auto; width:min(100%,860px); }
+
+    #gachaPage.page.active { justify-content:flex-start; }
+    #gachaPage .gacha-wrap {
+      order:2;
+      flex:1;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      gap:clamp(.6rem, min(2vh, 2vw), 1.4rem);
+      padding-top:clamp(1rem, 4vh, 2.5rem);
+    }
+
+    .loot-detail { flex:1; }
+
+    /* BONUS PAGE */
+    #bonusPage.page.active { justify-content:flex-start; }
+    #bonusPage .bonus-wrap {
+      order:2;
+      width:min(100%, 720px);
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.75rem, 2vh, 1.2rem);
+      background:var(--card);
+      padding:clamp(1rem, 2.6vh, 1.6rem) clamp(1.2rem, 3vw, 2rem);
+      border-radius:16px;
+      box-shadow:0 12px 24px rgba(0,0,0,.18);
+    }
+    #bonusPage .bonus-title {
+      margin:0;
+      font-size:clamp(1.1rem, 2.4vw, 1.6rem);
+      text-transform:uppercase;
+      letter-spacing:.16em;
+    }
+    #bonusList ul {
+      margin:0;
+      padding-left:1.25rem;
+      display:flex;
+      flex-direction:column;
+      gap:.45rem;
+    }
+    #bonusList li { line-height:1.4; }
+    #bonusList p { margin:0; }
+    #bonusList .bonus-section {
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.45rem, 1.3vh, .75rem);
+    }
+    #bonusList .bonus-section + .bonus-section {
+      margin-top:clamp(.8rem, 2vh, 1.2rem);
+    }
+    #bonusList .bonus-section-trophies {
+      width:100%;
+    }
+    .trophy-list {
+      list-style:none;
+      margin:0;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.5rem,1.3vh,.8rem);
+    }
+    .trophy-list li {
+      background:var(--pill);
+      border-radius:12px;
+      padding:clamp(.6rem,1.4vh,.95rem) clamp(.75rem,2vw,1.3rem);
+      display:flex;
+      flex-direction:column;
+      gap:.35rem;
+      border:1px solid transparent;
+      box-shadow:0 10px 20px rgba(0,0,0,.18);
+    }
+    .trophy-list li.trophy-unlocked {
+      border-color:rgba(255,255,255,.35);
+      box-shadow:0 12px 28px rgba(0,0,0,.25);
+    }
+    .trophy-list li.trophy-locked {
+      opacity:.9;
+    }
+    .trophy-name {
+      font-weight:700;
+      font-size:clamp(.95rem,1.7vw,1.2rem);
+    }
+    .trophy-desc {
+      font-size:clamp(.75rem,1.2vw,.95rem);
+      opacity:.85;
+    }
+    .trophy-progress {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:clamp(.7rem,1.1vw,.85rem);
+      opacity:.8;
+      gap:.6rem;
+    }
+    .trophy-progress-value {
+      font-weight:600;
+    }
+    .trophy-progress-target {
+      opacity:.75;
+      text-align:right;
+    }
+    .bonus-subtitle {
+      margin:0;
+      font-size:clamp(.85rem, 1.8vw, 1.1rem);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      opacity:.85;
+    }
+    .set-status-grid {
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.35rem, 1.2vh, .65rem);
+    }
+    .set-status-card {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:clamp(.45rem, 1.2vw, .85rem);
+      padding:clamp(.55rem, 1.4vh, .9rem) clamp(.75rem, 2vw, 1.25rem);
+      border-radius:12px;
+      background:var(--pill);
+      box-shadow:0 6px 16px rgba(0,0,0,.14);
+    }
+    .set-status-card.set-complete {
+      box-shadow:0 0 0 2px rgba(120,255,200,.35), 0 6px 16px rgba(0,0,0,.16);
+    }
+    .set-status-name {
+      font-weight:600;
+      letter-spacing:.05em;
+    }
+    .set-status-info {
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:.2rem;
+      font-size:clamp(.7rem, 1.3vw, .95rem);
+    }
+    .set-status-progress {
+      opacity:.75;
+    }
+    .set-status-state {
+      font-weight:700;
+    }
+    .set-status-card.set-complete .set-status-state {
+      color:var(--accent);
+    }
+    .set-status-card.set-incomplete .set-status-state {
+      opacity:.7;
+    }
+
+    @media (max-width: 900px) {
+      .page { padding:clamp(1.25rem,5vh,2.5rem) clamp(1rem,5vw,2rem); }
+      .theme-selector {
+        width:100%;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:clamp(.45rem,2vh,.9rem);
+      }
+      #themeControls {
+        width:100%;
+        justify-content:flex-start;
+        flex-wrap:wrap;
+        gap:clamp(.45rem,3vw,.85rem);
+      }
+      #themeControls button { width:clamp(2.4rem,10vw,3rem); height:clamp(2.4rem,10vw,3rem); }
+      .atomsCluster { flex-direction:column; align-items:stretch; }
+      .atomsBox { min-width:unset; width:100%; }
+      .statPill { width:100%; flex-direction:row; justify-content:space-between; }
+      .statLabel { letter-spacing:.12em; }
+      .statValue { font-size:clamp(1.05rem,6vw,1.7rem); }
+      #shopPage { padding-left:clamp(1.25rem,5vw,2.2rem); }
+      .shop-wrap { width:100%; }
+      .shop-row { flex-direction:column; align-items:flex-start; }
+      .gacha-wrap { gap:clamp(1rem,4vh,1.8rem); }
+      .gacha-grid { width:100%; max-width:100%; }
+    }
+
+    @media (max-width: 720px) {
+      .gacha-info .info-lines { grid-template-columns:1fr; }
+    }
+
+    @media (max-height: 720px) {
+      .atom { width:clamp(7.5rem,20vmin,15rem); }
+      .gacha-grid { --cell-size: clamp(32px, min(3.6vw, 5.5vh), 48px); }
+      .gacha-info { min-height:clamp(32px, min(3.6vw, 5.5vh), 48px); }
+    }
+
+    @media (max-height: 620px) {
+      #shopBtn, #backBtn, #gachaBtn, #backFromGacha, #bonusBtn, #backFromBonus {
+        top:clamp(.5rem,2vh,1.25rem);
+      }
+    }
+
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.6);
+      display:flex; align-items:center; justify-content:center;
+      z-index:1000; padding:1.5rem;
+    }
+
+
+    .modal-overlay.hidden {
+      display:none;
+    }
+
+
+    .modal-content {
+      background:var(--card); color:var(--fg); border-radius:16px;
+      padding:clamp(1rem,2.5vh,1.6rem) clamp(1.2rem,3vw,2rem);
+      width:min(100%,520px); box-shadow:0 18px 36px rgba(0,0,0,.28);
+      display:flex; flex-direction:column; gap:clamp(.75rem,2vh,1.2rem);
+    }
+
+    .reset-description { margin:0; font-size:clamp(.85rem,1.2vw,1rem); opacity:.85; }
+    .reset-word {
+      font-size:clamp(1rem,2.2vw,1.4rem);
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      text-align:center;
+      padding:.65rem 1rem;
+      border-radius:12px;
+      background:var(--pill);
+    }
+    #resetInput {
+      padding:.65rem .85rem;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.2);
+      color:var(--fg);
+      font-family:'Orbitron',sans-serif;
+      font-size:clamp(.85rem,1.2vw,1rem);
+      outline:none;
+    }
+    body.theme-light #resetInput {
+      background:rgba(255,255,255,.65);
+      border-color:rgba(0,0,0,.15);
+      color:#0b0b0f;
+    }
+    .reset-actions { display:flex; justify-content:flex-end; gap:.75rem; }
+    .reset-actions button {
+      padding:.6rem 1.1rem;
+      border:none;
+      border-radius:10px;
+      font-family:'Orbitron',sans-serif;
+      font-size:clamp(.8rem,1.15vw,.95rem);
+      cursor:pointer;
+      background:var(--pill);
+      color:var(--fg);
+    }
+    .reset-actions button.confirm {
+      background:linear-gradient(135deg, rgba(255,90,90,.45), rgba(190,0,0,.65));
+      color:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.25);
+    }
+    .reset-actions button.confirm:disabled {
+      opacity:.6;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .modal-header { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+
+    .modal-header h2 { margin:0; font-size:clamp(1.1rem,2.4vw,1.6rem); }
+
+    .modal-close {
+      background:transparent; border:none; color:var(--fg); font-size:1.6rem; cursor:pointer; line-height:1;
+    }
+
+  </style>
+</head>
+<body class="theme-rainbow">
+  <div id="confettiLayer" aria-hidden="true"></div>
+  <!-- PAGE PRINCIPALE -->
+  <div id="mainPage" class="page active">
+    <button id="gachaBtn">Atomes</button>
+    <button id="shopBtn">Shop</button>
+
+    <div class="atomsCluster">
+      <div class="statPill statPill-apc">
+        <span class="statLabel">APC</span>
+        <span class="statValue" id="apc">1.0</span>
+        <span class="frenzyStatus" id="frenzyStatus" aria-live="polite">Frénésie ×1.0</span>
+      </div>
+      <div class="atomsBox">
+        <span class="atomsLabel">Atoms</span>
+        <strong class="atomsValue" id="atoms">0.0</strong>
+      </div>
+      <div class="statPill statPill-aps">
+        <span class="statLabel">APS</span>
+        <span class="statValue" id="aps">0.0</span>
+      </div>
+    </div>
+
+    <img class="atom" id="atomIcon" src="Assets/Image/Atom.png" alt="Icône d'atome" />
+
+    <button id="frenzyOrb" type="button" aria-label="Activer le Multiplicateur Frénésie" disabled></button>
+
+    <div id="autoGachaPanel" class="auto-gacha-panel hidden" aria-live="polite">
+      <div id="autoGachaHeader" class="auto-gacha-header">Tirage auto</div>
+      <div class="auto-gacha-content">
+        <span id="autoGachaName" class="auto-gacha-name">—</span>
+        <span id="autoGachaResult" class="loot-result auto-gacha-result" data-base-class="loot-result auto-gacha-result">—</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PAGE SHOP -->
+  <div id="shopPage" class="page">
+    <button id="backBtn">Retour</button>
+    <div class="atomsCluster">
+      <div class="statPill statPill-apc">
+        <span class="statLabel">APC</span>
+        <span class="statValue" id="apcShop">1.0</span>
+      </div>
+      <div class="atomsBox">
+        <span class="atomsLabel">Atoms</span>
+        <strong class="atomsValue" id="atomsShop">0.0</strong>
+      </div>
+      <div class="statPill statPill-aps">
+        <span class="statLabel">APS</span>
+        <span class="statValue" id="apsShop">0.0</span>
+      </div>
+    </div>
+    <div class="shop-wrap">
+      <div class="card gacha-card">
+        <div class="gacha-card-header">
+          <span class="card-title">Capsule Gacha</span>
+          <button id="rollBtn">🎲 Tirage (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
+        </div>
+        <div class="gacha-card-meta">
+          <span class="muted">Isotopes</span>
+          <div class="info-pill"><span id="isotopes">0</span></div>
+        </div>
+        <div class="loot hidden" id="lastLootBox">
+          <div class="loot-detail">
+            <span id="lastLootName" class="loot-name">—</span>
+            <span id="lastLootFam" class="loot-family">—</span>
+          </div>
+          <span id="lastLootType" class="loot-result" data-base-class="loot-result">—</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Améliorations de base</div>
+        <div class="shop-row">
+          <button id="buyApc"></button>
+          <span id="apcInfo"></span>
+        </div>
+        <div class="shop-row">
+          <button id="buyAuto"></button>
+          <span id="autoInfo"></span>
+        </div>
+        <div class="shop-row">
+          <button id="buyApcMulti"></button>
+          <span id="apcMultiInfo"></span>
+        </div>
+        <div class="shop-row">
+          <button id="buyApsMulti"></button>
+          <span id="apsMultiInfo"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Gestion de la partie</div>
+        <div class="shop-row">
+          <button id="resetBtn" class="danger" type="button">Réinitialiser la partie</button>
+          <div class="theme-selector" role="group" aria-label="Gestion du thème">
+            <span class="theme-label">Thème</span>
+            <div id="themeControls" aria-label="Sélecteur de thème">
+              <button type="button" data-theme="light" aria-label="Activer le thème clair" title="Thème clair"></button>
+              <button type="button" data-theme="dark" aria-label="Activer le thème sombre" title="Thème sombre"></button>
+              <button type="button" data-theme="rainbow" aria-label="Activer le thème arc-en-ciel" title="Thème arc-en-ciel"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE GACHA -->
+  <div id="gachaPage" class="page">
+    <button id="backFromGacha">Retour</button>
+    <button id="bonusBtn">Bonus</button>
+
+    <div class="gacha-wrap">
+      <!-- grille périodique réelle + panneau d'infos -->
+      <div id="periodicGrid" class="gacha-grid">
+        <div id="gachaInfo" class="gacha-info">
+          <div id="elementTitle" class="info-title">
+            <span id="elementName">Clique un élément dans la grille</span>
+            <span id="elementIsoCount" class="iso-count">—</span>
+          </div>
+          <div class="info-lines">
+            <div class="info-line" id="elementFamily">Famille : —</div>
+          </div>
+        </div>
+        <div id="awakenWrapper" class="awaken-box hidden">
+          <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE BONUS -->
+  <div id="bonusPage" class="page">
+    <button id="backFromBonus">Retour</button>
+    <div class="bonus-wrap">
+      <h2 class="bonus-title">Bonus débloqués</h2>
+      <div id="bonusList"><p>Aucun bonus actif pour le moment.</p></div>
+    </div>
+  </div>
+
+  <div id="resetModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="resetTitle">Confirmer la réinitialisation</h2>
+        <button id="closeReset" class="modal-close" type="button" aria-label="Fermer la fenêtre">×</button>
+      </div>
+      <p class="reset-description">Pour remettre la partie à zéro, recopie le mot ci-dessous puis valide.</p>
+      <div id="resetWord" class="reset-word">—</div>
+      <label class="reset-description" for="resetInput">Recopiez le mot affiché</label>
+      <input id="resetInput" type="text" autocomplete="off" spellcheck="false" />
+      <div class="reset-actions">
+        <button id="cancelReset" type="button">Annuler</button>
+        <button id="confirmReset" class="confirm" type="button" disabled>Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===================== Données ===================== */
+
+    // Familles & poids de tirage
+    const FAMILIES = {
+      ALK: { label:"Alcalins", weight:7, bonusDesc:"+1% chance de crit (max 50%), puis +10% dégâts critiques / bonus (set +5% chance)", bonusType:"crit" },
+      HAL: { label:"Halogènes", weight:7, bonusDesc:"+1% APC / unique (set +10%)", bonusType:"apc" },
+      NG : { label:"Gaz nobles", weight:7, bonusDesc:"+2% APS / unique (set +10%)", bonusType:"aps" },
+      C  : { label:"Métaux de transition", weight:40, bonusDesc:"+1 APC & APS / élément unique (set +5)", bonusType:"flat" },
+      AN : { label:"Actinides", weight:15, bonusDesc:"+1% APS offline / unique (set +50%)", bonusType:"offline" },
+      LN : { label:"Lanthanides", weight:15, bonusDesc:"+0.5% multiplicateur global / unique (set +10%)", bonusType:"global" },
+      MET: { label:"Métalloïdes", weight:7, bonusDesc:"+0.5% APC et APS / unique (set +5%)", bonusType:"hybrid" },
+      NM : { label:"Non-métaux", weight:2, bonusDesc:"-1% coût du tirage par élément + éveil (set -10%)", bonusType:"infl" },
+      AE : { label:"Alcalino-terreux", weight:7, bonusDesc:"Multiplicateur Frénésie : x5 APC +1 par élément/éveil (set +10)", bonusType:"frenzy" }
+    };
+
+    const FAMILY_COLORS = {
+      ALK: { base:"#f8ead2", owned:"#e3ca9e" },
+      AE : { base:"#e5f2d9", owned:"#c6d8b3" },
+      C  : { base:"#dde8f7", owned:"#b9cbe6" },
+      HAL: { base:"#e0f7f2", owned:"#b6ded0" },
+      NG : { base:"#f0e7fb", owned:"#cec0ee" },
+      LN : { base:"#fbe5f0", owned:"#e3bcd1" },
+      AN : { base:"#ffe4e1", owned:"#efb7b2" },
+      MET:{ base:"#e8f3ea", owned:"#c7dbce" },
+      NM : { base:"#f3f3f3", owned:"#d8d8d8" }
+    };
+
+    const LOOT_RARITIES = [
+      { key:"common", label:"Commun", weight:600, multiplier:1 },
+      { key:"uncommon", label:"Peu commun", weight:250, multiplier:2 },
+      { key:"rare", label:"Rare", weight:100, multiplier:5 },
+      { key:"epic", label:"Épique", weight:40, multiplier:10 },
+      { key:"legendary", label:"Légendaire", weight:9, multiplier:25 },
+      { key:"mythic", label:"Mythique", weight:1, multiplier:100 }
+    ];
+
+    const AUTO_GACHA_TROPHIES = [
+      { key:"auto1", threshold:1_000_000, name:"Réacteur automatique I", description:"Débloque un tirage gacha gratuit toutes les 10 s sur la page principale." },
+      { key:"auto2", threshold:1_000_000_000, name:"Réacteur automatique II", description:"Réduit l'intervalle des tirages auto à 9 s." },
+      { key:"auto3", threshold:1_000_000_000_000, name:"Réacteur automatique III", description:"Réduit l'intervalle des tirages auto à 8 s." },
+      { key:"auto4", threshold:1_000_000_000_000_000, name:"Réacteur automatique IV", description:"Réduit l'intervalle des tirages auto à 7 s." },
+      { key:"auto5", threshold:1_000_000_000_000_000_000, name:"Réacteur automatique V", description:"Réduit l'intervalle des tirages auto à 6 s." },
+      { key:"auto6", threshold:1_000_000_000_000_000_000_000, name:"Réacteur automatique VI", description:"Réduit l'intervalle des tirages auto à 5 s." }
+    ];
+
+    const AWAKEN_MAX = 100;
+    const AWAKEN_FINAL_COST = 1_000_000;
+    const AWAKEN_BASE_COSTS = [5,10,25,50];
+    const AWAKEN_COSTS = (()=>{
+      const costs = AWAKEN_BASE_COSTS.slice(0, AWAKEN_MAX);
+      if (costs.length === 0) costs.push(5);
+      let remaining = Math.max(0, AWAKEN_MAX - costs.length);
+      let prev = costs[costs.length - 1];
+      while (remaining > 0){
+        const ratio = Math.pow(AWAKEN_FINAL_COST / prev, 1 / remaining);
+        const maxAllowed = AWAKEN_FINAL_COST - (remaining - 1) * 5;
+        let next = prev * ratio;
+        next = Math.round(next / 5) * 5;
+        if (next > maxAllowed) next = maxAllowed;
+        if (next <= prev) next = prev + 5;
+        costs.push(Math.round(next));
+        remaining--;
+        prev = next;
+      }
+      costs[costs.length - 1] = AWAKEN_FINAL_COST;
+      return costs;
+    })();
+
+    // Liste des métalloïdes classiques
+    const METALLOIDS = new Set(["B","Si","Ge","As","Sb","Te","Po"]);
+
+    // Noms FR (si un manque, on affichera le symbole)
+    const NAMES_FR = {
+      H:"Hydrogène", He:"Hélium", Li:"Lithium", Be:"Béryllium", B:"Bore", C:"Carbone", N:"Azote", O:"Oxygène", F:"Fluor", Ne:"Néon",
+      Na:"Sodium", Mg:"Magnésium", Al:"Aluminium", Si:"Silicium", P:"Phosphore", S:"Soufre", Cl:"Chlore", Ar:"Argon",
+      K:"Potassium", Ca:"Calcium", Sc:"Scandium", Ti:"Titane", V:"Vanadium", Cr:"Chrome", Mn:"Manganèse", Fe:"Fer", Co:"Cobalt", Ni:"Nickel", Cu:"Cuivre", Zn:"Zinc", Ga:"Gallium", Ge:"Germanium", As:"Arsenic", Se:"Sélénium", Br:"Brome", Kr:"Krypton",
+      Rb:"Rubidium", Sr:"Strontium", Y:"Yttrium", Zr:"Zirconium", Nb:"Niobium", Mo:"Molybdène", Tc:"Technétium", Ru:"Ruthénium", Rh:"Rhodium", Pd:"Palladium", Ag:"Argent", Cd:"Cadmium", In:"Indium", Sn:"Étain", Sb:"Antimoine", Te:"Tellure", I:"Iode", Xe:"Xénon",
+      Cs:"Césium", Ba:"Baryum", La:"Lanthane", Ce:"Cérium", Pr:"Praséodyme", Nd:"Néodyme", Pm:"Prométhium", Sm:"Samarium", Eu:"Europium", Gd:"Gadolinium", Tb:"Terbium", Dy:"Dysprosium", Ho:"Holmium", Er:"Erbium", Tm:"Thulium", Yb:"Ytterbium", Lu:"Lutécium",
+      Hf:"Hafnium", Ta:"Tantale", W:"Tungstène", Re:"Rhénium", Os:"Osmium", Ir:"Iridium", Pt:"Platine", Au:"Or", Hg:"Mercure", Tl:"Thallium", Pb:"Plomb", Bi:"Bismuth", Po:"Polonium", At:"Astate", Rn:"Radon",
+      Fr:"Francium", Ra:"Radium", Ac:"Actinium", Th:"Thorium", Pa:"Protactinium", U:"Uranium", Np:"Neptunium", Pu:"Plutonium", Am:"Américium", Cm:"Curium", Bk:"Berkélium", Cf:"Californium", Es:"Einsteinium", Fm:"Fermium", Md:"Mendélévium", No:"Nobélium", Lr:"Lawrencium",
+      Rf:"Rutherfordium", Db:"Dubnium", Sg:"Seaborgium", Bh:"Bohrium", Hs:"Hassium", Mt:"Meitnérium", Ds:"Darmstadtium", Rg:"Roentgenium", Cn:"Copernicium", Nh:"Nihonium", Fl:"Flérovium", Mc:"Moscovium", Lv:"Livermorium", Ts:"Tennessine", Og:"Oganesson"
+    };
+
+    // Ordre officiel des 118 éléments (numéros atomiques croissants)
+    // Source de référence : https://fr.periodic-table.io/
+    const ORDERED_SYMBOLS = [
+      "H","He","Li","Be","B","C","N","O","F","Ne",
+      "Na","Mg","Al","Si","P","S","Cl","Ar",
+      "K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn",
+      "Ga","Ge","As","Se","Br","Kr",
+      "Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd",
+      "In","Sn","Sb","Te","I","Xe",
+      "Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu",
+      "Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn",
+      "Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr",
+      "Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"
+    ];
+
+    const ATOMIC_NUMBERS = ORDERED_SYMBOLS.reduce((map, symbol, idx) => {
+      map[symbol] = idx + 1;
+      return map;
+    }, {});
+
+    // Tableau périodique : périodes 1–7 (grille 18 colonnes)
+    // Chaque ligne est un tableau de 18 symboles ("" = vide, "*" = emplacement de série f)
+    const PERIODS = {
+      1: ["H","","","","","","","","","","","","","","","","","He"],
+      2: ["Li","Be","","","","","","","","","","","B","C","N","O","F","Ne"],
+      3: ["Na","Mg","","","","","","","","","","","Al","Si","P","S","Cl","Ar"],
+      4: ["K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr"],
+      5: ["Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe"],
+      6: ["Cs","Ba","*","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn"],
+      7: ["Fr","Ra","*","Rf","Db","Sg","Bh","Hs","Mt","Ds","Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"]
+    };
+
+    // Séries f (Lanthanides & Actinides), 15 éléments chacune, placées en rangées séparées
+    const LANTHANIDES = ["La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu"];
+    const ACTINIDES   = ["Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"];
+
+    // Famille calculée selon groupe/période
+    function familyOf(symbol, row, col){
+      // Lanthanides / Actinides
+      if (LANTHANIDES.includes(symbol)) return "LN";
+      if (ACTINIDES.includes(symbol)) return "AN";
+      // Groupes
+      if (col===18) return "NG";
+      if (col===17) return "HAL";
+      if (col===1 && symbol!=="H") return "ALK";
+      if (col===2) return "AE";
+      // Métalloïdes
+      if (METALLOIDS.has(symbol)) return "MET";
+      // Non-métaux "classiques"
+      if (["H","C","N","O","P","S","Se"].includes(symbol)) return "NM";
+      // Métaux de transition (3–12) + autres métaux -> range dans C par simplicité de bonus
+      if (col>=3 && col<=12) return "C";
+      // Post-transition (13–16) => range dans C également pour ce design
+      if (col>=13 && col<=16) return METALLOIDS.has(symbol) ? "MET" : "C";
+      return "C";
+    }
+
+    function blockOf(symbol, period, col){
+      if (LANTHANIDES.includes(symbol) || ACTINIDES.includes(symbol)) return "f";
+      if (col <= 2) return "s";
+      if (col >= 13) return "p";
+      return "d";
+    }
+
+    // Construction de la liste complète 118 avec positions
+    const ELEMENTS = [];
+    for (let period=1; period<=7; period++){
+      const row = PERIODS[period];
+      for (let c=1; c<=18; c++){
+        const sym = row[c-1] || "";
+        if (!sym || sym==="*") continue;
+        const Z = ATOMIC_NUMBERS[sym] ?? (ELEMENTS.length + 1);
+        const family = familyOf(sym, period, c);
+        const block = blockOf(sym, period, c);
+        ELEMENTS.push({ Z, symbol: sym, name: NAMES_FR[sym]||sym, family, period, col:c, block });
+      }
+    }
+    // Ajoute lanthanides (col 4 -> 18)
+    LANTHANIDES.forEach((sym,i)=>{
+      const col = 4 + i;
+      const Z = ATOMIC_NUMBERS[sym] ?? (ELEMENTS.length + 1);
+      ELEMENTS.push({ Z, symbol:sym, name:NAMES_FR[sym]||sym, family:"LN", period:6, col, block:"f", frow:"lan" });
+    });
+    // Ajoute actinides (col 4 -> 18)
+    ACTINIDES.forEach((sym,i)=>{
+      const col = 4 + i;
+      const Z = ATOMIC_NUMBERS[sym] ?? (ELEMENTS.length + 1);
+      ELEMENTS.push({ Z, symbol:sym, name:NAMES_FR[sym]||sym, family:"AN", period:7, col, block:"f", frow:"act" });
+    });
+
+    if (ELEMENTS.length !== ORDERED_SYMBOLS.length){
+      console.warn(`[PeriodicTable] ${ELEMENTS.length} éléments chargés (attendu ${ORDERED_SYMBOLS.length}).`);
+    }
+
+    const ELEMENT_BY_SYMBOL = ELEMENTS.reduce((map, el)=>{
+      map[el.symbol] = el;
+      return map;
+    }, {});
+
+    // Tailles de set (pour les bonus de “set complet”)
+    const FAMILY_SET_SIZES = {};
+    for (const f of Object.keys(FAMILIES)) FAMILY_SET_SIZES[f] = ELEMENTS.filter(e=>e.family===f && !e.frow).length
+      + (f==="LN"?LANTHANIDES.length:0) + (f==="AN"?ACTINIDES.length:0);
+
+    /* ===================== État & persistance ===================== */
+    const S0 = JSON.parse(localStorage.getItem("miniAtomState") || "{}");
+    let atoms = toNonNegativeInt(S0.atoms ?? 0);
+    let baseApc = Math.max(1, toNonNegativeInt(S0.apc ?? 1));
+    let baseAps = toNonNegativeInt(S0.aps ?? 0);
+    let apcLvl = toNonNegativeInt(S0.apcLvl ?? 0);
+    let autoLvl = toNonNegativeInt(S0.autoLvl ?? 0);
+    let apcMultiLvl = toNonNegativeInt(S0.apcMultiLvl ?? 0);
+    let apsMultiLvl = toNonNegativeInt(S0.apsMultiLvl ?? 0);
+    let totalAtoms = toNonNegativeInt(S0.totalAtoms ?? atoms);
+    let trophies = {};
+    if (S0.trophies && typeof S0.trophies === "object"){
+      for (const trophy of AUTO_GACHA_TROPHIES){
+        if (S0.trophies[trophy.key]) trophies[trophy.key] = S0.trophies[trophy.key];
+      }
+    }
+    let last = S0.last ?? null;
+    let frenzyEffects = [];
+    let currentFrenzyBase = 5;
+    let frenzyOrbTimeout = null;
+    let frenzyOrbVisible = false;
+    let autoGachaCooldown = 0;
+    let lastAutoResult = null;
+
+    // Gacha/collection
+    function createDefaultGachaState(){
+      return {
+        pulls: 0,
+        isotopes: 0,
+        owned: {},   // symbol -> 0/1
+        dupes: {},   // symbol -> n
+        isoStock: {}, // symbol -> isotopes accumulés
+        awakens: {},  // symbol -> niveau d'éveil
+        rollCost: 100 // coût actuel d’un tirage (Atoms)
+      };
+    }
+    const G0 = JSON.parse(localStorage.getItem("gacha") || "{}");
+    let gacha = Object.assign(createDefaultGachaState(), G0);
+    gacha.rollCost = Math.max(1, toNonNegativeInt(gacha.rollCost ?? 100));
+    gacha.pulls = toNonNegativeInt(gacha.pulls || 0);
+
+    if (!gacha.isoStock || typeof gacha.isoStock !== "object") gacha.isoStock = {};
+    if (!gacha.awakens || typeof gacha.awakens !== "object") gacha.awakens = {};
+
+    if (G0.isoStock){
+      for (const [sym, amt] of Object.entries(G0.isoStock)){
+        gacha.isoStock[sym] = Math.max(0, Math.floor(amt));
+      }
+    }
+    syncTotalIsotopes();
+
+    // Thème
+
+    function saveAll(){
+      localStorage.setItem("miniAtomState", JSON.stringify({ atoms, apc: baseApc, aps: baseAps, apcLvl, autoLvl, apcMultiLvl, apsMultiLvl, totalAtoms, trophies, last: Date.now() }));
+      localStorage.setItem("gacha", JSON.stringify(gacha));
+    }
+
+    /* ===================== UI refs ===================== */
+
+    const atomIcon = document.getElementById("atomIcon");
+    const confettiLayer = document.getElementById("confettiLayer");
+    const mainPageEl = document.getElementById("mainPage");
+    const shopPageEl = document.getElementById("shopPage");
+    const gachaPageEl = document.getElementById("gachaPage");
+    const bonusPageEl = document.getElementById("bonusPage");
+
+    const elAtoms = document.getElementById("atoms");
+    const elAps = document.getElementById("aps");
+    const elApc = document.getElementById("apc");
+
+    const elAtomsShop = document.getElementById("atomsShop");
+    const elApsShop = document.getElementById("apsShop");
+    const elApcShop = document.getElementById("apcShop");
+
+    const elAtomsGacha = document.getElementById("atomsGacha");
+    const elApsGacha = document.getElementById("apsGacha");
+    const elApcGacha = document.getElementById("apcGacha");
+
+    const btnShop = document.getElementById("shopBtn");
+    const btnBack = document.getElementById("backBtn");
+    const btnGacha = document.getElementById("gachaBtn");
+    const btnBackGacha = document.getElementById("backFromGacha");
+
+    const btnBuyApc = document.getElementById("buyApc");
+    const btnBuyAuto = document.getElementById("buyAuto");
+    const btnBuyApcMulti = document.getElementById("buyApcMulti");
+    const btnBuyApsMulti = document.getElementById("buyApsMulti");
+    const infoApc = document.getElementById("apcInfo");
+    const infoAuto = document.getElementById("autoInfo");
+    const infoApcMulti = document.getElementById("apcMultiInfo");
+    const infoApsMulti = document.getElementById("apsMultiInfo");
+
+    const rollBtn = document.getElementById("rollBtn");
+    const rollCostOnBtn = document.getElementById("rollCostOnBtn");
+    const isotopesEl = document.getElementById("isotopes");
+
+    const gridMain = document.getElementById("periodicGrid");
+    const gachaInfoPanel = document.getElementById("gachaInfo");
+
+    const elementName = document.getElementById("elementName");
+    const elementIsoCount = document.getElementById("elementIsoCount");
+    const elementFamily = document.getElementById("elementFamily");
+    const awakenBtn = document.getElementById("awakenBtn");
+    const awakenWrapper = document.getElementById("awakenWrapper");
+
+    const bonusBtn = document.getElementById("bonusBtn");
+    const backBonusBtn = document.getElementById("backFromBonus");
+    const bonusList = document.getElementById("bonusList");
+
+    const resetBtn = document.getElementById("resetBtn");
+    const resetModal = document.getElementById("resetModal");
+    const resetWordEl = document.getElementById("resetWord");
+    const resetInput = document.getElementById("resetInput");
+    const resetConfirmBtn = document.getElementById("confirmReset");
+    const resetCancelBtn = document.getElementById("cancelReset");
+    const resetCloseBtn = document.getElementById("closeReset");
+
+    const lastLootBox = document.getElementById("lastLootBox");
+    const lastLootName = document.getElementById("lastLootName");
+    const lastLootFam = document.getElementById("lastLootFam");
+    const lastLootType = document.getElementById("lastLootType");
+    const frenzyStatusEl = document.getElementById("frenzyStatus");
+    const frenzyOrbEl = document.getElementById("frenzyOrb");
+    const autoGachaPanel = document.getElementById("autoGachaPanel");
+    const autoGachaHeader = document.getElementById("autoGachaHeader");
+    const autoGachaName = document.getElementById("autoGachaName");
+    const autoGachaResultEl = document.getElementById("autoGachaResult");
+
+    function setLootResultClass(cls, target = lastLootType){
+      if (!target) return;
+      const baseClass = target.dataset.baseClass || "loot-result";
+      target.className = baseClass;
+      if (cls) target.classList.add(cls);
+    }
+
+    const themeButtons = Array.from(document.querySelectorAll('#themeControls button'));
+
+    const CONFETTI_LIFETIME = 2500;
+    const CONFETTI_COUNT = 36;
+    const CONFETTI_PALETTES = {
+      dark: ['#fff3b0','#ffadad','#cdb4db','#90f1ef','#ffd6a5','#f9f871'],
+      light: ['#5f0f40','#9a031e','#fb8b24','#0f4c5c','#335c67','#3a86ff'],
+      rainbow: ['#ff595e','#ffca3a','#8ac926','#1982c4','#6a4c93','#ff924c']
+    };
+
+    let currentTheme = null;
+    let currentElement = null;
+    let currentIsoDiscount = 0;
+    let currentRollDiscount = 0;
+    const cellMap = new Map();
+    let currentResetWord = "";
+    let critFlashTimeout = null;
+
+    function createSoundPlayer(src, { poolSize = 4, volume = 1 } = {}){
+      const players = [];
+      for (let i = 0; i < poolSize; i++){
+        const audio = new Audio(src);
+        audio.preload = "auto";
+        audio.volume = volume;
+        audio.load();
+        players.push(audio);
+      }
+      let nextIndex = 0;
+      return function play(){
+        if (!players.length) return;
+        const audio = players[nextIndex];
+        nextIndex = (nextIndex + 1) % players.length;
+        try {
+          audio.currentTime = 0;
+          const playPromise = audio.play();
+          if (playPromise && typeof playPromise.catch === "function"){
+            playPromise.catch(()=>{});
+          }
+        } catch (err) {
+          /* ignore playback errors (autoplay restrictions, etc.) */
+        }
+      };
+    }
+
+    const playPopSound = createSoundPlayer("Assets/Sounds/pop.mp3", { poolSize:6, volume:0.45 });
+    const playCritSound = createSoundPlayer("Assets/Sounds/crit.mp3", { poolSize:3, volume:0.6 });
+
+
+    // Thème (après récupération des boutons pour éviter les erreurs à l'initialisation)
+    const savedTheme = localStorage.getItem("theme") || "rainbow";
+    currentTheme = savedTheme;
+    function applyTheme(theme, { persist = true } = {}){
+      document.body.classList.remove("theme-light","theme-dark","theme-rainbow");
+      document.body.classList.add(`theme-${theme}`);
+      if (persist) localStorage.setItem("theme", theme);
+      themeButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.theme === theme));
+      currentTheme = theme;
+    }
+    applyTheme(savedTheme, { persist:false });
+
+
+    /* ===================== Helpers ===================== */
+    const RESET_WORDS = [
+      "quantique","neutron","proton","orbite","fusion","plasma","noyau","isotope","photon","boson","quark","ion"
+    ];
+
+    const MULTIPLIER_SCALE = 1000;
+    const CHANCE_SCALE = 1000;
+
+    const SUFFIXES = (()=>{
+      const list = ["", "m", "b", "t"];
+      const prefixes = ["S","T","U","V","W","X","Y","Z"];
+      for (const prefix of prefixes){
+        for (let i = 0; i < 26; i++){
+          list.push(`${prefix}${String.fromCharCode(97 + i)}`);
+        }
+      }
+      return list;
+    })();
+
+    function toInteger(value){
+      if (!Number.isFinite(value)) return 0;
+      return value >= 0 ? Math.floor(value) : Math.ceil(value);
+    }
+
+    function toNonNegativeInt(value){
+      const intVal = toInteger(value);
+      return intVal < 0 ? 0 : intVal;
+    }
+
+    function addAtoms(amount, { silent = false } = {}){
+      const gain = Math.max(0, toNonNegativeInt(amount));
+      if (!gain) return false;
+      atoms = Math.max(0, atoms + gain);
+      totalAtoms = Math.max(0, totalAtoms + gain);
+      checkTrophies({ silent });
+      return true;
+    }
+
+    function splitIntoGroups(value){
+      const groups = [];
+      let remaining = value;
+      while (remaining >= 1000){
+        groups.push(remaining % 1000);
+        remaining = Math.floor(remaining / 1000);
+      }
+      groups.push(remaining);
+      return groups.reverse();
+    }
+
+    function joinGroups(groups){
+      return groups.map((group, idx)=> idx === 0 ? String(group) : String(group).padStart(3, '0')).join('.');
+    }
+
+    function formatWithSuffix(value){
+      const negative = value < 0;
+      const absVal = Math.abs(value);
+      const groups = splitIntoGroups(absVal);
+      let formatted;
+      if (groups.length >= 3){
+        const suffixIndex = Math.min(groups.length - 2, SUFFIXES.length - 1);
+        const suffix = SUFFIXES[suffixIndex];
+        const head = groups[0];
+        const next = groups[1];
+        formatted = `${head}.${String(next).padStart(3, '0')}${suffix}`;
+      } else {
+        formatted = joinGroups(groups);
+      }
+      return negative && absVal > 0 ? `-${formatted}` : formatted;
+    }
+
+    function formatNumber(value){
+      return formatWithSuffix(toInteger(value));
+    }
+
+    function scaledToPercent(value){
+      return Math.floor((value * 100 + Math.floor(MULTIPLIER_SCALE / 2)) / MULTIPLIER_SCALE);
+    }
+
+    function chanceScaledToPercent(value){
+      return Math.floor((value * 100 + Math.floor(CHANCE_SCALE / 2)) / CHANCE_SCALE);
+    }
+    const normalizeWord = str => (str || "").trim().toLowerCase();
+
+    const FRENZY_DURATION_MS = 30_000;
+    const FRENZY_SPAWN_DENOM = 120;
+    const FRENZY_ORB_LIFETIME_MS = 8_000;
+
+    function getConfettiPalette(){
+      return CONFETTI_PALETTES[currentTheme] || CONFETTI_PALETTES.dark;
+    }
+
+    function getAtomCenter(){
+      if (!atomIcon) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      const rect = atomIcon.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+    }
+
+    function spawnConfettiBurst(origin = getAtomCenter(), pieces = CONFETTI_COUNT){
+      if (!confettiLayer) return;
+      const palette = getConfettiPalette();
+      for (let i = 0; i < pieces; i++){
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+
+        const baseColor = palette[Math.floor(Math.random() * palette.length)];
+        const accentColor = palette[Math.floor(Math.random() * palette.length)];
+        const useGradient = Math.random() > 0.6 && baseColor !== accentColor;
+        const gradientAngle = Math.floor(Math.random() * 360);
+        piece.style.background = useGradient ? `linear-gradient(${gradientAngle}deg, ${baseColor}, ${accentColor})` : baseColor;
+
+        const width = 6 + Math.random() * 10;
+        const height = width * (0.6 + Math.random() * 0.9);
+        piece.style.width = `${width.toFixed(2)}px`;
+        piece.style.height = `${height.toFixed(2)}px`;
+        piece.style.boxShadow = `0 0 8px ${baseColor}44`;
+
+        const shapeRoll = Math.random();
+        if (shapeRoll < 0.3){
+          piece.style.borderRadius = `${Math.floor(Math.random() * 50)}%`;
+        } else if (shapeRoll < 0.55){
+          piece.style.borderRadius = '999px';
+        } else if (shapeRoll < 0.8){
+          piece.style.clipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)';
+        } else {
+          piece.style.clipPath = 'polygon(0% 0%, 80% 10%, 100% 100%, 20% 90%)';
+        }
+
+        const left = origin.x - width / 2;
+        const top = origin.y - height / 2;
+        piece.style.left = `${left}px`;
+        piece.style.top = `${top}px`;
+
+        confettiLayer.appendChild(piece);
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 120 + Math.random() * 160;
+        const driftX = Math.cos(angle) * distance;
+        const driftY = Math.sin(angle) * distance + 80 + Math.random() * 80;
+        const rotateStart = Math.random() * 360;
+        const rotateDirection = Math.random() > 0.5 ? 1 : -1;
+        const rotateEnd = rotateStart + rotateDirection * (360 + Math.random() * 540);
+        const scaleEnd = 0.4 + Math.random() * 0.35;
+
+        const animation = piece.animate([
+          { transform: `translate3d(0,0,0) rotate(${rotateStart}deg) scale(1)`, opacity: 1 },
+          { offset: 0.6, opacity: 1 },
+          { transform: `translate3d(${driftX}px, ${driftY}px, 0) rotate(${rotateEnd}deg) scale(${scaleEnd})`, opacity: 0 }
+        ], {
+          duration: CONFETTI_LIFETIME,
+          easing: 'cubic-bezier(0.32, 0.12, 0.17, 1)'
+        });
+
+        animation.onfinish = () => piece.remove();
+        animation.oncancel = () => piece.remove();
+      }
+    }
+
+    function getUnlockedAutoTrophiesCount(){
+      return AUTO_GACHA_TROPHIES.reduce((count, trophy) => count + (trophies[trophy.key] ? 1 : 0), 0);
+    }
+
+    function hasAutoGachaUnlocked(){
+      return getUnlockedAutoTrophiesCount() > 0;
+    }
+
+    function getAutoGachaInterval(){
+      const unlocked = getUnlockedAutoTrophiesCount();
+      if (unlocked <= 0) return null;
+      const extra = Math.min(unlocked - 1, AUTO_GACHA_TROPHIES.length - 1);
+      return Math.max(1, 10 - extra);
+    }
+
+    function resetAutoGachaCooldown(){
+      const interval = getAutoGachaInterval();
+      if (interval){
+        if (autoGachaCooldown <= 0 || autoGachaCooldown > interval){
+          autoGachaCooldown = interval;
+        } else {
+          autoGachaCooldown = Math.min(autoGachaCooldown, interval);
+        }
+      } else {
+        autoGachaCooldown = 0;
+      }
+    }
+
+    function updateAutoGachaHeader(){
+      if (!autoGachaHeader) return;
+      const interval = getAutoGachaInterval();
+      autoGachaHeader.textContent = interval ? `Tirage auto (${interval}s)` : "Tirage auto";
+    }
+
+    function updateAutoGachaPanel(){
+      if (!autoGachaPanel) return;
+      const isMainActive = !!(mainPageEl && mainPageEl.classList.contains('active'));
+      const shouldShow = hasAutoGachaUnlocked() && lastAutoResult && isMainActive;
+      autoGachaPanel.classList.toggle('hidden', !shouldShow);
+    }
+
+    function showAutoGachaResult(result){
+      lastAutoResult = result;
+      if (autoGachaName && result?.element){
+        autoGachaName.textContent = `${result.element.name} (${result.element.symbol})`;
+      }
+      if (autoGachaResultEl){
+        if (result?.isNew){
+          setLootResultClass('is-new', autoGachaResultEl);
+          autoGachaResultEl.textContent = 'Nouveau!';
+        } else if (result?.lootRarity){
+          setLootResultClass(`rarity-${result.lootRarity.key}`, autoGachaResultEl);
+          autoGachaResultEl.textContent = `Isotopes ×${result.lootRarity.multiplier}`;
+        } else {
+          setLootResultClass(null, autoGachaResultEl);
+          autoGachaResultEl.textContent = '—';
+        }
+      }
+      updateAutoGachaPanel();
+    }
+
+    function checkTrophies({ silent = false } = {}){
+      let unlocked = false;
+      for (const trophy of AUTO_GACHA_TROPHIES){
+        if (!trophies[trophy.key] && totalAtoms >= trophy.threshold){
+          trophies[trophy.key] = Date.now();
+          unlocked = true;
+          if (!silent) spawnConfettiBurst();
+        }
+      }
+      if (unlocked){
+        resetAutoGachaCooldown();
+        updateAutoGachaHeader();
+        updateAutoGachaPanel();
+        refreshBonusList();
+      }
+      return unlocked;
+    }
+
+    function performAutoGachaRoll(){
+      const result = rollGacha({ free:true, origin:"auto" });
+      if (!result) return false;
+      saveAndUpdate();
+      showAutoGachaResult(result);
+      return true;
+    }
+
+    function handleAutoGachaTick(deltaSeconds = 1){
+      const interval = getAutoGachaInterval();
+      if (!interval){
+        autoGachaCooldown = 0;
+        return;
+      }
+      if (!(mainPageEl && mainPageEl.classList.contains('active'))) return;
+      autoGachaCooldown = Math.max(0, autoGachaCooldown - deltaSeconds);
+      if (autoGachaCooldown > 0) return;
+      if (!performAutoGachaRoll()){
+        // Si le tirage échoue, on retente après un intervalle complet.
+      }
+      autoGachaCooldown = interval;
+    }
+
+    function pruneFrenzyEffects(now = Date.now()){
+      frenzyEffects = frenzyEffects.filter(effect => effect.expiresAt > now);
+    }
+
+    function getActiveFrenzyMultiplier(){
+      pruneFrenzyEffects();
+      if (!frenzyEffects.length) return 1;
+      return frenzyEffects.reduce((mul, effect) => mul * effect.multiplier, 1);
+    }
+
+    function getFrenzyStackCount(){
+      pruneFrenzyEffects();
+      return frenzyEffects.length;
+    }
+
+    function getLongestFrenzyRemaining(){
+      pruneFrenzyEffects();
+      if (!frenzyEffects.length) return 0;
+      const now = Date.now();
+      return Math.max(...frenzyEffects.map(effect => Math.max(0, effect.expiresAt - now)));
+    }
+
+    function triggerFrenzyBonus(){
+      const multiplier = Math.max(1, currentFrenzyBase);
+      const expiresAt = Date.now() + FRENZY_DURATION_MS;
+      frenzyEffects.push({ multiplier, expiresAt });
+      spawnConfettiBurst(getAtomCenter(), Math.max(12, Math.floor(CONFETTI_COUNT / 2)));
+      updateUI();
+    }
+
+    function hideFrenzyOrb(){
+      if (frenzyOrbTimeout){
+        clearTimeout(frenzyOrbTimeout);
+        frenzyOrbTimeout = null;
+      }
+      if (frenzyOrbEl){
+        frenzyOrbEl.classList.remove('visible');
+        frenzyOrbEl.disabled = true;
+        if (document.activeElement === frenzyOrbEl) frenzyOrbEl.blur();
+      }
+      frenzyOrbVisible = false;
+    }
+
+    function spawnFrenzyOrb(){
+      if (!frenzyOrbEl || frenzyOrbVisible) return;
+      if (!mainPageEl || !mainPageEl.classList.contains('active')) return;
+      const mainRect = mainPageEl.getBoundingClientRect();
+      const atomRect = atomIcon ? atomIcon.getBoundingClientRect() : null;
+      if (!atomRect) return;
+      const centerX = atomRect.left + atomRect.width / 2 - mainRect.left;
+      const centerY = atomRect.top + atomRect.height / 2 - mainRect.top;
+      const radius = atomRect.width * (0.6 + Math.random() * 0.5);
+      const angle = Math.random() * Math.PI * 2;
+      let targetX = centerX + Math.cos(angle) * radius;
+      let targetY = centerY + Math.sin(angle) * radius;
+      const margin = Math.min(60, Math.max(24, atomRect.width * 0.3));
+      targetX = Math.min(Math.max(targetX, margin), Math.max(margin, mainRect.width - margin));
+      targetY = Math.min(Math.max(targetY, margin), Math.max(margin, mainRect.height - margin));
+      frenzyOrbEl.style.left = `${targetX}px`;
+      frenzyOrbEl.style.top = `${targetY}px`;
+      frenzyOrbEl.classList.add('visible');
+      frenzyOrbEl.disabled = false;
+      frenzyOrbVisible = true;
+      if (frenzyOrbTimeout) clearTimeout(frenzyOrbTimeout);
+      frenzyOrbTimeout = setTimeout(()=> hideFrenzyOrb(), FRENZY_ORB_LIFETIME_MS);
+    }
+
+    function checkFrenzySpawn(){
+      if (frenzyOrbVisible) return;
+      if (!mainPageEl || !mainPageEl.classList.contains('active')) return;
+      if (Math.floor(Math.random() * FRENZY_SPAWN_DENOM) === 0) spawnFrenzyOrb();
+    }
+
+    function rollLootRarity(){
+      const totalWeight = LOOT_RARITIES.reduce((sum, rarity)=> sum + (rarity.weight || 0), 0);
+      if (totalWeight <= 0) return LOOT_RARITIES[0];
+      let roll = Math.floor(Math.random() * totalWeight);
+      let acc = 0;
+      for (const rarity of LOOT_RARITIES){
+        acc += rarity.weight || 0;
+        if (roll < acc) return rarity;
+      }
+      return LOOT_RARITIES[LOOT_RARITIES.length - 1];
+    }
+
+    function getIsoStock(symbol){
+      return Math.max(0, Math.floor((gacha.isoStock && gacha.isoStock[symbol]) || 0));
+    }
+
+    function computeTotalIsotopes(){
+      return Object.values(gacha.isoStock || {}).reduce((sum, val)=> sum + Math.max(0, Math.floor(val||0)), 0);
+    }
+
+    function syncTotalIsotopes(){
+      gacha.isotopes = computeTotalIsotopes();
+    }
+
+    function addIsotopes(symbol, amount){
+      if (!amount) return;
+      const current = getIsoStock(symbol);
+      gacha.isoStock[symbol] = current + Math.max(0, Math.floor(amount));
+      syncTotalIsotopes();
+    }
+
+    function spendIsotopes(symbol, amount){
+      const cost = Math.max(0, Math.floor(amount));
+      if (cost === 0) return true;
+      const current = getIsoStock(symbol);
+      if (current < cost) return false;
+      const remaining = current - cost;
+      if (remaining > 0) gacha.isoStock[symbol] = remaining; else delete gacha.isoStock[symbol];
+      syncTotalIsotopes();
+      return true;
+    }
+
+    function getAwakenLevel(symbol){
+      return Math.min(AWAKEN_MAX, (gacha.awakens && gacha.awakens[symbol]) || 0);
+    }
+
+    function setAwakenLevel(symbol, level){
+      gacha.awakens[symbol] = Math.min(AWAKEN_MAX, Math.max(0, Math.floor(level)));
+    }
+
+    function getAwakenMultiplier(level){
+      return Math.pow(2, Math.max(0, Math.min(level, AWAKEN_MAX)));
+    }
+
+    function getAwakenCost(level){
+      return AWAKEN_COSTS[level] ?? null;
+    }
+
+    function getDiscountedAwakenCost(level, isoDiscountScaled){
+      const baseCost = getAwakenCost(level);
+      if (baseCost == null) return null;
+      if (baseCost === 0) return 0;
+      const discount = Math.max(0, Math.min(isoDiscountScaled || 0, MULTIPLIER_SCALE));
+      const numerator = (MULTIPLIER_SCALE - discount) * baseCost + (MULTIPLIER_SCALE - 1);
+      return Math.max(1, Math.floor(numerator / MULTIPLIER_SCALE));
+    }
+
+    // Probabilités familiales (pondérées)
+    function pickFamily(){
+      const entries = Object.entries(FAMILIES).filter(([k,v]) => (v.weight || 0) > 0);
+      if (!entries.length) return null;
+      const sum = entries.reduce((s,[,v])=> s + (v.weight || 0), 0);
+      if (sum <= 0) return entries[0][0];
+      let roll = Math.floor(Math.random() * sum);
+      let acc = 0;
+      for (const [key, v] of entries){
+        acc += v.weight || 0;
+        if (roll < acc) return key;
+      }
+      return entries[0][0];
+    }
+
+    function animateAtom(isCrit = false){
+      playPopSound();
+      if (!atomIcon){
+        if (isCrit){
+          playCritSound();
+          spawnConfettiBurst();
+        }
+        return;
+      }
+      atomIcon.classList.add("enflé");
+      atomIcon.classList.add("colorShift");
+      setTimeout(()=>{
+        atomIcon.classList.remove("enflé");
+        atomIcon.classList.remove("colorShift");
+      }, 220);
+      if (isCrit){
+        playCritSound();
+        atomIcon.classList.add("crit");
+        spawnConfettiBurst();
+        if (critFlashTimeout) clearTimeout(critFlashTimeout);
+        critFlashTimeout = setTimeout(()=>{
+          atomIcon.classList.remove("crit");
+          critFlashTimeout = null;
+        }, 650);
+      }
+    }
+
+    function saveAndUpdate(){ saveAll(); updateUI(); }
+
+    /* ===================== Bonus de familles ===================== */
+    function computeFamilyEffects(){
+      // Compte uniques possédés par famille
+      const perFamCount = {};
+      const perFamWeight = {};
+      const perFamAwakenLevels = {};
+      for (const f of Object.keys(FAMILIES)){
+        perFamCount[f] = 0;
+        perFamWeight[f] = 0;
+        perFamAwakenLevels[f] = 0;
+      }
+      for (const el of ELEMENTS){
+        if (!gacha.owned[el.symbol]) continue;
+        const lvl = getAwakenLevel(el.symbol);
+        perFamCount[el.family] = (perFamCount[el.family]||0) + 1;
+        perFamWeight[el.family] = (perFamWeight[el.family]||0) + getAwakenMultiplier(lvl);
+        perFamAwakenLevels[el.family] = (perFamAwakenLevels[el.family]||0) + lvl;
+      }
+
+      let critUnits = 0;
+      let apcMul = MULTIPLIER_SCALE;
+      let apsMul = MULTIPLIER_SCALE;
+      let inflRed = 0;
+      let offlineBonus = 0;
+      let globalMul = MULTIPLIER_SCALE;
+      let isoDiscount = 0;
+      let apcFlat = 0;
+      let apsFlat = 0;
+
+      // hybrid (métalloïdes)
+      let hybridAPC = 0, hybridAPS = 0;
+      let frenzyBase = 5;
+
+      for (const [f, n] of Object.entries(perFamWeight)){
+        if (!n) continue;
+        const uniqueCount = perFamCount[f] || 0;
+        const awakenSum = perFamAwakenLevels[f] || 0;
+        switch(f){
+          case "ALK": critUnits += n; break;
+          case "HAL": apcMul += n * 10; break;
+          case "NG" : apsMul += n * 20; break;
+          case "C"  : apcFlat += n; apsFlat += n; break;
+          case "AN" : offlineBonus += n * 10; break;
+          case "LN" : globalMul += n * 5; break;
+          case "MET": hybridAPC += n * 5; hybridAPS += n * 5; break;
+          case "NM" : inflRed += (uniqueCount + awakenSum) * 10; break;
+          case "AE" : frenzyBase += (perFamCount[f]||0) + (perFamAwakenLevels[f]||0); break;
+        }
+      }
+
+      // Sets complets
+      const isSet = f => (perFamCount[f]||0) === (FAMILY_SET_SIZES[f]||0);
+      if (isSet("ALK")) critUnits += 5;
+      if (isSet("HAL")) apcMul = Math.floor(apcMul * 1100 / MULTIPLIER_SCALE);
+      if (isSet("NG"))  apsMul = Math.floor(apsMul * 1100 / MULTIPLIER_SCALE);
+      if (isSet("C"))  { apcFlat += 5; apsFlat += 5; }
+      if (isSet("AN"))  offlineBonus += 500;
+      if (isSet("LN"))  globalMul = Math.floor(globalMul * 1100 / MULTIPLIER_SCALE);
+      if (isSet("MET")) { hybridAPC += 50; hybridAPS += 50; }
+      if (isSet("NM"))  inflRed += 100;
+      if (isSet("AE"))  frenzyBase += 10;
+
+      inflRed = Math.min(inflRed, 900);
+
+      const critChance = Math.min(500, critUnits * 10);
+      const extraCritUnits = Math.max(0, critUnits - 50);
+      const critDamagePercent = 100 + extraCritUnits * 10;
+
+      return { critChance, critDamagePercent, apcMul, apsMul, apcFlat, apsFlat, inflRed, offlineBonus, globalMul, isoDiscount, hybridAPC, hybridAPS, frenzyBase };
+    }
+
+    function applyMultiplier(value, multiplier){
+      if (value <= 0 || multiplier <= 0) return 0;
+      return Math.floor(value * multiplier / MULTIPLIER_SCALE);
+    }
+
+    function computeDerivedStats(){
+      const { critChance, critDamagePercent, apcMul, apsMul, apcFlat, apsFlat, inflRed, offlineBonus, globalMul, isoDiscount, hybridAPC, hybridAPS, frenzyBase } = computeFamilyEffects();
+      currentFrenzyBase = Math.max(1, frenzyBase);
+      const frenzyMultiplier = Math.max(1, getActiveFrenzyMultiplier());
+      const apcBase = Math.max(0, baseApc + apcFlat);
+      const apsBase = Math.max(0, baseAps + apsFlat);
+      let APC = applyMultiplier(apcBase, apcMul);
+      APC = applyMultiplier(APC, MULTIPLIER_SCALE + hybridAPC);
+      APC = applyMultiplier(APC, globalMul);
+      APC = Math.max(0, APC * frenzyMultiplier);
+      APC = applyBinaryMultiplier(APC, apcMultiLvl);
+
+      let APS = applyMultiplier(apsBase, apsMul);
+      APS = applyMultiplier(APS, MULTIPLIER_SCALE + hybridAPS);
+      APS = applyMultiplier(APS, globalMul);
+      APS = applyBinaryMultiplier(APS, apsMultiLvl);
+
+      return { APC, APS, critChance, critDamagePercent, inflRed, offlineBonus, globalMul, isoDiscount, apcFlat, apsFlat, frenzyMultiplier, frenzyBase };
+    }
+
+    function getBonusLines(){
+      const { critChance, critDamagePercent, apcMul, apsMul, apcFlat, apsFlat, inflRed, offlineBonus, globalMul, isoDiscount, hybridAPC, hybridAPS, frenzyBase } = computeFamilyEffects();
+      const combinedApcMul = Math.floor(apcMul * (MULTIPLIER_SCALE + hybridAPC) / MULTIPLIER_SCALE);
+      const combinedApsMul = Math.floor(apsMul * (MULTIPLIER_SCALE + hybridAPS) / MULTIPLIER_SCALE);
+      const apcBonus = Math.max(0, combinedApcMul - MULTIPLIER_SCALE);
+      const apsBonus = Math.max(0, combinedApsMul - MULTIPLIER_SCALE);
+      const globalBonus = Math.max(0, globalMul - MULTIPLIER_SCALE);
+      const lines = [];
+      if (critChance > 0){
+        lines.push(`+${chanceScaledToPercent(critChance)}% chance de coup critique (max 50%)`);
+        lines.push(`+${formatNumber(critDamagePercent)}% dégâts critiques`);
+      } else if (critDamagePercent > 100){
+        lines.push(`+${formatNumber(critDamagePercent)}% dégâts critiques`);
+      }
+      if (apcFlat > 0) lines.push(`+${formatNumber(apcFlat)} APC (bonus plat)`);
+      if (apcBonus > 0) lines.push(`+${scaledToPercent(apcBonus)}% APC (production manuelle)`);
+      if (apsFlat > 0) lines.push(`+${formatNumber(apsFlat)} APS (bonus plat)`);
+      if (apsBonus > 0) lines.push(`+${scaledToPercent(apsBonus)}% APS (production automatique)`);
+      if (globalBonus > 0) lines.push(`+${scaledToPercent(globalBonus)}% multiplicateur global`);
+      if (offlineBonus > 0) lines.push(`+${scaledToPercent(offlineBonus)}% APS offline`);
+      if (inflRed > 0) lines.push(`-${scaledToPercent(inflRed)}% coût des tirages gacha`);
+      if (isoDiscount > 0) lines.push(`-${scaledToPercent(isoDiscount)}% coût en isotopes`);
+      const frenzyReady = Math.max(1, frenzyBase);
+      if (frenzyReady > 1){
+        const extra = frenzyReady - 5;
+        const extraText = extra > 0 ? ` (bonus AE +${formatNumber(extra)})` : "";
+        lines.push(`Multiplicateur Frénésie : ×${formatNumber(frenzyReady)} APC pendant 30s${extraText}`);
+      }
+      return lines;
+    }
+
+    function getFamilySetStatuses(){
+      const counts = {};
+      for (const key of Object.keys(FAMILIES)) counts[key] = 0;
+      for (const el of ELEMENTS){
+        if (!gacha.owned[el.symbol]) continue;
+        counts[el.family] = (counts[el.family] || 0) + 1;
+      }
+      return Object.entries(FAMILIES).map(([key, info])=>{
+        const owned = counts[key] || 0;
+        const required = FAMILY_SET_SIZES[key] || 0;
+        const complete = required > 0 && owned >= required;
+        return { key, label: info.label, owned, required, complete };
+      });
+    }
+
+    function getTrophyStatuses(){
+      return AUTO_GACHA_TROPHIES.map(trophy => {
+        const unlocked = !!trophies[trophy.key];
+        const threshold = Math.max(1, trophy.threshold || 1);
+        const progress = Math.min(1, totalAtoms / threshold);
+        const currentValue = Math.min(totalAtoms, threshold);
+        return {
+          key: trophy.key,
+          name: trophy.name,
+          description: trophy.description,
+          unlocked,
+          threshold,
+          progress,
+          currentValue
+        };
+      });
+    }
+
+    function renderTrophySection(){
+      const statuses = getTrophyStatuses();
+      if (!statuses.length) return "";
+      const items = statuses.map(status => {
+        const progressPercent = Math.min(100, Math.floor(status.progress * 100));
+        const currentText = formatNumber(status.currentValue);
+        const targetText = formatNumber(status.threshold);
+        const stateLabel = status.unlocked ? "Débloqué" : `${progressPercent}%`;
+        const itemClass = status.unlocked ? "trophy-unlocked" : "trophy-locked";
+        return `<li class="${itemClass}"><div class="trophy-name">${status.name}</div><div class="trophy-desc">${status.description}</div><div class="trophy-progress"><span class="trophy-progress-value">${stateLabel}</span><span class="trophy-progress-target">${currentText} / ${targetText} Atoms</span></div></li>`;
+      }).join("");
+      return `<div class="bonus-section bonus-section-trophies"><h3 class="bonus-subtitle">Trophées</h3><ul class="trophy-list">${items}</ul></div>`;
+    }
+
+    function renderBonusHtml(){
+      const lines = getBonusLines();
+      const sections = [];
+      const trophySection = renderTrophySection();
+      if (trophySection) sections.push(trophySection);
+      if (lines.length === 0){
+        sections.push('<div class="bonus-section"><p>Aucun bonus actif pour le moment.</p></div>');
+      } else {
+        sections.push(`<div class="bonus-section"><h3 class="bonus-subtitle">Effets actifs</h3><ul>${lines.map(line => `<li>${line}</li>`).join("")}</ul></div>`);
+      }
+
+      const setStatuses = getFamilySetStatuses();
+      if (setStatuses.length > 0){
+        const cards = setStatuses.map(status => {
+          const progress = status.required > 0 ? `${status.owned} / ${status.required}` : `${status.owned}`;
+          const stateText = status.complete ? "Bonus de set activé" : "Bonus de set inactif";
+          const statusClass = status.complete ? "set-status-card set-complete" : "set-status-card set-incomplete";
+          return `<div class="${statusClass}"><span class="set-status-name">${status.label}</span><span class="set-status-info"><span class="set-status-progress">${progress}</span><span class="set-status-state">${stateText}</span></span></div>`;
+        }).join("");
+        sections.push(`<div class="bonus-section bonus-section-sets"><h3 class="bonus-subtitle">Bonus de set</h3><div class="set-status-grid">${cards}</div></div>`);
+      }
+
+      return sections.join("");
+    }
+
+    function refreshBonusList(){
+      if (!bonusList) return;
+      bonusList.innerHTML = renderBonusHtml();
+    }
+
+    function refreshAwakenHighlights(){
+      if (!cellMap.size) return;
+      for (const [symbol, cell] of cellMap.entries()){
+        if (!cell) continue;
+        const owned = !!gacha.owned[symbol];
+        const level = getAwakenLevel(symbol);
+        const baseCost = getAwakenCost(level);
+        const isoAmount = getIsoStock(symbol);
+        let canAwaken = false;
+        if (owned && baseCost != null && level < AWAKEN_MAX){
+          const discounted = getDiscountedAwakenCost(level, currentIsoDiscount);
+          canAwaken = discounted != null && isoAmount >= discounted;
+        }
+        cell.classList.toggle("awaken-ready", !!canAwaken);
+      }
+    }
+
+    function clampRollDiscount(value){
+      if (!Number.isFinite(value)) return 0;
+      return Math.max(0, Math.min(Math.floor(value), 900));
+    }
+
+    function getDiscountedRollCost(baseCost, discountScaled = 0){
+      const base = Math.max(0, Math.floor(baseCost));
+      if (base <= 0) return 0;
+      const discount = clampRollDiscount(discountScaled);
+      const adjusted = MULTIPLIER_SCALE - discount;
+      if (adjusted <= 0) return 1;
+      return Math.max(1, Math.floor(base * adjusted / MULTIPLIER_SCALE));
+    }
+
+    function computeNextRollCost(currentCost){
+      if (currentCost >= 10000){
+        return currentCost + 100;
+      }
+      const growth = MULTIPLIER_SCALE + 10;
+      return Math.max(1, Math.floor(currentCost * growth / MULTIPLIER_SCALE));
+    }
+
+    /* ===================== Grille périodique ===================== */
+    function buildPeriodicGrids(){
+      if (!gridMain) return;
+      gridMain.innerHTML = "";
+      cellMap.clear();
+      if (gachaInfoPanel) gridMain.appendChild(gachaInfoPanel);
+      if (awakenWrapper){
+        gridMain.appendChild(awakenWrapper);
+        awakenWrapper.classList.add("hidden");
+      }
+      if (awakenBtn){
+        awakenBtn.textContent = "Éveil";
+        awakenBtn.disabled = true;
+        awakenBtn.removeAttribute("title");
+      }
+      if (elementName) elementName.textContent = "Clique un élément dans la grille";
+      if (elementIsoCount) elementIsoCount.textContent = "—";
+      // Périodes 1–7 (hors cases "*")
+      for (let period=1; period<=7; period++){
+        const row = PERIODS[period];
+        for (let c=1; c<=18; c++){
+          const sym = row[c-1] || "";
+          if (!sym || sym==="*") continue;
+          const el = ELEMENTS.find(e=>e.symbol===sym && !e.frow);
+          const cell = document.createElement("div");
+          const colors = FAMILY_COLORS[el.family] || {};
+          cell.className = `cell${gacha.owned[el.symbol] ? ' owned' : ''}`;
+          cell.style.gridColumn = c;
+          cell.style.gridRow = period;
+          if (colors.base) cell.style.setProperty("--bg-base", colors.base);
+          if (colors.owned) cell.style.setProperty("--bg-owned", colors.owned);
+          cell.dataset.symbol = el.symbol;
+          cell.dataset.family = el.family;
+          cell.innerHTML = `<div class="Z">${el.Z}</div><div class="sym">${el.symbol}</div>`;
+          cell.addEventListener("click", ()=> showElementInfo(el));
+          cell.addEventListener("dblclick", event => handleCellDoubleClick(el, event));
+          gridMain.appendChild(cell);
+          cellMap.set(el.symbol, cell);
+        }
+      }
+      // Lanthanides row (col 4->18)
+      const lanRowIndex = 8;
+      LANTHANIDES.forEach((sym,i)=>{
+        const el = ELEMENTS.find(e=>e.symbol===sym);
+        const cell = document.createElement("div");
+        const colors = FAMILY_COLORS[el.family] || {};
+        cell.className = `cell${gacha.owned[el.symbol] ? ' owned' : ''}`;
+        cell.style.gridColumn = (4+i);
+        cell.style.gridRow = lanRowIndex;
+        if (colors.base) cell.style.setProperty("--bg-base", colors.base);
+        if (colors.owned) cell.style.setProperty("--bg-owned", colors.owned);
+        cell.dataset.symbol = el.symbol;
+        cell.dataset.family = el.family;
+        cell.innerHTML = `<div class="Z">${el.Z}</div><div class="sym">${el.symbol}</div>`;
+        cell.addEventListener("click", ()=> showElementInfo(el));
+        cell.addEventListener("dblclick", event => handleCellDoubleClick(el, event));
+        gridMain.appendChild(cell);
+        cellMap.set(el.symbol, cell);
+      });
+      // Actinides row (col 4->18)
+      const actRowIndex = 9;
+      ACTINIDES.forEach((sym,i)=>{
+        const el = ELEMENTS.find(e=>e.symbol===sym);
+        const cell = document.createElement("div");
+        const colors = FAMILY_COLORS[el.family] || {};
+        cell.className = `cell${gacha.owned[el.symbol] ? ' owned' : ''}`;
+        cell.style.gridColumn = (4+i);
+        cell.style.gridRow = actRowIndex;
+        if (colors.base) cell.style.setProperty("--bg-base", colors.base);
+        if (colors.owned) cell.style.setProperty("--bg-owned", colors.owned);
+        cell.dataset.symbol = el.symbol;
+        cell.dataset.family = el.family;
+        cell.innerHTML = `<div class="Z">${el.Z}</div><div class="sym">${el.symbol}</div>`;
+        cell.addEventListener("click", ()=> showElementInfo(el));
+        cell.addEventListener("dblclick", event => handleCellDoubleClick(el, event));
+        gridMain.appendChild(cell);
+        cellMap.set(el.symbol, cell);
+      });
+      refreshAwakenHighlights();
+    }
+
+    function refreshElementPanel({ forceRecompute = false } = {}){
+      if (forceRecompute){
+        const derived = computeDerivedStats();
+        currentIsoDiscount = derived.isoDiscount || 0;
+        currentRollDiscount = clampRollDiscount(derived.inflRed || 0);
+      }
+      if (!currentElement){
+        if (elementName) elementName.textContent = "Clique un élément dans la grille";
+        if (elementIsoCount) elementIsoCount.textContent = "—";
+        if (elementFamily) elementFamily.textContent = "Famille : —";
+        if (awakenWrapper) awakenWrapper.classList.add("hidden");
+        if (awakenBtn){
+          awakenBtn.textContent = "Éveil";
+          awakenBtn.disabled = true;
+          awakenBtn.removeAttribute("title");
+        }
+        return;
+      }
+      const el = currentElement;
+      const owned = !!gacha.owned[el.symbol];
+      const isoAmount = getIsoStock(el.symbol);
+      const awakenLevel = getAwakenLevel(el.symbol);
+      const maxLevel = Math.min(AWAKEN_MAX, AWAKEN_COSTS.length);
+      if (elementName) elementName.textContent = `${el.name} (${el.symbol})`;
+      if (elementFamily){
+        const familyDef = FAMILIES[el.family] || {};
+        const familyLabel = familyDef.label || el.family;
+        const bonusLabel = familyDef.bonusDesc || "";
+        const bonusText = bonusLabel ? ` (Bonus: ${bonusLabel})` : "";
+        elementFamily.textContent = `Famille : ${familyLabel}${bonusText}`;
+      }
+      if (elementIsoCount) elementIsoCount.textContent = formatNumber(isoAmount);
+      if (!awakenWrapper || !awakenBtn) return;
+      const progressText = `(${awakenLevel}/${maxLevel})`;
+      const baseCost = getDiscountedAwakenCost(awakenLevel, currentIsoDiscount);
+      const costText = baseCost != null ? `${formatNumber(baseCost)} iso` : "—";
+      if (!owned){
+        awakenWrapper.classList.remove("hidden");
+        awakenBtn.textContent = `Éveil : ${costText} ${progressText}`;
+        awakenBtn.disabled = true;
+        awakenBtn.title = "Obtiens cet élément pour l'éveiller";
+      } else if (awakenLevel >= maxLevel){
+        awakenWrapper.classList.remove("hidden");
+        awakenBtn.textContent = `Éveil max ${progressText}`;
+        awakenBtn.disabled = true;
+        awakenBtn.removeAttribute("title");
+      } else {
+        const discountLabel = currentIsoDiscount > 0 ? ` (-${scaledToPercent(currentIsoDiscount)}%)` : "";
+        const isoText = baseCost != null ? `${formatNumber(baseCost)} iso${discountLabel}` : costText;
+        awakenWrapper.classList.remove("hidden");
+        awakenBtn.textContent = `Éveil : ${isoText} ${progressText}`;
+        awakenBtn.disabled = baseCost == null || isoAmount < baseCost;
+        if (awakenBtn.disabled && baseCost != null){
+          awakenBtn.title = `Requiert ${formatNumber(baseCost)} isotopes`;
+        } else {
+          awakenBtn.removeAttribute("title");
+        }
+      }
+      if (forceRecompute) refreshAwakenHighlights();
+    }
+
+    function showElementInfo(el){
+      currentElement = el;
+      refreshElementPanel({ forceRecompute: true });
+    }
+
+    function handleCellDoubleClick(el, event){
+      if (!el) return;
+      if (event){
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      showElementInfo(el);
+      attemptAwaken();
+    }
+
+    function attemptAwaken(){
+      if (!currentElement) return;
+      const el = currentElement;
+      if (!gacha.owned[el.symbol]) return;
+      const level = getAwakenLevel(el.symbol);
+      if (level >= AWAKEN_MAX) return;
+      const derived = computeDerivedStats();
+      currentIsoDiscount = derived.isoDiscount || 0;
+      currentRollDiscount = clampRollDiscount(derived.inflRed || 0);
+      const cost = getDiscountedAwakenCost(level, currentIsoDiscount);
+      if (cost == null) return;
+      if (!spendIsotopes(el.symbol, cost)) return;
+      setAwakenLevel(el.symbol, level + 1);
+      saveAndUpdate();
+      refreshElementPanel();
+    }
+
+    /* ===================== Tirage Gacha ===================== */
+    function rollGacha({ free = false } = {}){
+      const baseCost = gacha.rollCost;
+      const discountScaled = clampRollDiscount(currentRollDiscount);
+      const cost = getDiscountedRollCost(baseCost, discountScaled);
+      if (!free && atoms < cost) return null;
+
+      if (!free){
+        atoms = Math.max(0, atoms - cost);
+        gacha.rollCost = computeNextRollCost(baseCost);
+      }
+
+      // Choix famille puis élément aléatoire dans cette famille
+      const fam = pickFamily();
+      const pool = ELEMENTS.filter(e=>e.family===fam);
+      if (!pool.length) return null;
+      const el = pool[Math.floor(Math.random()*pool.length)];
+
+      gacha.pulls++;
+      let first = false;
+      let lootRarity = null;
+      let isoGain = 0;
+      if (gacha.owned[el.symbol]){
+        gacha.dupes[el.symbol] = (gacha.dupes[el.symbol]||0) + 1;
+        lootRarity = rollLootRarity();
+        isoGain = lootRarity.multiplier;
+        addIsotopes(el.symbol, isoGain);
+      } else {
+        gacha.owned[el.symbol] = 1;
+        first = true;
+      }
+
+      // Feedback UI : encart loot + mise à jour grille
+      if (lastLootBox) lastLootBox.classList.remove("hidden");
+      if (lastLootName) lastLootName.textContent = `${el.name} (${el.symbol})`;
+      if (lastLootFam) lastLootFam.textContent = `${FAMILIES[fam]?.label || fam}`;
+      if (first){
+        setLootResultClass("is-new");
+        if (lastLootType) lastLootType.textContent = "Nouveau!";
+      } else if (lootRarity){
+        setLootResultClass(`rarity-${lootRarity.key}`);
+        if (lastLootType) lastLootType.textContent = `Doublons x${lootRarity.multiplier}`;
+      } else {
+        setLootResultClass(null);
+        if (lastLootType) lastLootType.textContent = "—";
+      }
+
+      // Surbrillance de la case
+      [...document.querySelectorAll('[data-symbol]')].forEach(n=>{
+        if (n.dataset.symbol===el.symbol) n.classList.add('owned');
+      });
+
+      return { element: el, family: fam, isNew: first, lootRarity, isoGain };
+    }
+
+    /* ===================== Interactions & Boucles ===================== */
+    function prepareResetModal(){
+      if (!resetWordEl) return;
+      const word = RESET_WORDS[Math.floor(Math.random() * RESET_WORDS.length)] || "reset";
+      currentResetWord = word;
+      resetWordEl.textContent = word;
+      if (resetInput) resetInput.value = "";
+      if (resetConfirmBtn) resetConfirmBtn.disabled = true;
+      if (typeof updateResetConfirmState === "function") updateResetConfirmState();
+      setTimeout(()=>{ if (resetInput) resetInput.focus(); }, 50);
+    }
+
+    function openResetModal(){
+      if (!resetModal) return;
+      prepareResetModal();
+      resetModal.classList.remove("hidden");
+    }
+
+    function closeResetModal(){
+      if (!resetModal) return;
+      resetModal.classList.add("hidden");
+      currentResetWord = "";
+      if (resetInput) resetInput.value = "";
+      if (resetConfirmBtn) resetConfirmBtn.disabled = true;
+    }
+
+    function performReset(){
+      atoms = 0;
+      baseApc = 1;
+      baseAps = 0;
+      apcLvl = 0;
+      autoLvl = 0;
+      apcMultiLvl = 0;
+      apsMultiLvl = 0;
+      totalAtoms = 0;
+      trophies = {};
+      last = Date.now();
+      gacha = createDefaultGachaState();
+      syncTotalIsotopes();
+      currentElement = null;
+      currentIsoDiscount = 0;
+      currentRollDiscount = 0;
+      frenzyEffects = [];
+      currentFrenzyBase = 5;
+      hideFrenzyOrb();
+      resetAutoGachaCooldown();
+      lastAutoResult = null;
+      updateAutoGachaHeader();
+      if (autoGachaPanel) autoGachaPanel.classList.add("hidden");
+      if (lastLootBox) lastLootBox.classList.add("hidden");
+      if (lastLootName) lastLootName.textContent = "—";
+      if (lastLootFam) lastLootFam.textContent = "—";
+      setLootResultClass(null);
+      if (lastLootType) lastLootType.textContent = "—";
+      localStorage.removeItem("miniAtomState");
+      localStorage.removeItem("gacha");
+      buildPeriodicGrids();
+      saveAll();
+      updateUI();
+    }
+
+    // Clic partout sur la page principale
+    if (mainPageEl){
+      mainPageEl.addEventListener("click", ()=>{
+        const { APC, critChance, critDamagePercent } = computeDerivedStats();
+        let gain = Math.max(0, toNonNegativeInt(APC));
+        let isCrit = false;
+        if (critChance > 0){
+          const roll = Math.floor(Math.random() * CHANCE_SCALE);
+          isCrit = roll < critChance;
+          if (isCrit){
+            gain = Math.max(gain, Math.floor(gain * critDamagePercent / 100));
+          }
+        }
+        addAtoms(gain);
+        animateAtom(isCrit);
+        updateUI();
+      });
+    }
+
+    if (frenzyOrbEl){
+      frenzyOrbEl.addEventListener("click", event=>{
+        event.preventDefault();
+        event.stopPropagation();
+        playPopSound();
+        hideFrenzyOrb();
+        triggerFrenzyBonus();
+      });
+    }
+
+    if (awakenBtn){
+      awakenBtn.addEventListener("click", attemptAwaken);
+    }
+
+    // Améliorations de base
+    const baseApcCost = 15;
+    const baseAutoCost = 50;
+    const LINEAR_TARGET_LEVEL = 999;
+    const LINEAR_TARGET_COST = 1_000_000;
+
+    function computeUpgradeCost(baseCost, level){
+      const base = Math.max(1, baseCost);
+      const lvl = Math.max(0, toNonNegativeInt(level));
+      if (lvl <= 0) return base;
+      const diff = Math.max(0, LINEAR_TARGET_COST - base);
+      const raw = diff * lvl;
+      if (!Number.isFinite(raw) || raw > Number.MAX_SAFE_INTEGER){
+        return Number.MAX_SAFE_INTEGER;
+      }
+      const scaled = Math.floor(raw / LINEAR_TARGET_LEVEL);
+      const total = base + scaled;
+      if (!Number.isFinite(total) || total > Number.MAX_SAFE_INTEGER){
+        return Number.MAX_SAFE_INTEGER;
+      }
+      return Math.max(1, Math.floor(total));
+    }
+
+    const apcCost = lvl => computeUpgradeCost(baseApcCost, lvl);
+    const autoCost = lvl => computeUpgradeCost(baseAutoCost, lvl);
+
+    const MULTIPLIER_BASE_COST = 1_000_000;
+
+    function computeMultiplierCost(level){
+      const lvl = Math.max(0, toNonNegativeInt(level));
+      let cost = MULTIPLIER_BASE_COST;
+      for (let i = 0; i < lvl; i++){
+        if (!Number.isFinite(cost) || cost > Number.MAX_SAFE_INTEGER / 10){
+          return Number.MAX_SAFE_INTEGER;
+        }
+        cost *= 10;
+      }
+      if (!Number.isFinite(cost)) return Number.MAX_SAFE_INTEGER;
+      return Math.max(1, Math.floor(cost));
+    }
+
+    function applyBinaryMultiplier(value, level){
+      const baseValue = Math.max(0, toNonNegativeInt(value));
+      if (baseValue <= 0) return 0;
+      const lvl = Math.max(0, toNonNegativeInt(level));
+      if (lvl <= 0) return baseValue;
+      const multiplier = Math.pow(2, lvl);
+      if (!Number.isFinite(multiplier) || multiplier > Number.MAX_SAFE_INTEGER){
+        return Number.MAX_SAFE_INTEGER;
+      }
+      const result = baseValue * multiplier;
+      if (!Number.isFinite(result) || result > Number.MAX_SAFE_INTEGER){
+        return Number.MAX_SAFE_INTEGER;
+      }
+      return Math.max(0, Math.floor(result));
+    }
+
+    btnBuyApc.addEventListener("click", ()=>{
+      const cost = apcCost(apcLvl);
+      if (atoms >= cost){
+        atoms -= cost; baseApc += 1; apcLvl++; saveAndUpdate();
+      }
+    });
+    btnBuyAuto.addEventListener("click", ()=>{
+      const cost = autoCost(autoLvl);
+      if (atoms >= cost){
+        atoms -= cost; baseAps += 1; autoLvl++; saveAndUpdate();
+      }
+    });
+    btnBuyApcMulti.addEventListener("click", ()=>{
+      const cost = computeMultiplierCost(apcMultiLvl);
+      if (atoms >= cost){
+        atoms -= cost; apcMultiLvl++; saveAndUpdate();
+      }
+    });
+    btnBuyApsMulti.addEventListener("click", ()=>{
+      const cost = computeMultiplierCost(apsMultiLvl);
+      if (atoms >= cost){
+        atoms -= cost; apsMultiLvl++; saveAndUpdate();
+      }
+    });
+
+    // Tirage
+    rollBtn.addEventListener("click", ()=>{
+      const result = rollGacha();
+      if (result) saveAndUpdate();
+    });
+
+    // Navigation
+    btnShop.addEventListener("click", ()=>{
+      if (!mainPageEl || !shopPageEl) return;
+      hideFrenzyOrb();
+      mainPageEl.classList.remove("active");
+      shopPageEl.classList.add("active");
+      updateUI();
+    });
+    btnBack.addEventListener("click", ()=>{
+      if (!shopPageEl || !mainPageEl) return;
+      shopPageEl.classList.remove("active");
+      mainPageEl.classList.add("active");
+      updateUI();
+    });
+    btnGacha.addEventListener("click", ()=>{
+      if (!mainPageEl || !gachaPageEl) return;
+      hideFrenzyOrb();
+      mainPageEl.classList.remove("active");
+      gachaPageEl.classList.add("active");
+      updateUI();
+    });
+    btnBackGacha.addEventListener("click", ()=>{
+      if (!gachaPageEl || !mainPageEl) return;
+      gachaPageEl.classList.remove("active");
+      mainPageEl.classList.add("active");
+      updateUI();
+    });
+    if (bonusBtn){
+      bonusBtn.addEventListener("click", ()=>{
+        if (!gachaPageEl || !bonusPageEl) return;
+        gachaPageEl.classList.remove("active");
+        bonusPageEl.classList.add("active");
+        updateUI();
+      });
+    }
+    if (backBonusBtn){
+      backBonusBtn.addEventListener("click", ()=>{
+        if (!bonusPageEl || !gachaPageEl) return;
+        bonusPageEl.classList.remove("active");
+        gachaPageEl.classList.add("active");
+        updateUI();
+      });
+    }
+
+    // Thèmes
+    themeButtons.forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        applyTheme(btn.dataset.theme);
+      });
+    });
+
+    function updateResetConfirmState(){
+      if (!resetConfirmBtn) return;
+      const inputValue = resetInput ? resetInput.value : "";
+      const matches = normalizeWord(inputValue) === normalizeWord(currentResetWord);
+      resetConfirmBtn.disabled = !matches;
+    }
+
+    if (resetBtn){
+      resetBtn.addEventListener("click", openResetModal);
+    }
+    if (resetInput){
+      resetInput.addEventListener("input", updateResetConfirmState);
+      resetInput.addEventListener("keydown", event=>{
+        if (event.key === "Enter" && resetConfirmBtn && !resetConfirmBtn.disabled){
+          event.preventDefault();
+          if (normalizeWord(resetInput.value) === normalizeWord(currentResetWord)){
+            performReset();
+            closeResetModal();
+          }
+        }
+      });
+    }
+    if (resetConfirmBtn){
+      resetConfirmBtn.addEventListener("click", ()=>{
+        const inputValue = resetInput ? resetInput.value : "";
+        if (normalizeWord(inputValue) === normalizeWord(currentResetWord)){
+          performReset();
+          closeResetModal();
+        }
+      });
+    }
+    if (resetCancelBtn){
+      resetCancelBtn.addEventListener("click", closeResetModal);
+    }
+    if (resetCloseBtn){
+      resetCloseBtn.addEventListener("click", closeResetModal);
+    }
+    if (resetModal){
+      resetModal.addEventListener("click", event=>{
+        if (event.target === resetModal) closeResetModal();
+      });
+    }
+
+    document.addEventListener("keydown", event=>{
+      if (event.key === "Escape"){
+        if (resetModal && !resetModal.classList.contains("hidden")) closeResetModal();
+      }
+    });
+
+    // Offline progress (avec bonus offline via Actinides)
+    (function applyOfflineProgress(){
+      if (!last) return;
+      const elapsedMs = Math.max(0, Date.now() - last);
+      const elapsed = Math.floor(elapsedMs / 1000);
+      if (elapsed <= 0) return;
+      const { APS, offlineBonus } = computeDerivedStats();
+      if (APS > 0){
+        const apsInt = toNonNegativeInt(APS);
+        const bonus = Math.max(0, Math.min(offlineBonus, MULTIPLIER_SCALE));
+        const gain = Math.floor(apsInt * elapsed * (MULTIPLIER_SCALE + bonus) / MULTIPLIER_SCALE);
+        addAtoms(gain, { silent:true });
+      }
+    })();
+
+    // Boucle d’auto-gain
+    setInterval(()=>{
+      const { APS } = computeDerivedStats();
+      addAtoms(toNonNegativeInt(APS), { silent:true });
+    }, 1000);
+
+    setInterval(()=> handleAutoGachaTick(1), 1000);
+
+    // Apparition du bonus Frénésie
+    setInterval(checkFrenzySpawn, 1000);
+
+    // Rendu + autosave
+    setInterval(()=>{ saveAll(); updateUI(); }, 1000);
+
+    function updateUI(){
+      const derived = computeDerivedStats();
+      const { APC, APS, isoDiscount = 0, inflRed = 0, frenzyMultiplier = 1, frenzyBase = currentFrenzyBase } = derived;
+      currentIsoDiscount = isoDiscount;
+      currentRollDiscount = clampRollDiscount(inflRed);
+      updateAutoGachaHeader();
+
+      const atomsText = formatNumber(atoms);
+      const apsText = formatNumber(APS);
+      const apcText = formatNumber(APC);
+
+      if (elAtoms) elAtoms.textContent = atomsText;
+      elAps.textContent = apsText;
+      elApc.textContent = apcText;
+
+      elAtomsShop.textContent = atomsText;
+      elApsShop.textContent = apsText;
+      elApcShop.textContent = apcText;
+
+      if (elAtomsGacha) elAtomsGacha.textContent = atomsText;
+      if (elApsGacha) elApsGacha.textContent = apsText;
+      if (elApcGacha) elApcGacha.textContent = apcText;
+
+      if (frenzyStatusEl){
+        const stacks = getFrenzyStackCount();
+        if (stacks > 0){
+          const remainingMs = getLongestFrenzyRemaining();
+          const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
+          const stackText = stacks > 1 ? ` (${stacks} charges)` : "";
+          frenzyStatusEl.textContent = `Frénésie ×${formatNumber(frenzyMultiplier)}${stackText} – ${remainingSec}s`;
+          frenzyStatusEl.classList.add("active");
+        } else {
+          frenzyStatusEl.textContent = `Frénésie prête : ×${formatNumber(Math.max(1, frenzyBase))}`;
+          frenzyStatusEl.classList.remove("active");
+        }
+      }
+
+      // Boutons de base
+      btnBuyApc.textContent = `↑ APC (+1) – Coût ${formatNumber(apcCost(apcLvl))}`;
+      infoApc.textContent = `Niveau ${apcLvl}`;
+      btnBuyAuto.textContent = `↑ Auto (+1 APS) – Coût ${formatNumber(autoCost(autoLvl))}`;
+      infoAuto.textContent = `Niveau ${autoLvl}`;
+      btnBuyApcMulti.textContent = `×2 APC – Coût ${formatNumber(computeMultiplierCost(apcMultiLvl))}`;
+      const apcMultiTotal = applyBinaryMultiplier(1, apcMultiLvl);
+      infoApcMulti.textContent = `Achats ${apcMultiLvl} (×${formatNumber(apcMultiTotal)})`;
+      btnBuyApsMulti.textContent = `×2 APS – Coût ${formatNumber(computeMultiplierCost(apsMultiLvl))}`;
+      const apsMultiTotal = applyBinaryMultiplier(1, apsMultiLvl);
+      infoApsMulti.textContent = `Achats ${apsMultiLvl} (×${formatNumber(apsMultiTotal)})`;
+
+      // Gacha infos
+      const displayedRollCost = getDiscountedRollCost(gacha.rollCost, currentRollDiscount);
+      rollCostOnBtn.textContent = formatNumber(displayedRollCost);
+      isotopesEl.textContent = formatNumber(gacha.isotopes);
+
+      refreshBonusList();
+      refreshAwakenHighlights();
+      refreshElementPanel();
+      updateAutoGachaPanel();
+    }
+
+    // Init
+    checkTrophies({ silent:true });
+    resetAutoGachaCooldown();
+    updateAutoGachaHeader();
+    updateAutoGachaPanel();
+    buildPeriodicGrids();
+    updateUI();
+  </script>
+</body>
+</html>
