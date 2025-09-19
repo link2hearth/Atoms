@@ -2143,18 +2143,15 @@
       // Compte uniques possédés par famille
       const perFamCount = {};
       const perFamWeight = {};
-      const perFamAwakenLevels = {};
       for (const f of Object.keys(FAMILIES)){
         perFamCount[f] = 0;
         perFamWeight[f] = 0;
-        perFamAwakenLevels[f] = 0;
       }
       for (const el of ELEMENTS){
         if (!gacha.owned[el.symbol]) continue;
         const lvl = getAwakenLevel(el.symbol);
         perFamCount[el.family] = (perFamCount[el.family]||0) + 1;
         perFamWeight[el.family] = (perFamWeight[el.family]||0) + getAwakenMultiplier(lvl);
-        perFamAwakenLevels[el.family] = (perFamAwakenLevels[el.family]||0) + lvl;
       }
 
       let critUnits = 0;
@@ -2173,8 +2170,6 @@
 
       for (const [f, n] of Object.entries(perFamWeight)){
         if (!n) continue;
-        const uniqueCount = perFamCount[f] || 0;
-        const awakenSum = perFamAwakenLevels[f] || 0;
         switch(f){
           case "ALK": critUnits += n; break;
           case "HAL": apcMul += n * 10; break;
@@ -2183,8 +2178,8 @@
           case "AN" : offlineBonus += n * 10; break;
           case "LN" : globalMul += n * 5; break;
           case "MET": hybridAPC += n * 5; hybridAPS += n * 5; break;
-          case "NM" : inflRed += (uniqueCount + awakenSum) * 10; break;
-          case "AE" : frenzyBase += (perFamCount[f]||0) + (perFamAwakenLevels[f]||0); break;
+          case "NM" : inflRed += n * 5; break;
+          case "AE" : frenzyBase += n; break;
         }
       }
 
