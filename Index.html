@@ -3084,28 +3084,49 @@
     // Améliorations de base
     const baseApcCost = 15;
     const baseAutoCost = 50;
-    const LINEAR_TARGET_LEVEL = 999;
-    const LINEAR_TARGET_COST = 1_000_000;
+    const UPGRADE_STAGE_SIZE = 100;
 
-    function computeUpgradeCost(baseCost, level){
+    function computeUpgradeCost(baseCost, level, baseIncrement){
       const base = Math.max(1, baseCost);
+      const increment = Math.max(0, toNonNegativeInt(baseIncrement ?? base));
       const lvl = Math.max(0, toNonNegativeInt(level));
       if (lvl <= 0) return base;
-      const diff = Math.max(0, LINEAR_TARGET_COST - base);
-      const raw = diff * lvl;
-      if (!Number.isFinite(raw) || raw > Number.MAX_SAFE_INTEGER){
-        return Number.MAX_SAFE_INTEGER;
+
+      let totalIncrease = 0;
+      let step = increment;
+
+      for (let stage = 0; ; stage++){
+        const stageStart = stage === 0 ? 0 : stage * UPGRADE_STAGE_SIZE - 1;
+        if (stageStart >= lvl) break;
+        if (stage > 0){
+          if (!Number.isFinite(step) || step > Number.MAX_SAFE_INTEGER / 2){
+            return Number.MAX_SAFE_INTEGER;
+          }
+          step *= 2;
+        }
+        const stageEnd = (stage + 1) * UPGRADE_STAGE_SIZE - 2;
+        const effectiveEnd = Math.min(lvl - 1, stageEnd);
+        if (effectiveEnd < stageStart) continue;
+        const count = effectiveEnd - stageStart + 1;
+        if (!Number.isFinite(step) || step > Number.MAX_SAFE_INTEGER / Math.max(1, count)){
+          return Number.MAX_SAFE_INTEGER;
+        }
+        const stageIncrease = step * count;
+        if (!Number.isFinite(stageIncrease) || stageIncrease > Number.MAX_SAFE_INTEGER - totalIncrease){
+          return Number.MAX_SAFE_INTEGER;
+        }
+        totalIncrease += stageIncrease;
       }
-      const scaled = Math.floor(raw / LINEAR_TARGET_LEVEL);
-      const total = base + scaled;
+
+      const total = base + totalIncrease;
       if (!Number.isFinite(total) || total > Number.MAX_SAFE_INTEGER){
         return Number.MAX_SAFE_INTEGER;
       }
       return Math.max(1, Math.floor(total));
     }
 
-    const apcCost = lvl => computeUpgradeCost(baseApcCost, lvl);
-    const autoCost = lvl => computeUpgradeCost(baseAutoCost, lvl);
+    const apcCost = lvl => computeUpgradeCost(baseApcCost, lvl, baseApcCost);
+    const autoCost = lvl => computeUpgradeCost(baseAutoCost, lvl, baseAutoCost);
 
     const MULTIPLIER_BASE_COST = 1_000_000;
 
