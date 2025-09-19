@@ -2143,18 +2143,15 @@
       // Compte uniques possédés par famille
       const perFamCount = {};
       const perFamWeight = {};
-      const perFamAwakenLevels = {};
       for (const f of Object.keys(FAMILIES)){
         perFamCount[f] = 0;
         perFamWeight[f] = 0;
-        perFamAwakenLevels[f] = 0;
       }
       for (const el of ELEMENTS){
         if (!gacha.owned[el.symbol]) continue;
         const lvl = getAwakenLevel(el.symbol);
         perFamCount[el.family] = (perFamCount[el.family]||0) + 1;
         perFamWeight[el.family] = (perFamWeight[el.family]||0) + getAwakenMultiplier(lvl);
-        perFamAwakenLevels[el.family] = (perFamAwakenLevels[el.family]||0) + lvl;
       }
 
       let critUnits = 0;
@@ -2173,8 +2170,6 @@
 
       for (const [f, n] of Object.entries(perFamWeight)){
         if (!n) continue;
-        const uniqueCount = perFamCount[f] || 0;
-        const awakenSum = perFamAwakenLevels[f] || 0;
         switch(f){
           case "ALK": critUnits += n; break;
           case "HAL": apcMul += n * 10; break;
@@ -2183,8 +2178,8 @@
           case "AN" : offlineBonus += n * 10; break;
           case "LN" : globalMul += n * 5; break;
           case "MET": hybridAPC += n * 5; hybridAPS += n * 5; break;
-          case "NM" : inflRed += (uniqueCount + awakenSum) * 10; break;
-          case "AE" : frenzyBase += (perFamCount[f]||0) + (perFamAwakenLevels[f]||0); break;
+          case "NM" : inflRed += n * 5; break;
+          case "AE" : frenzyBase += n; break;
         }
       }
 
@@ -2224,11 +2219,21 @@
       const apsBaseValue = Math.max(0, baseAps);
       const apcFlatBonus = Math.max(0, apcFlat);
       const apsFlatBonus = Math.max(0, apsFlat);
-      const apcAfterFlat = Math.max(0, apcBaseValue + apcFlatBonus);
-      const apsAfterFlat = Math.max(0, apsBaseValue + apsFlatBonus);
+      const apcFamilyPercent = Math.max(0, apcMul - MULTIPLIER_SCALE);
+      const apsFamilyPercent = Math.max(0, apsMul - MULTIPLIER_SCALE);
+      const apcFamilyBonusValue = (apcBaseValue > 0 && apcFamilyPercent > 0)
+        ? Math.floor(apcBaseValue * apcFamilyPercent / MULTIPLIER_SCALE)
+        : 0;
+      const apsFamilyBonusValue = (apsBaseValue > 0 && apsFamilyPercent > 0)
+        ? Math.floor(apsBaseValue * apsFamilyPercent / MULTIPLIER_SCALE)
+        : 0;
+      const apcAfterFamily = Math.max(0, apcBaseValue + apcFamilyBonusValue);
+      const apsAfterFamily = Math.max(0, apsBaseValue + apsFamilyBonusValue);
+      const apcAfterFlat = Math.max(0, apcAfterFamily + apcFlatBonus);
+      const apsAfterFlat = Math.max(0, apsAfterFamily + apsFlatBonus);
 
-      const apcFamilyMultiplier = Math.max(0, apcMul) / MULTIPLIER_SCALE;
-      let APC = applyMultiplier(apcAfterFlat, apcMul);
+      const apcFamilyMultiplier = apcBaseValue > 0 ? Math.max(0, apcAfterFamily) / apcBaseValue : 1;
+      let APC = apcAfterFlat;
       const apcHybridMultiplier = (MULTIPLIER_SCALE + Math.max(0, hybridAPC)) / MULTIPLIER_SCALE;
       APC = applyMultiplier(APC, MULTIPLIER_SCALE + hybridAPC);
       const apcGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
@@ -2237,8 +2242,8 @@
       const apcBinaryMultiplier = Math.max(1, applyBinaryMultiplier(1, apcMultiLvl));
       APC = applyBinaryMultiplier(APC, apcMultiLvl);
 
-      const apsFamilyMultiplier = Math.max(0, apsMul) / MULTIPLIER_SCALE;
-      let APS = applyMultiplier(apsAfterFlat, apsMul);
+      const apsFamilyMultiplier = apsBaseValue > 0 ? Math.max(0, apsAfterFamily) / apsBaseValue : 1;
+      let APS = apsAfterFlat;
       const apsHybridMultiplier = (MULTIPLIER_SCALE + Math.max(0, hybridAPS)) / MULTIPLIER_SCALE;
       APS = applyMultiplier(APS, MULTIPLIER_SCALE + hybridAPS);
       const apsGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
@@ -2263,7 +2268,9 @@
         frenzyBase,
         apcBaseValue,
         apsBaseValue,
+        apcAfterFamily,
         apcAfterFlat,
+        apsAfterFamily,
         apsAfterFlat,
         apcFamilyMultiplier,
         apcHybridMultiplier,
