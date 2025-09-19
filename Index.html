@@ -32,15 +32,109 @@
     .page.active { display:flex; flex-direction:column; align-items:center; gap:clamp(1rem, 3vh, 2.5rem); justify-content:space-between; flex:1; }
 
     /* Boutons navigation / barre du haut */
-    #shopBtn, #backBtn, #gachaBtn, #backFromGacha, #bonusBtn, #backFromBonus {
-      position:absolute; padding:clamp(.55rem,1.2vw,.95rem) clamp(.85rem,1.8vw,1.5rem); font-size:clamp(.8rem,1.4vw,1rem); border:none; border-radius:10px; cursor:pointer;
-      background:var(--pill); color:var(--fg);
+    .app-header {
+      position:sticky;
+      top:0;
+      z-index:150;
+      background:var(--bg);
+      box-shadow:0 12px 28px rgba(0,0,0,.32);
+      backdrop-filter:blur(14px);
     }
-    #gachaBtn { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
-    #shopBtn { top:clamp(1rem,3vh,2rem); right:clamp(1rem,3vw,2.5rem); }
-    #backBtn, #backFromGacha { top:clamp(1rem,3vh,2rem); right:clamp(1rem,3vw,2.5rem); }
-    #bonusBtn { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
-    #backFromBonus { top:clamp(1rem,3vh,2rem); left:clamp(1rem,3vw,2.5rem); }
+    .nav-menu {
+      width:100%;
+      max-width:var(--grid-max);
+      margin:0 auto;
+      padding:clamp(.85rem, 2.8vh, 1.5rem) clamp(1.2rem, 4vw, 2.4rem);
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(.55rem, 1.8vw, 1.1rem);
+      list-style:none;
+    }
+    .nav-button {
+      display:flex;
+      align-items:center;
+      gap:.55rem;
+      padding:clamp(.55rem, 1.4vh, .95rem) clamp(.95rem, 2.5vw, 1.65rem);
+      border:none;
+      border-radius:999px;
+      background:var(--pill);
+      color:var(--fg);
+      font-family:'Orbitron',sans-serif;
+      font-size:clamp(.72rem, 1.05vw, .95rem);
+      font-weight:600;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      cursor:pointer;
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+    }
+    .nav-button .nav-icon {
+      font-size:clamp(1rem, 1.7vw, 1.4rem);
+      line-height:1;
+    }
+    .nav-button:hover,
+    .nav-button:focus-visible {
+      transform:translateY(-2px);
+      box-shadow:0 12px 24px rgba(0,0,0,.3);
+    }
+    .nav-button.active {
+      background:var(--accent);
+      color:var(--bg);
+      box-shadow:0 12px 26px rgba(0,0,0,.32);
+    }
+    main {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+    }
+    #pageContainer {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+    .page-header {
+      width:100%;
+      max-width:var(--grid-max);
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:.4rem;
+    }
+    .page-title {
+      margin:0;
+      font-size:clamp(1.3rem, 3vw, 2.2rem);
+      letter-spacing:.16em;
+      text-transform:uppercase;
+    }
+    .page-description {
+      margin:0;
+      font-size:clamp(.8rem, 1.2vw, 1rem);
+      opacity:.75;
+      max-width:65ch;
+    }
+    .placeholder-card {
+      width:min(100%, var(--grid-max));
+      margin:0 auto;
+      background:var(--card);
+      border-radius:18px;
+      padding:clamp(1.2rem, 3vh, 2rem) clamp(1.2rem, 4vw, 2.2rem);
+      box-shadow:0 14px 28px rgba(0,0,0,.28);
+      display:flex;
+      flex-direction:column;
+      gap:.75rem;
+    }
+    .placeholder-card h2 {
+      margin:0;
+      font-size:clamp(1.1rem, 2.4vw, 1.6rem);
+      letter-spacing:.08em;
+    }
+    .placeholder-card p {
+      margin:0;
+      font-size:clamp(.85rem, 1.3vw, 1.05rem);
+      opacity:.8;
+    }
 
     /* Sélecteur de thème (boutons shop) */
     .theme-selector {
@@ -468,7 +562,7 @@
     .hidden { display:none; }
 
     /* Layout spécifiques par page */
-    #mainPage.page.active { justify-content:center; }
+    #mainPage.page.active { justify-content:flex-start; }
     #mainPage .atomsCluster { order:1; margin-bottom:clamp(1.2rem, 4vh, 3rem); }
     #mainPage .atom { order:2; margin:0 auto; }
 
@@ -628,6 +722,8 @@
 
     @media (max-width: 900px) {
       .page { padding:clamp(1.25rem,5vh,2.5rem) clamp(1rem,5vw,2rem); }
+      .nav-menu { justify-content:flex-start; }
+      .nav-button { flex:1 1 calc(50% - clamp(.55rem, 2vw, 1rem)); justify-content:center; }
       .theme-selector {
         width:100%;
         flex-direction:column;
@@ -654,6 +750,8 @@
     }
 
     @media (max-width: 720px) {
+      .nav-menu { justify-content:center; }
+      .nav-button { flex:1 1 100%; }
       .gacha-info .info-lines { grid-template-columns:1fr; }
     }
 
@@ -661,12 +759,6 @@
       .atom { width:clamp(7.5rem,20vmin,15rem); }
       .gacha-grid { --cell-size: clamp(32px, min(3.6vw, 5.5vh), 48px); }
       .gacha-info { min-height:clamp(32px, min(3.6vw, 5.5vh), 48px); }
-    }
-
-    @media (max-height: 620px) {
-      #shopBtn, #backBtn, #gachaBtn, #backFromGacha, #bonusBtn, #backFromBonus {
-        top:clamp(.5rem,2vh,1.25rem);
-      }
     }
 
     .modal-overlay {
@@ -748,146 +840,209 @@
 </head>
 <body class="theme-rainbow">
   <div id="confettiLayer" aria-hidden="true"></div>
-  <!-- PAGE PRINCIPALE -->
-  <div id="mainPage" class="page active">
-    <button id="gachaBtn">Atomes</button>
-    <button id="shopBtn">Shop</button>
+  <header class="app-header" role="banner">
+    <nav class="nav-menu" aria-label="Navigation principale">
+      <button class="nav-button active" type="button" data-page-target="mainPage">
+        <span class="nav-icon" aria-hidden="true">⚛️</span>
+        <span class="nav-label">Atoms</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="shopPage">
+        <span class="nav-icon" aria-hidden="true">🛒</span>
+        <span class="nav-label">Shop</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="gachaPage">
+        <span class="nav-icon" aria-hidden="true">🎲</span>
+        <span class="nav-label">Gacha</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="bonusPage">
+        <span class="nav-icon" aria-hidden="true">🎁</span>
+        <span class="nav-label">Bonus</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="infosPage">
+        <span class="nav-icon" aria-hidden="true">ℹ️</span>
+        <span class="nav-label">Infos</span>
+      </button>
+      <button class="nav-button" type="button" data-page-target="revivePage">
+        <span class="nav-icon" aria-hidden="true">♻️</span>
+        <span class="nav-label">Revive</span>
+      </button>
+    </nav>
+  </header>
+  <main id="pageContainer">
+    <!-- PAGE PRINCIPALE -->
+    <section id="mainPage" class="page active" aria-labelledby="mainTitle">
+      <header class="page-header">
+        <h1 id="mainTitle" class="page-title">ATOMS</h1>
+        <p class="page-description">Clique sur l'atome pour générer de l'énergie et débloquer des bonus.</p>
+      </header>
 
-    <div class="atomsCluster">
-      <div class="statPill statPill-apc">
-        <span class="statLabel">APC</span>
-        <span class="statValue" id="apc">1.0</span>
-        <span class="frenzyStatus" id="frenzyStatus" aria-live="polite">Frénésie ×1.0</span>
-      </div>
-      <div class="atomsBox">
-        <span class="atomsLabel">Atoms</span>
-        <strong class="atomsValue" id="atoms">0.0</strong>
-      </div>
-      <div class="statPill statPill-aps">
-        <span class="statLabel">APS</span>
-        <span class="statValue" id="aps">0.0</span>
-      </div>
-    </div>
-
-    <img class="atom" id="atomIcon" src="Assets/Image/Atom.png" alt="Icône d'atome" />
-
-    <button id="frenzyOrb" type="button" aria-label="Activer le Multiplicateur Frénésie" disabled></button>
-
-    <div id="autoGachaPanel" class="auto-gacha-panel hidden" aria-live="polite">
-      <div id="autoGachaHeader" class="auto-gacha-header">Tirage auto</div>
-      <div class="auto-gacha-content">
-        <span id="autoGachaName" class="auto-gacha-name">—</span>
-        <span id="autoGachaResult" class="loot-result auto-gacha-result" data-base-class="loot-result auto-gacha-result">—</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- PAGE SHOP -->
-  <div id="shopPage" class="page">
-    <button id="backBtn">Retour</button>
-    <div class="atomsCluster">
-      <div class="statPill statPill-apc">
-        <span class="statLabel">APC</span>
-        <span class="statValue" id="apcShop">1.0</span>
-      </div>
-      <div class="atomsBox">
-        <span class="atomsLabel">Atoms</span>
-        <strong class="atomsValue" id="atomsShop">0.0</strong>
-      </div>
-      <div class="statPill statPill-aps">
-        <span class="statLabel">APS</span>
-        <span class="statValue" id="apsShop">0.0</span>
-      </div>
-    </div>
-    <div class="shop-wrap">
-      <div class="card gacha-card">
-        <div class="gacha-card-header">
-          <span class="card-title">Capsule Gacha</span>
-          <button id="rollBtn">🎲 Tirage (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
+      <div class="atomsCluster">
+        <div class="statPill statPill-apc">
+          <span class="statLabel">APC</span>
+          <span class="statValue" id="apc">1.0</span>
+          <span class="frenzyStatus" id="frenzyStatus" aria-live="polite">Frénésie ×1.0</span>
         </div>
-        <div class="gacha-card-meta">
-          <span class="muted">Isotopes</span>
-          <div class="info-pill"><span id="isotopes">0</span></div>
+        <div class="atomsBox">
+          <span class="atomsLabel">Atoms</span>
+          <strong class="atomsValue" id="atoms">0.0</strong>
         </div>
-        <div class="loot hidden" id="lastLootBox">
-          <div class="loot-detail">
-            <span id="lastLootName" class="loot-name">—</span>
-            <span id="lastLootFam" class="loot-family">—</span>
+        <div class="statPill statPill-aps">
+          <span class="statLabel">APS</span>
+          <span class="statValue" id="aps">0.0</span>
+        </div>
+      </div>
+
+      <img class="atom" id="atomIcon" src="Assets/Image/Atom.png" alt="Icône d'atome" />
+
+      <button id="frenzyOrb" type="button" aria-label="Activer le Multiplicateur Frénésie" disabled></button>
+
+      <div id="autoGachaPanel" class="auto-gacha-panel hidden" aria-live="polite">
+        <div id="autoGachaHeader" class="auto-gacha-header">Tirage auto</div>
+        <div class="auto-gacha-content">
+          <span id="autoGachaName" class="auto-gacha-name">—</span>
+          <span id="autoGachaResult" class="loot-result auto-gacha-result" data-base-class="loot-result auto-gacha-result">—</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE SHOP -->
+    <section id="shopPage" class="page" aria-labelledby="shopTitle">
+      <header class="page-header">
+        <h1 id="shopTitle" class="page-title">Shop</h1>
+        <p class="page-description">Investis tes atomes pour renforcer ton réacteur.</p>
+      </header>
+      <div class="atomsCluster">
+        <div class="statPill statPill-apc">
+          <span class="statLabel">APC</span>
+          <span class="statValue" id="apcShop">1.0</span>
+        </div>
+        <div class="atomsBox">
+          <span class="atomsLabel">Atoms</span>
+          <strong class="atomsValue" id="atomsShop">0.0</strong>
+        </div>
+        <div class="statPill statPill-aps">
+          <span class="statLabel">APS</span>
+          <span class="statValue" id="apsShop">0.0</span>
+        </div>
+      </div>
+      <div class="shop-wrap">
+        <div class="card gacha-card">
+          <div class="gacha-card-header">
+            <span class="card-title">Capsule Gacha</span>
+            <button id="rollBtn">🎲 Tirage (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
           </div>
-          <span id="lastLootType" class="loot-result" data-base-class="loot-result">—</span>
+          <div class="gacha-card-meta">
+            <span class="muted">Isotopes</span>
+            <div class="info-pill"><span id="isotopes">0</span></div>
+          </div>
+          <div class="loot hidden" id="lastLootBox">
+            <div class="loot-detail">
+              <span id="lastLootName" class="loot-name">—</span>
+              <span id="lastLootFam" class="loot-family">—</span>
+            </div>
+            <span id="lastLootType" class="loot-result" data-base-class="loot-result">—</span>
+          </div>
         </div>
-      </div>
 
-      <div class="card">
-        <div class="muted">Améliorations de base</div>
-        <div class="shop-row">
-          <button id="buyApc"></button>
-          <span id="apcInfo"></span>
+        <div class="card">
+          <div class="muted">Améliorations de base</div>
+          <div class="shop-row">
+            <button id="buyApc"></button>
+            <span id="apcInfo"></span>
+          </div>
+          <div class="shop-row">
+            <button id="buyAuto"></button>
+            <span id="autoInfo"></span>
+          </div>
+          <div class="shop-row">
+            <button id="buyApcMulti"></button>
+            <span id="apcMultiInfo"></span>
+          </div>
+          <div class="shop-row">
+            <button id="buyApsMulti"></button>
+            <span id="apsMultiInfo"></span>
+          </div>
         </div>
-        <div class="shop-row">
-          <button id="buyAuto"></button>
-          <span id="autoInfo"></span>
-        </div>
-        <div class="shop-row">
-          <button id="buyApcMulti"></button>
-          <span id="apcMultiInfo"></span>
-        </div>
-        <div class="shop-row">
-          <button id="buyApsMulti"></button>
-          <span id="apsMultiInfo"></span>
-        </div>
-      </div>
 
-      <div class="card">
-        <div class="muted">Gestion de la partie</div>
-        <div class="shop-row">
-          <button id="resetBtn" class="danger" type="button">Réinitialiser la partie</button>
-          <div class="theme-selector" role="group" aria-label="Gestion du thème">
-            <span class="theme-label">Thème</span>
-            <div id="themeControls" aria-label="Sélecteur de thème">
-              <button type="button" data-theme="light" aria-label="Activer le thème clair" title="Thème clair"></button>
-              <button type="button" data-theme="dark" aria-label="Activer le thème sombre" title="Thème sombre"></button>
-              <button type="button" data-theme="rainbow" aria-label="Activer le thème arc-en-ciel" title="Thème arc-en-ciel"></button>
+        <div class="card">
+          <div class="muted">Gestion de la partie</div>
+          <div class="shop-row">
+            <button id="resetBtn" class="danger" type="button">Réinitialiser la partie</button>
+            <div class="theme-selector" role="group" aria-label="Gestion du thème">
+              <span class="theme-label">Thème</span>
+              <div id="themeControls" aria-label="Sélecteur de thème">
+                <button type="button" data-theme="light" aria-label="Activer le thème clair" title="Thème clair"></button>
+                <button type="button" data-theme="dark" aria-label="Activer le thème sombre" title="Thème sombre"></button>
+                <button type="button" data-theme="rainbow" aria-label="Activer le thème arc-en-ciel" title="Thème arc-en-ciel"></button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- PAGE GACHA -->
-  <div id="gachaPage" class="page">
-    <button id="backFromGacha">Retour</button>
-    <button id="bonusBtn">Bonus</button>
-
-    <div class="gacha-wrap">
-      <!-- grille périodique réelle + panneau d'infos -->
-      <div id="periodicGrid" class="gacha-grid">
-        <div id="gachaInfo" class="gacha-info">
-          <div id="elementTitle" class="info-title">
-            <span id="elementName">Clique un élément dans la grille</span>
-            <span id="elementIsoCount" class="iso-count">—</span>
+    <!-- PAGE GACHA -->
+    <section id="gachaPage" class="page" aria-labelledby="gachaTitle">
+      <header class="page-header">
+        <h1 id="gachaTitle" class="page-title">Gacha</h1>
+        <p class="page-description">Tire des éléments de la table périodique pour booster ta production.</p>
+      </header>
+      <div class="gacha-wrap">
+        <div id="periodicGrid" class="gacha-grid">
+          <div id="gachaInfo" class="gacha-info">
+            <div id="elementTitle" class="info-title">
+              <span id="elementName">Clique un élément dans la grille</span>
+              <span id="elementIsoCount" class="iso-count">—</span>
+            </div>
+            <div class="info-lines">
+              <div class="info-line" id="elementFamily">Famille : —</div>
+            </div>
           </div>
-          <div class="info-lines">
-            <div class="info-line" id="elementFamily">Famille : —</div>
+          <div id="awakenWrapper" class="awaken-box hidden">
+            <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
           </div>
-        </div>
-        <div id="awakenWrapper" class="awaken-box hidden">
-          <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- PAGE BONUS -->
-  <div id="bonusPage" class="page">
-    <button id="backFromBonus">Retour</button>
-    <div class="bonus-wrap">
-      <h2 class="bonus-title">Bonus débloqués</h2>
-      <div id="bonusList"><p>Aucun bonus actif pour le moment.</p></div>
-    </div>
-  </div>
+    <!-- PAGE BONUS -->
+    <section id="bonusPage" class="page" aria-labelledby="bonusTitle">
+      <header class="page-header">
+        <h1 id="bonusTitle" class="page-title">Bonus</h1>
+        <p class="page-description">Surveille les effets permanents débloqués via le gacha.</p>
+      </header>
+      <div class="bonus-wrap">
+        <h2 class="bonus-title">Bonus débloqués</h2>
+        <div id="bonusList"><p>Aucun bonus actif pour le moment.</p></div>
+      </div>
+    </section>
+
+    <!-- PAGE INFOS -->
+    <section id="infosPage" class="page" aria-labelledby="infosTitle">
+      <header class="page-header">
+        <h1 id="infosTitle" class="page-title">Infos</h1>
+        <p class="page-description">Une zone dédiée pour documenter l'univers du jeu et partager les règles.</p>
+      </header>
+      <div class="placeholder-card">
+        <h2>En construction</h2>
+        <p>Cette page servira de hub pour les informations, les explications et les guides à destination des joueurs.</p>
+        <p>Tu pourras y détailler les mécaniques, raconter l'histoire ou partager des astuces une fois le contenu final prêt.</p>
+      </div>
+    </section>
+
+    <!-- PAGE REVIVE -->
+    <section id="revivePage" class="page" aria-labelledby="reviveTitle">
+      <header class="page-header">
+        <h1 id="reviveTitle" class="page-title">Revive</h1>
+        <p class="page-description">Planifie ici le système de renaissance et les récompenses associées.</p>
+      </header>
+      <div class="placeholder-card">
+        <h2>Module de renaissance</h2>
+        <p>Cette section accueillera tes idées de reset avancé : mécaniques de prestige, bonus temporaires ou missions spéciales.</p>
+        <p>Ajoute-y les variables importantes dès que tu définiras le fonctionnement précis de la renaissance.</p>
+      </div>
+    </section>
+  </main>
 
   <div id="resetModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
     <div class="modal-content">
@@ -1160,6 +1315,9 @@
     const shopPageEl = document.getElementById("shopPage");
     const gachaPageEl = document.getElementById("gachaPage");
     const bonusPageEl = document.getElementById("bonusPage");
+    const infosPageEl = document.getElementById("infosPage");
+    const revivePageEl = document.getElementById("revivePage");
+    const navButtons = Array.from(document.querySelectorAll(".nav-button[data-page-target]"));
 
     const elAtoms = document.getElementById("atoms");
     const elAps = document.getElementById("aps");
@@ -1172,11 +1330,6 @@
     const elAtomsGacha = document.getElementById("atomsGacha");
     const elApsGacha = document.getElementById("apsGacha");
     const elApcGacha = document.getElementById("apcGacha");
-
-    const btnShop = document.getElementById("shopBtn");
-    const btnBack = document.getElementById("backBtn");
-    const btnGacha = document.getElementById("gachaBtn");
-    const btnBackGacha = document.getElementById("backFromGacha");
 
     const btnBuyApc = document.getElementById("buyApc");
     const btnBuyAuto = document.getElementById("buyAuto");
@@ -1200,8 +1353,6 @@
     const awakenBtn = document.getElementById("awakenBtn");
     const awakenWrapper = document.getElementById("awakenWrapper");
 
-    const bonusBtn = document.getElementById("bonusBtn");
-    const backBonusBtn = document.getElementById("backFromBonus");
     const bonusList = document.getElementById("bonusList");
 
     const resetBtn = document.getElementById("resetBtn");
@@ -2392,48 +2543,52 @@
     });
 
     // Navigation
-    btnShop.addEventListener("click", ()=>{
-      if (!mainPageEl || !shopPageEl) return;
-      hideFrenzyOrb();
-      mainPageEl.classList.remove("active");
-      shopPageEl.classList.add("active");
-      updateUI();
-    });
-    btnBack.addEventListener("click", ()=>{
-      if (!shopPageEl || !mainPageEl) return;
-      shopPageEl.classList.remove("active");
-      mainPageEl.classList.add("active");
-      updateUI();
-    });
-    btnGacha.addEventListener("click", ()=>{
-      if (!mainPageEl || !gachaPageEl) return;
-      hideFrenzyOrb();
-      mainPageEl.classList.remove("active");
-      gachaPageEl.classList.add("active");
-      updateUI();
-    });
-    btnBackGacha.addEventListener("click", ()=>{
-      if (!gachaPageEl || !mainPageEl) return;
-      gachaPageEl.classList.remove("active");
-      mainPageEl.classList.add("active");
-      updateUI();
-    });
-    if (bonusBtn){
-      bonusBtn.addEventListener("click", ()=>{
-        if (!gachaPageEl || !bonusPageEl) return;
-        gachaPageEl.classList.remove("active");
-        bonusPageEl.classList.add("active");
-        updateUI();
+    const pageElements = new Map([
+      ["mainPage", mainPageEl],
+      ["shopPage", shopPageEl],
+      ["gachaPage", gachaPageEl],
+      ["bonusPage", bonusPageEl],
+      ["infosPage", infosPageEl],
+      ["revivePage", revivePageEl]
+    ]);
+
+    /**
+     * Active la page demandée et synchronise l'état du menu.
+     * Cette fonction centralise toute la logique de navigation pour
+     * éviter les oublis lors de l'ajout de nouvelles pages.
+     */
+    function activatePage(pageId){
+      if (!pageElements.has(pageId)) return;
+      pageElements.forEach((pageEl, id)=>{
+        if (!pageEl) return;
+        if (id === pageId){
+          pageEl.classList.add("active");
+        } else {
+          pageEl.classList.remove("active");
+        }
       });
-    }
-    if (backBonusBtn){
-      backBonusBtn.addEventListener("click", ()=>{
-        if (!bonusPageEl || !gachaPageEl) return;
-        bonusPageEl.classList.remove("active");
-        gachaPageEl.classList.add("active");
-        updateUI();
+      navButtons.forEach(btn=>{
+        const target = btn.dataset.pageTarget;
+        const isActive = target === pageId;
+        btn.classList.toggle("active", isActive);
+        if (isActive){
+          btn.setAttribute("aria-current", "page");
+        } else {
+          btn.removeAttribute("aria-current");
+        }
       });
+      if (pageId !== "mainPage"){
+        hideFrenzyOrb();
+      }
+      updateUI();
     }
+
+    navButtons.forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const target = btn.dataset.pageTarget;
+        if (target) activatePage(target);
+      });
+    });
 
     // Thèmes
     themeButtons.forEach(btn=>{
@@ -2586,7 +2741,7 @@
     updateAutoGachaHeader();
     updateAutoGachaPanel();
     buildPeriodicGrids();
-    updateUI();
+    activatePage("mainPage");
   </script>
 </body>
 </html>
