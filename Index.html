@@ -28,8 +28,8 @@
     body.theme-rainbow{ background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet); background-size:1400% 1400%; animation: rainbow 20s linear infinite; }
     @keyframes rainbow { 0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%} }
 
-    .page { display:none; width:100%; height:100%; box-sizing:border-box; position:relative; padding:clamp(1.5rem, 6vh, 4rem) clamp(1.2rem, 4vw, 3.5rem); overflow:auto; }
-    .page.active { display:flex; flex-direction:column; align-items:center; gap:clamp(1rem, 3vh, 2.5rem); justify-content:space-between; flex:1; }
+    .page { display:none; width:100%; height:100%; box-sizing:border-box; position:relative; padding:clamp(1.2rem, 5vh, 3rem) clamp(1rem, 3.5vw, 3rem); overflow:auto; }
+    .page.active { display:flex; flex-direction:column; align-items:center; gap:clamp(1rem, 2.6vh, 2rem); justify-content:flex-start; flex:1; }
 
     /* Boutons navigation / barre du haut */
     .app-header {
@@ -37,38 +37,44 @@
       top:0;
       z-index:150;
       background:var(--bg);
-      box-shadow:0 8px 20px rgba(0,0,0,.22);
-      backdrop-filter:blur(14px);
+      box-shadow:0 6px 18px rgba(0,0,0,.22);
+      backdrop-filter:blur(12px);
       border-bottom:1px solid rgba(255,255,255,.08);
     }
     .nav-menu {
-      width:100%;
-      max-width:var(--grid-max);
-      margin:0 auto;
-      padding:clamp(.6rem, 2vh, 1rem) clamp(1.2rem, 4vw, 2.4rem);
       display:flex;
-      flex-wrap:wrap;
       align-items:center;
       justify-content:center;
-      gap:clamp(.45rem, 1.5vw, .9rem);
+      gap:clamp(.35rem, .8vw, .7rem);
+      padding:clamp(.45rem, 1.3vh, .75rem) clamp(1rem, 3vw, 2rem);
+      margin:0 auto;
+      width:100%;
       list-style:none;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
     }
+    .nav-menu::-webkit-scrollbar { display:none; }
     .nav-button {
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:clamp(.45rem, 1.2vh, .8rem) clamp(.9rem, 2.1vw, 1.4rem);
+      flex:0 0 auto;
+      min-height:clamp(2rem, 5vh, 2.6rem);
+      padding:clamp(.35rem, 1vh, .6rem) clamp(.75rem, 1.8vw, 1.2rem);
       border:none;
       border-radius:999px;
       background:var(--pill);
       color:var(--fg);
       font-family:'Orbitron',sans-serif;
-      font-size:clamp(.68rem, 1vw, .85rem);
+      font-size:clamp(.58rem, .95vw, .78rem);
       font-weight:600;
-      letter-spacing:.16em;
+      letter-spacing:.12em;
       text-transform:uppercase;
       cursor:pointer;
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+      white-space:nowrap;
     }
     .nav-button[disabled]{
       opacity:.4;
@@ -350,33 +356,37 @@
 
     /* Compteurs */
     .atomsCluster {
-      display:flex;
-      align-items:stretch;
-      justify-content:center;
-      flex-wrap:wrap;
-      gap:clamp(.6rem, 2vw, 1.2rem);
-      margin-top:clamp(.5rem, 2.5vh, 1.6rem);
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+      gap:clamp(.45rem, 1.6vw, 1.1rem);
+      width:min(100%, var(--grid-max));
+      margin:clamp(.4rem, 2.4vh, 1.4rem) auto 0;
+      grid-auto-flow:dense;
     }
     .atomsBox {
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:.35rem;
-      font-size:clamp(1.35rem,3vw,2.6rem);
-      padding:clamp(.6rem,1.8vw,1.4rem) clamp(1.1rem,3vw,2.2rem);
+      gap:.3rem;
+      font-size:clamp(1.1rem, 2.6vw, 2.1rem);
+      padding:clamp(.55rem, 1.6vw, 1.1rem) clamp(.9rem, 2.6vw, 1.9rem);
       background:var(--card);
-      border-radius:16px;
-      box-shadow:0 10px 26px rgba(0,0,0,.22);
-      min-width:clamp(10rem, 36vw, 18rem);
+      border-radius:14px;
+      box-shadow:0 8px 20px rgba(0,0,0,.2);
+      width:100%;
+      max-width:clamp(220px, 60vw, 420px);
+      justify-self:center;
+      grid-column:1 / -1;
     }
     .atomsLabel {
-      font-size:clamp(.75rem,1.4vw,1rem);
+      font-size:clamp(.68rem, 1.1vw, .9rem);
       text-transform:uppercase;
-      letter-spacing:.12em;
-      opacity:.82;
+      letter-spacing:.14em;
+      opacity:.78;
     }
     .atomsValue {
       font-weight:700;
+      line-height:1.1;
     }
     .statPill {
       display:flex;
@@ -384,11 +394,11 @@
       justify-content:center;
       align-items:center;
       background:var(--pill);
-      padding:clamp(.55rem,1.5vw,1rem) clamp(.75rem,1.9vw,1.3rem);
-      border-radius:14px;
-      min-width:clamp(5.5rem, 16vw, 8rem);
-      box-shadow:0 8px 18px rgba(0,0,0,.18);
+      padding:clamp(.45rem, 1.3vw, .85rem) clamp(.55rem, 1.6vw, 1.05rem);
+      border-radius:12px;
+      box-shadow:0 6px 16px rgba(0,0,0,.18);
       gap:.2rem;
+      min-height:100%;
     }
     .statLabel {
       font-size:clamp(.65rem,1.1vw,.9rem);
@@ -397,8 +407,9 @@
       opacity:.7;
     }
     .statValue {
-      font-size:clamp(.95rem,2.2vw,1.5rem);
+      font-size:clamp(.85rem, 1.8vw, 1.35rem);
       font-weight:700;
+      line-height:1.1;
     }
     .statPill-apc {
       background:linear-gradient(140deg, rgba(255,140,82,.25), rgba(255,200,160,.18));
@@ -476,11 +487,12 @@
     }
 
     .frenzyStatus {
-      font-size:clamp(.55rem, 1vw, .85rem);
-      opacity:.75;
-      margin-top:.25rem;
+      font-size:clamp(.55rem, .95vw, .8rem);
+      opacity:.8;
+      margin-top:.2rem;
       letter-spacing:.05em;
     }
+    .frenzyStatus:empty { display:none; }
     .frenzyStatus.active {
       opacity:1;
       color:var(--accent);
@@ -527,38 +539,170 @@
     }
 
     /* SHOP */
-    .shop-wrap { display:flex; flex-direction:column; align-items:center; gap:clamp(1rem,3vh,2rem); width:min(100%,960px); }
-    .card { background: var(--card); padding:clamp(1rem,2.5vh,1.5rem); border-radius:12px; width:100%; box-sizing:border-box; }
-    .shop-row { display:flex; gap:clamp(.75rem,2vw,1.5rem); align-items:center; justify-content:space-between; flex-wrap:wrap; }
-    .shop-row button { padding:clamp(.75rem,1.8vw,1.2rem) clamp(1rem,2.4vw,1.8rem); border:none; border-radius:10px; background:var(--pill); color:var(--fg); cursor:pointer; font-size:clamp(.85rem,1.3vw,1rem); }
-    .shop-actions { display:flex; flex-wrap:wrap; gap:clamp(.4rem,1.2vw,.9rem); }
-    .shop-row button.danger {
-      background:linear-gradient(135deg, rgba(255,90,90,.35), rgba(190,0,0,.55));
-      color:#fff;
-      box-shadow:0 6px 16px rgba(0,0,0,.25);
+    .shop-wrap {
+      width:100%;
+      display:flex;
+      justify-content:center;
     }
-    .shop-row button.danger:hover {
-      filter:brightness(1.05);
-      box-shadow:0 10px 22px rgba(0,0,0,.3);
+    .card {
+      background: var(--card);
+      border-radius:12px;
+      box-sizing:border-box;
+      padding:clamp(1rem, 2.5vh, 1.5rem);
+      width:100%;
     }
-    .muted { opacity:.8; }
-    .info-pill { background:var(--pill); border-radius:999px; padding:.4rem .8rem; }
-    .gacha-card-header,
-    .gacha-card-meta {
+    .shop-grid {
+      width:min(100%, var(--grid-max));
+      display:grid;
+      gap:clamp(.9rem, 2vw, 1.6rem);
+      grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .shop-card {
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.75rem, 2vh, 1.2rem);
+      padding:clamp(.9rem, 2.2vh, 1.4rem) clamp(1rem, 2.8vw, 1.8rem);
+      box-shadow:0 10px 22px rgba(0,0,0,.22);
+    }
+    .shop-card-title {
+      margin:0;
+      font-size:clamp(.95rem, 1.6vw, 1.25rem);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+    .shop-upgrade {
+      display:flex;
+      flex-direction:column;
+      gap:.45rem;
+    }
+    .shop-upgrade-header {
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:clamp(.6rem,2vw,1.2rem);
+      gap:.6rem;
     }
-    .gacha-card-actions { display:flex; flex-wrap:wrap; gap:clamp(.4rem,1.2vw,.9rem); justify-content:flex-end; }
-    .gacha-card-actions button { white-space:nowrap; }
-    .card-title {
-      font-size:clamp(1rem,1.8vw,1.3rem);
-      font-weight:700;
+    .shop-upgrade-label {
+      font-size:clamp(.72rem, 1.1vw, .95rem);
       text-transform:uppercase;
-      letter-spacing:.1em;
+      letter-spacing:.16em;
     }
-    .gacha-card-meta { margin-top:clamp(.85rem,2vh,1.2rem); }
+    .shop-upgrade-meta {
+      font-size:clamp(.6rem, .95vw, .8rem);
+      opacity:.7;
+    }
+    .shop-options {
+      display:flex;
+      gap:clamp(.4rem, 1.2vw, .85rem);
+      flex-wrap:wrap;
+    }
+    .shop-option {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      border-radius:12px;
+      padding:clamp(.45rem, 1.1vw, .75rem) clamp(.6rem, 1.8vw, 1rem);
+      min-width:clamp(3.8rem, 12vw, 5.1rem);
+      background:var(--pill);
+      color:var(--fg);
+      font-family:'Orbitron',sans-serif;
+      font-size:clamp(.6rem, .95vw, .82rem);
+      font-weight:600;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.18);
+      transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+      gap:.2rem;
+    }
+    .shop-option:hover,
+    .shop-option:focus-visible {
+      transform:translateY(-1px);
+      box-shadow:0 10px 22px rgba(0,0,0,.24);
+    }
+    .shop-option .option-tier {
+      font-size:clamp(.8rem, 1.4vw, 1.05rem);
+      font-weight:700;
+    }
+    .shop-option .option-price {
+      font-size:clamp(.52rem, .85vw, .72rem);
+      opacity:.8;
+      line-height:1.1;
+    }
+    .shop-option.not-available {
+      background:rgba(255,255,255,.12);
+      color:rgba(255,255,255,.55);
+      box-shadow:none;
+    }
+    body.theme-light .shop-option.not-available {
+      background:rgba(0,0,0,.08);
+      color:rgba(0,0,0,.5);
+    }
+    .shop-option:disabled {
+      cursor:not-allowed;
+      opacity:.75;
+      transform:none;
+    }
+    .shop-upgrade-single .shop-option {
+      width:100%;
+      flex-direction:row;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .shop-upgrade-single .option-tier {
+      font-size:clamp(.85rem, 1.5vw, 1.1rem);
+    }
+    .shop-card.gacha-card .shop-options {
+      justify-content:space-between;
+    }
+
+    /* OPTIONS */
+    .options-wrap {
+      width:min(100%, var(--grid-max));
+      margin:0 auto;
+      display:grid;
+      gap:clamp(.9rem, 2vw, 1.6rem);
+      grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .options-card {
+      display:flex;
+      flex-direction:column;
+      gap:clamp(.6rem, 2vh, 1rem);
+      box-shadow:0 8px 20px rgba(0,0,0,.18);
+    }
+    .options-title {
+      margin:0;
+      font-size:clamp(1rem, 2vw, 1.35rem);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+    }
+    .options-text {
+      margin:0;
+      font-size:clamp(.75rem, 1.1vw, .95rem);
+      opacity:.8;
+    }
+    .options-reset {
+      align-self:flex-start;
+      padding:clamp(.55rem, 1.4vw, .9rem) clamp(1rem, 2.4vw, 1.6rem);
+      border:none;
+      border-radius:10px;
+      background:linear-gradient(135deg, rgba(255,90,90,.35), rgba(190,0,0,.55));
+      color:#fff;
+      font-family:'Orbitron',sans-serif;
+      font-size:clamp(.75rem, 1vw, .95rem);
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(0,0,0,.22);
+      transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .options-reset:hover,
+    .options-reset:focus-visible {
+      transform:translateY(-1px);
+      box-shadow:0 10px 24px rgba(0,0,0,.28);
+      filter:brightness(1.05);
+    }
 
     /* Loot encart */
     .loot {
@@ -758,9 +902,9 @@
     #mainPage .atomsCluster { order:1; margin-bottom:clamp(1.2rem, 4vh, 3rem); }
     #mainPage .atom { order:2; margin:0 auto; }
 
-    #shopPage { padding-left:clamp(4rem,8vw,6rem); }
+    #shopPage { padding-left:clamp(1rem, 3vw, 2.2rem); padding-right:clamp(1rem, 3vw, 2.2rem); }
     #shopPage .atomsCluster { order:1; }
-    #shopPage .shop-wrap { order:2; margin:clamp(1rem,3vh,2rem) auto; width:min(100%,860px); }
+    #shopPage .shop-wrap { order:2; margin:clamp(.6rem, 2vh, 1.2rem) auto; }
 
     #gachaPage.page.active { justify-content:flex-start; }
     #gachaPage .gacha-wrap {
@@ -783,15 +927,15 @@
       width:min(100%, 720px);
       display:flex;
       flex-direction:column;
-      gap:clamp(.75rem, 2vh, 1.2rem);
+      gap:clamp(.6rem, 1.6vh, 1rem);
       background:var(--card);
-      padding:clamp(1rem, 2.6vh, 1.6rem) clamp(1.2rem, 3vw, 2rem);
+      padding:clamp(.85rem, 2.2vh, 1.3rem) clamp(1rem, 2.6vw, 1.6rem);
       border-radius:16px;
-      box-shadow:0 12px 24px rgba(0,0,0,.18);
+      box-shadow:0 10px 22px rgba(0,0,0,.18);
     }
     #bonusPage .bonus-title {
       margin:0;
-      font-size:clamp(1.1rem, 2.4vw, 1.6rem);
+      font-size:clamp(1rem, 2vw, 1.4rem);
       text-transform:uppercase;
       letter-spacing:.16em;
     }
@@ -826,12 +970,12 @@
     .trophy-list li {
       background:var(--pill);
       border-radius:12px;
-      padding:clamp(.6rem,1.4vh,.95rem) clamp(.75rem,2vw,1.3rem);
+      padding:clamp(.45rem,1.2vh,.75rem) clamp(.6rem,1.6vw,1.1rem);
       display:flex;
       flex-direction:column;
-      gap:.35rem;
+      gap:.3rem;
       border:1px solid transparent;
-      box-shadow:0 10px 20px rgba(0,0,0,.18);
+      box-shadow:0 8px 18px rgba(0,0,0,.16);
     }
     .trophy-list li.trophy-unlocked {
       border-color:rgba(255,255,255,.35);
@@ -842,19 +986,19 @@
     }
     .trophy-name {
       font-weight:700;
-      font-size:clamp(.95rem,1.7vw,1.2rem);
+      font-size:clamp(.85rem,1.4vw,1.05rem);
     }
     .trophy-desc {
-      font-size:clamp(.75rem,1.2vw,.95rem);
-      opacity:.85;
+      font-size:clamp(.68rem,1vw,.85rem);
+      opacity:.82;
     }
     .trophy-progress {
       display:flex;
       justify-content:space-between;
       align-items:center;
-      font-size:clamp(.7rem,1.1vw,.85rem);
-      opacity:.8;
-      gap:.6rem;
+      font-size:clamp(.6rem,.9vw,.75rem);
+      opacity:.78;
+      gap:.5rem;
     }
     .trophy-progress-value {
       font-weight:600;
@@ -919,7 +1063,7 @@
     @media (max-width: 900px) {
       .page { padding:clamp(1.25rem,5vh,2.5rem) clamp(1rem,5vw,2rem); }
       .nav-menu { justify-content:flex-start; }
-      .nav-button { flex:1 1 calc(50% - clamp(.55rem, 2vw, 1rem)); justify-content:center; }
+      .nav-button { flex:0 0 auto; }
       .theme-selector {
         width:100%;
         flex-direction:column;
@@ -933,21 +1077,23 @@
         gap:clamp(.45rem,3vw,.85rem);
       }
       #themeControls button { width:clamp(2.4rem,10vw,3rem); height:clamp(2.4rem,10vw,3rem); }
-      .atomsCluster { flex-direction:column; align-items:stretch; }
-      .atomsBox { min-width:unset; width:100%; }
+      .atomsCluster { grid-template-columns:1fr; }
+      .atomsBox { max-width:100%; }
       .statPill { width:100%; flex-direction:row; justify-content:space-between; }
       .statLabel { letter-spacing:.12em; }
-      .statValue { font-size:clamp(1.05rem,6vw,1.7rem); }
-      #shopPage { padding-left:clamp(1.25rem,5vw,2.2rem); }
-      .shop-wrap { width:100%; }
-      .shop-row { flex-direction:column; align-items:flex-start; }
+      .statValue { font-size:clamp(1rem,5.5vw,1.6rem); }
+      #shopPage { padding-left:clamp(.75rem,4vw,1.4rem); padding-right:clamp(.75rem,4vw,1.4rem); }
+      .shop-grid { grid-template-columns:1fr; }
+      .shop-card { gap:clamp(.6rem, 2vh, 1rem); }
+      .shop-options { justify-content:flex-start; }
+      .shop-option { min-width:clamp(3.4rem, 28vw, 4.8rem); }
       .gacha-wrap { gap:clamp(1rem,4vh,1.8rem); }
       .gacha-grid { width:100%; max-width:100%; }
     }
 
     @media (max-width: 720px) {
-      .nav-menu { justify-content:center; }
-      .nav-button { flex:1 1 100%; }
+      .nav-menu { justify-content:flex-start; }
+      .nav-button { min-width:clamp(4.2rem, 26vw, 6rem); }
       .gacha-info .info-lines { grid-template-columns:1fr; }
     }
 
@@ -1045,7 +1191,7 @@
         <span class="nav-label">Shop</span>
       </button>
       <button class="nav-button" type="button" data-page-target="gachaPage">
-        <span class="nav-label">Tableau</span>
+        <span class="nav-label">Table</span>
       </button>
       <button class="nav-button" type="button" data-page-target="bonusPage">
         <span class="nav-label">Bonus</span>
@@ -1056,6 +1202,9 @@
       <button class="nav-button" type="button" data-page-target="revivePage">
         <span class="nav-label">Revive</span>
       </button>
+      <button class="nav-button" type="button" data-page-target="optionsPage">
+        <span class="nav-label">Options</span>
+      </button>
     </nav>
   </header>
   <main id="pageContainer">
@@ -1064,19 +1213,19 @@
       <h1 id="mainTitle" class="sr-only">ATOMS</h1>
 
       <div class="atomsCluster">
-        <div class="statPill statPill-apc">
-          <span class="statLabel">APC</span>
-          <span class="statValue" id="apc">1.0</span>
-          <span class="frenzyStatus" id="apcFrenzyStatus" aria-live="polite">Frénésie APC ×1.0</span>
-        </div>
         <div class="atomsBox">
           <span class="atomsLabel">Atoms</span>
           <strong class="atomsValue" id="atoms">0.0</strong>
         </div>
+        <div class="statPill statPill-apc">
+          <span class="statLabel">APC</span>
+          <span class="statValue" id="apc">1.0</span>
+          <span class="frenzyStatus" id="apcFrenzyStatus" aria-live="polite"></span>
+        </div>
         <div class="statPill statPill-aps">
           <span class="statLabel">APS</span>
           <span class="statValue" id="aps">0.0</span>
-          <span class="frenzyStatus" id="apsFrenzyStatus" aria-live="polite">Frénésie APS ×1.0</span>
+          <span class="frenzyStatus" id="apsFrenzyStatus" aria-live="polite"></span>
         </div>
       </div>
 
@@ -1098,13 +1247,13 @@
     <section id="shopPage" class="page" aria-labelledby="shopTitle">
       <h1 id="shopTitle" class="sr-only">Shop</h1>
       <div class="atomsCluster">
-        <div class="statPill statPill-apc">
-          <span class="statLabel">APC</span>
-          <span class="statValue" id="apcShop">1.0</span>
-        </div>
         <div class="atomsBox">
           <span class="atomsLabel">Atoms</span>
           <strong class="atomsValue" id="atomsShop">0.0</strong>
+        </div>
+        <div class="statPill statPill-apc">
+          <span class="statLabel">APC</span>
+          <span class="statValue" id="apcShop">1.0</span>
         </div>
         <div class="statPill statPill-aps">
           <span class="statLabel">APS</span>
@@ -1112,67 +1261,93 @@
         </div>
       </div>
       <div class="shop-wrap">
-        <div class="card gacha-card">
-          <div class="gacha-card-header">
-            <span class="card-title">Capsule Gacha</span>
-            <div class="gacha-card-actions">
-              <button id="rollBtn">🎲 x1 (<span id="rollCostOnBtn">100.0</span> Atoms)</button>
-              <button id="roll10Btn">🎲 x10 (<span id="roll10Cost">—</span> Atoms)</button>
-              <button id="roll100Btn">🎲 x100 (<span id="roll100Cost">—</span> Atoms)</button>
-            </div>
-          </div>
-          <div class="gacha-card-meta">
-            <span class="muted">Isotopes</span>
-            <div class="info-pill"><span id="isotopes">0</span></div>
-          </div>
-          <div class="loot hidden" id="lastLootBox">
-            <div class="loot-detail">
-              <span id="lastLootName" class="loot-name">—</span>
-              <span id="lastLootFam" class="loot-family">—</span>
-            </div>
-            <span id="lastLootType" class="loot-result" data-base-class="loot-result">—</span>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="muted">Améliorations de base</div>
-          <div class="shop-row">
-            <div class="shop-actions">
-              <button id="buyApc"></button>
-              <button id="buyApc10"></button>
-              <button id="buyApc100"></button>
-            </div>
-            <span id="apcInfo"></span>
-          </div>
-          <div class="shop-row">
-            <div class="shop-actions">
-              <button id="buyAuto"></button>
-              <button id="buyAuto10"></button>
-              <button id="buyAuto100"></button>
-            </div>
-            <span id="autoInfo"></span>
-          </div>
-          <div class="shop-row">
-            <button id="buyApcMulti"></button>
-            <span id="apcMultiInfo"></span>
-          </div>
-          <div class="shop-row">
-            <button id="buyApsMulti"></button>
-            <span id="apsMultiInfo"></span>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="muted">Gestion de la partie</div>
-          <div class="shop-row">
-            <button id="resetBtn" class="danger" type="button">Réinitialiser la partie</button>
-            <div class="theme-selector" role="group" aria-label="Gestion du thème">
-              <span class="theme-label">Thème</span>
-              <div id="themeControls" aria-label="Sélecteur de thème">
-                <button type="button" data-theme="light" aria-label="Activer le thème clair" title="Thème clair"></button>
-                <button type="button" data-theme="dark" aria-label="Activer le thème sombre" title="Thème sombre"></button>
-                <button type="button" data-theme="rainbow" aria-label="Activer le thème arc-en-ciel" title="Thème arc-en-ciel"></button>
+        <div class="shop-grid">
+          <div class="card shop-card">
+            <h2 class="shop-card-title">Production</h2>
+            <div class="shop-upgrade">
+              <div class="shop-upgrade-header">
+                <span class="shop-upgrade-label">APC</span>
+                <span id="apcInfo" class="shop-upgrade-meta">Niveau 0</span>
               </div>
+              <div class="shop-options">
+                <button id="buyApc" class="shop-option" type="button">
+                  <span class="option-tier">x1</span>
+                  <span class="option-price">—</span>
+                </button>
+                <button id="buyApc10" class="shop-option" type="button">
+                  <span class="option-tier">x10</span>
+                  <span class="option-price">—</span>
+                </button>
+                <button id="buyApc100" class="shop-option" type="button">
+                  <span class="option-tier">x100</span>
+                  <span class="option-price">—</span>
+                </button>
+              </div>
+            </div>
+            <div class="shop-upgrade">
+              <div class="shop-upgrade-header">
+                <span class="shop-upgrade-label">APS</span>
+                <span id="autoInfo" class="shop-upgrade-meta">Niveau 0</span>
+              </div>
+              <div class="shop-options">
+                <button id="buyAuto" class="shop-option" type="button">
+                  <span class="option-tier">x1</span>
+                  <span class="option-price">—</span>
+                </button>
+                <button id="buyAuto10" class="shop-option" type="button">
+                  <span class="option-tier">x10</span>
+                  <span class="option-price">—</span>
+                </button>
+                <button id="buyAuto100" class="shop-option" type="button">
+                  <span class="option-tier">x100</span>
+                  <span class="option-price">—</span>
+                </button>
+              </div>
+            </div>
+            <div class="shop-upgrade shop-upgrade-single">
+              <div class="shop-upgrade-header">
+                <span class="shop-upgrade-label">Multiplicateur APC</span>
+                <span id="apcMultiInfo" class="shop-upgrade-meta">Achats 0</span>
+              </div>
+              <button id="buyApcMulti" class="shop-option" type="button">
+                <span class="option-tier">×2</span>
+                <span class="option-price">—</span>
+              </button>
+            </div>
+            <div class="shop-upgrade shop-upgrade-single">
+              <div class="shop-upgrade-header">
+                <span class="shop-upgrade-label">Multiplicateur APS</span>
+                <span id="apsMultiInfo" class="shop-upgrade-meta">Achats 0</span>
+              </div>
+              <button id="buyApsMulti" class="shop-option" type="button">
+                <span class="option-tier">×2</span>
+                <span class="option-price">—</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card shop-card gacha-card">
+            <h2 class="shop-card-title">Tirages Gacha</h2>
+            <div class="shop-options gacha-options">
+              <button id="rollBtn" class="shop-option" type="button">
+                <span class="option-tier">x1</span>
+                <span class="option-price" id="rollCostOnBtn">100.0</span>
+              </button>
+              <button id="roll10Btn" class="shop-option" type="button">
+                <span class="option-tier">x10</span>
+                <span class="option-price" id="roll10Cost">—</span>
+              </button>
+              <button id="roll100Btn" class="shop-option" type="button">
+                <span class="option-tier">x100</span>
+                <span class="option-price" id="roll100Cost">—</span>
+              </button>
+            </div>
+            <div class="loot hidden" id="lastLootBox">
+              <div class="loot-detail">
+                <span id="lastLootName" class="loot-name">—</span>
+                <span id="lastLootFam" class="loot-family">—</span>
+              </div>
+              <span id="lastLootType" class="loot-result" data-base-class="loot-result">—</span>
             </div>
           </div>
         </div>
@@ -1181,7 +1356,7 @@
 
     <!-- PAGE GACHA -->
     <section id="gachaPage" class="page" aria-labelledby="gachaTitle">
-      <h1 id="gachaTitle" class="sr-only">Tableau</h1>
+      <h1 id="gachaTitle" class="sr-only">Table</h1>
       <div class="gacha-wrap">
         <div id="periodicGrid" class="gacha-grid">
           <div id="gachaInfo" class="gacha-info">
@@ -1283,6 +1458,29 @@
           <p class="revive-note">Chaque renaissance remet à zéro tes Atoms, isotopes, bonus et améliorations, mais offre un bonus permanent d'APC/APS affiché ci-dessus et augmente le gain par achat du shop.</p>
           <p id="reviveLockedMessage" class="revive-locked hidden">Accumule suffisamment d'Atoms pour débloquer cette renaissance.</p>
         </article>
+      </div>
+    </section>
+
+    <!-- PAGE OPTIONS -->
+    <section id="optionsPage" class="page" aria-labelledby="optionsTitle">
+      <h1 id="optionsTitle" class="sr-only">Options</h1>
+      <div class="options-wrap">
+        <div class="card options-card">
+          <h2 class="options-title">Thème</h2>
+          <div class="theme-selector" role="group" aria-label="Gestion du thème">
+            <span class="theme-label">Thème</span>
+            <div id="themeControls" aria-label="Sélecteur de thème">
+              <button type="button" data-theme="light" aria-label="Activer le thème clair" title="Thème clair"></button>
+              <button type="button" data-theme="dark" aria-label="Activer le thème sombre" title="Thème sombre"></button>
+              <button type="button" data-theme="rainbow" aria-label="Activer le thème arc-en-ciel" title="Thème arc-en-ciel"></button>
+            </div>
+          </div>
+        </div>
+        <div class="card options-card">
+          <h2 class="options-title">Gestion</h2>
+          <p class="options-text">Réinitialise complètement ta sauvegarde et remet le jeu à zéro.</p>
+          <button id="resetBtn" class="danger options-reset" type="button">Réinitialiser la partie</button>
+        </div>
       </div>
     </section>
   </main>
@@ -1598,6 +1796,7 @@
     const bonusPageEl = document.getElementById("bonusPage");
     const infosPageEl = document.getElementById("infosPage");
     const revivePageEl = document.getElementById("revivePage");
+    const optionsPageEl = document.getElementById("optionsPage");
     const navButtons = Array.from(document.querySelectorAll(".nav-button[data-page-target]"));
     const reviveNavButton = navButtons.find(btn => btn.dataset.pageTarget === "revivePage");
 
@@ -2623,8 +2822,9 @@
 
     function renderTrophySection(){
       const statuses = getTrophyStatuses();
-      if (!statuses.length) return "";
-      const items = statuses.map(status => {
+      const unlockedStatuses = statuses.filter(status => status.unlocked);
+      if (!unlockedStatuses.length) return "";
+      const items = unlockedStatuses.map(status => {
         const progressPercent = Math.min(100, Math.floor(status.progress * 100));
         const currentText = formatNumber(status.currentValue);
         const targetText = formatNumber(status.threshold);
@@ -3304,7 +3504,8 @@
       ["gachaPage", gachaPageEl],
       ["bonusPage", bonusPageEl],
       ["infosPage", infosPageEl],
-      ["revivePage", revivePageEl]
+      ["revivePage", revivePageEl],
+      ["optionsPage", optionsPageEl]
     ]);
 
     /**
@@ -3528,11 +3729,10 @@
         if (stacks > 0){
           const remainingMs = getLongestApcFrenzyRemaining();
           const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
-          const stackText = stacks > 1 ? ` (${stacks} charges)` : "";
-          apcFrenzyStatusEl.textContent = `Frénésie APC ×${formatNumber(apcFrenzyMultiplier)}${stackText} – ${remainingSec}s`;
+          apcFrenzyStatusEl.textContent = `×${formatNumber(apcFrenzyMultiplier)} – ${remainingSec}s`;
           apcFrenzyStatusEl.classList.add("active");
         } else {
-          apcFrenzyStatusEl.textContent = `Frénésie APC prête : ×${formatNumber(Math.max(1, frenzyBase))}`;
+          apcFrenzyStatusEl.textContent = "";
           apcFrenzyStatusEl.classList.remove("active");
         }
       }
@@ -3542,11 +3742,10 @@
         if (stacks > 0){
           const remainingMs = getLongestApsFrenzyRemaining();
           const remainingSec = Math.max(0, Math.ceil(remainingMs / 1000));
-          const stackText = stacks > 1 ? ` (${stacks} charges)` : "";
-          apsFrenzyStatusEl.textContent = `Frénésie APS ×${formatNumber(apsFrenzyMultiplier)}${stackText} – ${remainingSec}s`;
+          apsFrenzyStatusEl.textContent = `×${formatNumber(apsFrenzyMultiplier)} – ${remainingSec}s`;
           apsFrenzyStatusEl.classList.add("active");
         } else {
-          apsFrenzyStatusEl.textContent = `Frénésie APS prête : ×${formatNumber(Math.max(1, frenzyBase))}`;
+          apsFrenzyStatusEl.textContent = "";
           apsFrenzyStatusEl.classList.remove("active");
         }
       }
@@ -3599,40 +3798,62 @@
       const apcBulk100Cost = computeBulkUpgradeCost(apcCost, apcLvl, 100);
       const autoBulk10Cost = computeBulkUpgradeCost(autoCost, autoLvl, 10);
       const autoBulk100Cost = computeBulkUpgradeCost(autoCost, autoLvl, 100);
+      const apcMultiCost = computeMultiplierCost(apcMultiLvl);
+      const apsMultiCost = computeMultiplierCost(apsMultiLvl);
 
       const apcInc10 = shopIncrement * 10;
       const apcInc100 = shopIncrement * 100;
       const autoInc10 = shopIncrement * 10;
       const autoInc100 = shopIncrement * 100;
 
-      if (btnBuyApc) btnBuyApc.textContent = `↑ APC (+${shopIncrementText}) – Coût ${formatNumber(apcSingleCost)}`;
-      if (btnBuyApc10) btnBuyApc10.textContent = `↑ APC ×10 (+${formatNumber(apcInc10)}) – Coût ${formatNumber(apcBulk10Cost)}`;
-      if (btnBuyApc100) btnBuyApc100.textContent = `↑ APC ×100 (+${formatNumber(apcInc100)}) – Coût ${formatNumber(apcBulk100Cost)}`;
-      if (infoApc) infoApc.textContent = `Niveau ${apcLvl}`;
+      const formatAtomsCost = value => `${formatNumber(value)} Atoms`;
+      const applyShopState = (button, cost, label) => {
+        if (!button) return;
+        const priceEl = button.querySelector('.option-price');
+        if (priceEl) priceEl.textContent = formatAtomsCost(cost);
+        if (label) button.setAttribute('aria-label', label);
+        const unavailable = atoms < cost;
+        button.classList.toggle('not-available', unavailable);
+        if (unavailable) {
+          button.setAttribute('aria-disabled', 'true');
+        } else {
+          button.removeAttribute('aria-disabled');
+        }
+      };
 
-      if (btnBuyAuto) btnBuyAuto.textContent = `↑ Auto (+${shopIncrementText} APS) – Coût ${formatNumber(autoSingleCost)}`;
-      if (btnBuyAuto10) btnBuyAuto10.textContent = `↑ Auto ×10 (+${formatNumber(autoInc10)} APS) – Coût ${formatNumber(autoBulk10Cost)}`;
-      if (btnBuyAuto100) btnBuyAuto100.textContent = `↑ Auto ×100 (+${formatNumber(autoInc100)} APS) – Coût ${formatNumber(autoBulk100Cost)}`;
-      if (infoAuto) infoAuto.textContent = `Niveau ${autoLvl}`;
-      btnBuyApcMulti.textContent = `×2 APC – Coût ${formatNumber(computeMultiplierCost(apcMultiLvl))}`;
+      applyShopState(btnBuyApc, apcSingleCost, `Acheter APC ×1 (+${shopIncrementText}) pour ${formatAtomsCost(apcSingleCost)}`);
+      applyShopState(btnBuyApc10, apcBulk10Cost, `Acheter APC ×10 (+${formatNumber(apcInc10)}) pour ${formatAtomsCost(apcBulk10Cost)}`);
+      applyShopState(btnBuyApc100, apcBulk100Cost, `Acheter APC ×100 (+${formatNumber(apcInc100)}) pour ${formatAtomsCost(apcBulk100Cost)}`);
+      if (infoApc) infoApc.textContent = `Niveau ${apcLvl} – +${shopIncrementText} APC / achat`;
+
+      applyShopState(btnBuyAuto, autoSingleCost, `Acheter Auto ×1 (+${shopIncrementText} APS) pour ${formatAtomsCost(autoSingleCost)}`);
+      applyShopState(btnBuyAuto10, autoBulk10Cost, `Acheter Auto ×10 (+${formatNumber(autoInc10)} APS) pour ${formatAtomsCost(autoBulk10Cost)}`);
+      applyShopState(btnBuyAuto100, autoBulk100Cost, `Acheter Auto ×100 (+${formatNumber(autoInc100)} APS) pour ${formatAtomsCost(autoBulk100Cost)}`);
+      if (infoAuto) infoAuto.textContent = `Niveau ${autoLvl} – +${shopIncrementText} APS / achat`;
+
+      applyShopState(btnBuyApcMulti, apcMultiCost, `Acheter multiplicateur APC pour ${formatAtomsCost(apcMultiCost)}`);
       const apcMultiTotal = applyBinaryMultiplier(1, apcMultiLvl);
       infoApcMulti.textContent = `Achats ${apcMultiLvl} (×${formatNumber(apcMultiTotal)})`;
-      btnBuyApsMulti.textContent = `×2 APS – Coût ${formatNumber(computeMultiplierCost(apsMultiLvl))}`;
+
+      applyShopState(btnBuyApsMulti, apsMultiCost, `Acheter multiplicateur APS pour ${formatAtomsCost(apsMultiCost)}`);
       const apsMultiTotal = applyBinaryMultiplier(1, apsMultiLvl);
       infoApsMulti.textContent = `Achats ${apsMultiLvl} (×${formatNumber(apsMultiTotal)})`;
 
       // Gacha infos
       const displayedRollCost = getDiscountedRollCost(gacha.rollCost, currentRollDiscount);
-      rollCostOnBtn.textContent = formatNumber(displayedRollCost);
+      applyShopState(rollBtn, displayedRollCost, `Tirage gacha ×1 pour ${formatAtomsCost(displayedRollCost)}`);
+      if (rollCostOnBtn) rollCostOnBtn.textContent = formatAtomsCost(displayedRollCost);
       if (roll10CostOnBtn){
         const bulk10Cost = computeBulkRollCost(10, { baseCost: gacha.rollCost, discount: currentRollDiscount });
-        roll10CostOnBtn.textContent = formatNumber(bulk10Cost);
+        applyShopState(roll10Btn, bulk10Cost, `Tirage gacha ×10 pour ${formatAtomsCost(bulk10Cost)}`);
+        roll10CostOnBtn.textContent = formatAtomsCost(bulk10Cost);
       }
       if (roll100CostOnBtn){
         const bulk100Cost = computeBulkRollCost(100, { baseCost: gacha.rollCost, discount: currentRollDiscount });
-        roll100CostOnBtn.textContent = formatNumber(bulk100Cost);
+        applyShopState(roll100Btn, bulk100Cost, `Tirage gacha ×100 pour ${formatAtomsCost(bulk100Cost)}`);
+        roll100CostOnBtn.textContent = formatAtomsCost(bulk100Cost);
       }
-      isotopesEl.textContent = formatNumber(gacha.isotopes);
+      if (isotopesEl) isotopesEl.textContent = formatNumber(gacha.isotopes);
 
       refreshBonusList();
       refreshAwakenHighlights();
