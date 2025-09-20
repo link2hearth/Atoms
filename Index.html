@@ -2899,8 +2899,8 @@
       const apcGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
       APC = applyMultiplier(APC, globalMul);
       APC = Math.max(0, APC * apcFrenzyMultiplier);
-      const apcBinaryMultiplier = Math.max(1, applyBinaryMultiplier(1, apcMultiLvl));
-      APC = applyBinaryMultiplier(APC, apcMultiLvl);
+      const apcShopMultiplier = getShopMultiplier(apcMultiLvl);
+      APC = applyShopMultiplier(APC, apcMultiLvl);
 
       const apsFamilyMultiplier = apsBaseValue > 0 ? Math.max(0, apsAfterFamily) / apsBaseValue : 1;
       let APS = apsAfterFlat;
@@ -2909,8 +2909,8 @@
       const apsGlobalMultiplier = Math.max(0, globalMul) / MULTIPLIER_SCALE;
       APS = applyMultiplier(APS, globalMul);
       APS = Math.max(0, APS * apsFrenzyMultiplier);
-      const apsBinaryMultiplier = Math.max(1, applyBinaryMultiplier(1, apsMultiLvl));
-      APS = applyBinaryMultiplier(APS, apsMultiLvl);
+      const apsShopMultiplier = getShopMultiplier(apsMultiLvl);
+      APS = applyShopMultiplier(APS, apsMultiLvl);
 
       return {
         APC,
@@ -2935,11 +2935,11 @@
         apcFamilyMultiplier,
         apcHybridMultiplier,
         apcGlobalMultiplier,
-        apcBinaryMultiplier,
+        apcShopMultiplier,
         apsFamilyMultiplier,
         apsHybridMultiplier,
         apsGlobalMultiplier,
-        apsBinaryMultiplier
+        apsShopMultiplier
       };
     }
 
@@ -3655,15 +3655,18 @@
       return Math.max(1, Math.floor(cost));
     }
 
-    function applyBinaryMultiplier(value, level){
+    function getShopMultiplier(level){
+      const lvl = Math.max(0, toNonNegativeInt(level));
+      const multiplier = 1 + lvl;
+      if (!Number.isFinite(multiplier) || multiplier <= 0) return 1;
+      return multiplier;
+    }
+
+    function applyShopMultiplier(value, level){
       const baseValue = Math.max(0, toNonNegativeInt(value));
       if (baseValue <= 0) return 0;
-      const lvl = Math.max(0, toNonNegativeInt(level));
-      if (lvl <= 0) return baseValue;
-      const multiplier = Math.pow(2, lvl);
-      if (!Number.isFinite(multiplier) || multiplier > Number.MAX_SAFE_INTEGER){
-        return Number.MAX_SAFE_INTEGER;
-      }
+      const multiplier = getShopMultiplier(level);
+      if (!Number.isFinite(multiplier) || multiplier <= 0) return 0;
       const result = baseValue * multiplier;
       if (!Number.isFinite(result) || result > Number.MAX_SAFE_INTEGER){
         return Number.MAX_SAFE_INTEGER;
@@ -4029,7 +4032,7 @@
         { label: 'Bonus métalloïdes', value: derived.apcHybridMultiplier },
         { label: 'Multiplicateur global', value: derived.apcGlobalMultiplier },
         { label: 'Frénésie APC', value: derived.apcFrenzyMultiplier },
-        { label: 'Multiplicateur APC ×2', value: derived.apcBinaryMultiplier }
+        { label: 'Multiplicateur APC (boutique)', value: derived.apcShopMultiplier }
       ]);
 
       if (infosApsBaseEl) infosApsBaseEl.textContent = formatNumber(derived.apsBaseValue);
@@ -4041,7 +4044,7 @@
         { label: 'Bonus métalloïdes', value: derived.apsHybridMultiplier },
         { label: 'Multiplicateur global', value: derived.apsGlobalMultiplier },
         { label: 'Frénésie APS', value: derived.apsFrenzyMultiplier },
-        { label: 'Multiplicateur APS ×2', value: derived.apsBinaryMultiplier }
+        { label: 'Multiplicateur APS (boutique)', value: derived.apsShopMultiplier }
       ]);
 
       // Boutons de base
@@ -4086,13 +4089,23 @@
       applyShopState(btnBuyAuto100, autoBulk100Cost, `Acheter Auto ×100 (+${formatNumber(autoInc100)} APS) pour ${formatAtomsCost(autoBulk100Cost)}`);
       if (infoAuto) infoAuto.textContent = `Niveau ${autoLvl} – +${shopIncrementText} APS / achat`;
 
-      applyShopState(btnBuyApcMulti, apcMultiCost, `Acheter multiplicateur APC pour ${formatAtomsCost(apcMultiCost)}`);
-      const apcMultiTotal = applyBinaryMultiplier(1, apcMultiLvl);
-      infoApcMulti.textContent = `Achats ${apcMultiLvl} (×${formatNumber(apcMultiTotal)})`;
+      const apcMultiTotal = getShopMultiplier(apcMultiLvl);
+      const apcNextMultiplier = getShopMultiplier(apcMultiLvl + 1);
+      applyShopState(btnBuyApcMulti, apcMultiCost, `Acheter multiplicateur APC (→ ×${formatNumber(apcNextMultiplier)}) pour ${formatAtomsCost(apcMultiCost)}`);
+      if (btnBuyApcMulti){
+        const tierEl = btnBuyApcMulti.querySelector('.option-tier');
+        if (tierEl) tierEl.textContent = `×${formatNumber(apcNextMultiplier)}`;
+      }
+      if (infoApcMulti) infoApcMulti.textContent = `Achats ${apcMultiLvl} (×${formatNumber(apcMultiTotal)})`;
 
-      applyShopState(btnBuyApsMulti, apsMultiCost, `Acheter multiplicateur APS pour ${formatAtomsCost(apsMultiCost)}`);
-      const apsMultiTotal = applyBinaryMultiplier(1, apsMultiLvl);
-      infoApsMulti.textContent = `Achats ${apsMultiLvl} (×${formatNumber(apsMultiTotal)})`;
+      const apsMultiTotal = getShopMultiplier(apsMultiLvl);
+      const apsNextMultiplier = getShopMultiplier(apsMultiLvl + 1);
+      applyShopState(btnBuyApsMulti, apsMultiCost, `Acheter multiplicateur APS (→ ×${formatNumber(apsNextMultiplier)}) pour ${formatAtomsCost(apsMultiCost)}`);
+      if (btnBuyApsMulti){
+        const tierEl = btnBuyApsMulti.querySelector('.option-tier');
+        if (tierEl) tierEl.textContent = `×${formatNumber(apsNextMultiplier)}`;
+      }
+      if (infoApsMulti) infoApsMulti.textContent = `Achats ${apsMultiLvl} (×${formatNumber(apsMultiTotal)})`;
 
       // Gacha infos
       const displayedRollCost = getDiscountedRollCost(gacha.rollCost, currentRollDiscount);
