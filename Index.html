@@ -869,6 +869,22 @@
       box-shadow:0 6px 18px rgba(0,0,0,.22);
     }
 
+    .awaken-discount-counter {
+      grid-column:1 / -1;
+      justify-self:end;
+      align-self:end;
+      font-size:clamp(.52rem, min(.9vw, 1.2vh), .7rem);
+      opacity:.55;
+      color:var(--fg);
+      pointer-events:none;
+      text-align:right;
+      padding:clamp(.15rem, .4vh, .3rem) clamp(.18rem, .5vw, .35rem) 0;
+    }
+
+    .awaken-discount-counter.has-discount {
+      opacity:.75;
+    }
+
     .gacha-grid {
       --cell-size: clamp(36px, min(4vw, 6vh), 60px);
       margin:0 auto;
@@ -1399,6 +1415,7 @@
             <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
             <button id="awakenAllBtn" class="awaken-btn awaken-all-btn hidden" type="button">Éveiller tout</button>
           </div>
+          <div id="awakenDiscountCounter" class="awaken-discount-counter">Rabais éveil : 0</div>
         </div>
       </div>
     </section>
@@ -1579,6 +1596,8 @@
     const AWAKEN_MAX = 100;
     const AWAKEN_FINAL_COST = 1_000_000;
     const AWAKEN_BASE_COSTS = [5,10,25,50];
+    const AWAKEN_DISCOUNT_STEP = 50; // Éveils nécessaires avant chaque réduction
+    const AWAKEN_DISCOUNT_RATIO = 0.99; // Réduction composée de 1% par palier pour garder un coût élevé
     const AWAKEN_COSTS = (()=>{
       const costs = AWAKEN_BASE_COSTS.slice(0, AWAKEN_MAX);
       if (costs.length === 0) costs.push(5);
@@ -1772,6 +1791,7 @@
         dupes: {},   // symbol -> n
         isoStock: {}, // symbol -> isotopes accumulés
         awakens: {},  // symbol -> niveau d'éveil
+        awakenCount: 0,
         rollCost: 100 // coût actuel d’un tirage (Atoms)
       };
     }
@@ -1788,6 +1808,15 @@
         gacha.isoStock[sym] = Math.max(0, Math.floor(amt));
       }
     }
+
+    let awakenCountFromLevels = 0;
+    for (const [sym, lvl] of Object.entries(gacha.awakens)){
+      const sanitizedLevel = Math.min(AWAKEN_MAX, Math.max(0, Math.floor(lvl)));
+      gacha.awakens[sym] = sanitizedLevel;
+      awakenCountFromLevels += sanitizedLevel;
+    }
+    const storedAwakenCount = toNonNegativeInt(gacha.awakenCount || 0);
+    gacha.awakenCount = Math.max(storedAwakenCount, awakenCountFromLevels);
     syncTotalIsotopes();
 
     // Thème
@@ -1872,6 +1901,7 @@
 
     const gridMain = document.getElementById("periodicGrid");
     const gachaInfoPanel = document.getElementById("gachaInfo");
+    const awakenDiscountCounter = document.getElementById("awakenDiscountCounter");
 
     const elementName = document.getElementById("elementName");
     const elementIsoCount = document.getElementById("elementIsoCount");
@@ -2609,6 +2639,36 @@
       return AWAKEN_COSTS[level] ?? null;
     }
 
+    function getTotalAwakenCount(){
+      return toNonNegativeInt(gacha.awakenCount || 0);
+    }
+
+    function registerAwakenProgress(amount = 1){
+      const increment = Math.max(0, Math.floor(amount));
+      if (!increment) return;
+      const current = getTotalAwakenCount();
+      const next = current + increment;
+      gacha.awakenCount = next >= Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : next;
+    }
+
+    function getAwakenDiscountSteps(){
+      if (AWAKEN_DISCOUNT_STEP <= 0) return 0;
+      const total = getTotalAwakenCount();
+      return Math.floor(total / AWAKEN_DISCOUNT_STEP);
+    }
+
+    function getAwakenDiscountScaled(){
+      const steps = getAwakenDiscountSteps();
+      if (steps <= 0) return 0;
+      const ratioBase = Math.min(Math.max(AWAKEN_DISCOUNT_RATIO, 0), 1);
+      if (ratioBase <= 0) return MULTIPLIER_SCALE - 1;
+      if (ratioBase >= 1) return 0;
+      const ratio = Math.pow(ratioBase, steps);
+      const ratioScaled = Math.max(1, Math.ceil(MULTIPLIER_SCALE * ratio));
+      const discount = MULTIPLIER_SCALE - ratioScaled;
+      return Math.max(0, Math.min(discount, MULTIPLIER_SCALE - 1));
+    }
+
     function getDiscountedAwakenCost(level, isoDiscountScaled){
       const baseCost = getAwakenCost(level);
       if (baseCost == null) return null;
@@ -2739,7 +2799,7 @@
       let inflRed = 0;
       let offlineBonus = 0;
       let globalMul = MULTIPLIER_SCALE;
-      let isoDiscount = 0;
+      let isoDiscount = getAwakenDiscountScaled();
       let apcFlat = 0;
       let apsFlat = 0;
 
@@ -2972,6 +3032,7 @@
     }
 
     function refreshAwakenHighlights(){
+      updateAwakenDiscountCounter();
       if (!cellMap.size) return;
       for (const [symbol, cell] of cellMap.entries()){
         if (!cell) continue;
@@ -2987,6 +3048,16 @@
         cell.classList.toggle("awaken-ready", !!canAwaken);
       }
       updateAwakenAllButton();
+    }
+
+    function updateAwakenDiscountCounter(){
+      if (!awakenDiscountCounter) return;
+      const steps = getAwakenDiscountSteps();
+      const discountScaled = getAwakenDiscountScaled();
+      const percent = scaledToPercent(discountScaled);
+      const percentText = percent > 0 ? ` (−${percent}%)` : "";
+      awakenDiscountCounter.textContent = `Rabais éveil : ${formatNumber(steps)}${percentText}`;
+      awakenDiscountCounter.classList.toggle("has-discount", steps > 0);
     }
 
     function clampRollDiscount(value){
@@ -3111,6 +3182,7 @@
         gridMain.appendChild(cell);
         cellMap.set(el.symbol, cell);
       });
+      if (awakenDiscountCounter) gridMain.appendChild(awakenDiscountCounter);
       refreshAwakenHighlights();
     }
 
@@ -3203,6 +3275,7 @@
       if (cost == null) return;
       if (!spendIsotopes(el.symbol, cost)) return;
       setAwakenLevel(el.symbol, level + 1);
+      registerAwakenProgress(1);
       saveAndUpdate();
       refreshElementPanel();
     }
@@ -3232,6 +3305,7 @@
             if (cost == null) break;
             if (!spendIsotopes(symbol, cost)) break;
             setAwakenLevel(symbol, level + 1);
+            registerAwakenProgress(1);
             upgraded++;
             progress = true;
             const nextDerived = computeDerivedStats();
