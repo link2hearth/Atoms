@@ -357,29 +357,36 @@
     /* Compteurs */
     .atomsCluster {
       display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
-      gap:clamp(.45rem, 1.6vw, 1.1rem);
-      width:min(100%, var(--grid-max));
-      margin:clamp(.4rem, 2.4vh, 1.4rem) auto 0;
-      grid-auto-flow:dense;
+      grid-template-columns:minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr);
+      grid-template-areas:"apc atoms aps";
+      gap:clamp(.35rem, 1.6vw, 1.2rem);
+      width:100%;
+      margin:clamp(.4rem, 2.4vh, 1.4rem) 0 0;
+      align-self:stretch;
+      align-items:stretch;
+      justify-items:stretch;
+    }
+    .atomsCluster > * {
+      min-width:0;
     }
     .atomsBox {
       display:flex;
       flex-direction:column;
       align-items:center;
       gap:.3rem;
-      font-size:clamp(1.1rem, 2.6vw, 2.1rem);
-      padding:clamp(.55rem, 1.6vw, 1.1rem) clamp(.9rem, 2.6vw, 1.9rem);
+      font-size:clamp(.85rem, 2.4vw, 2.2rem);
+      padding:clamp(.5rem, 1.8vw, 1.3rem) clamp(.8rem, 2.8vw, 2.3rem);
       background:var(--card);
       border-radius:14px;
       box-shadow:0 8px 20px rgba(0,0,0,.2);
       width:100%;
-      max-width:clamp(220px, 60vw, 420px);
-      justify-self:center;
-      grid-column:1 / -1;
+      max-width:none;
+      justify-self:stretch;
+      box-sizing:border-box;
+      grid-area:atoms;
     }
     .atomsLabel {
-      font-size:clamp(.68rem, 1.1vw, .9rem);
+      font-size:clamp(.5rem, .95vw, .88rem);
       text-transform:uppercase;
       letter-spacing:.14em;
       opacity:.78;
@@ -387,6 +394,7 @@
     .atomsValue {
       font-weight:700;
       line-height:1.1;
+      font-size:clamp(1.1rem, 4.5vw, 3.2rem);
     }
     .statPill {
       display:flex;
@@ -394,28 +402,31 @@
       justify-content:center;
       align-items:center;
       background:var(--pill);
-      padding:clamp(.45rem, 1.3vw, .85rem) clamp(.55rem, 1.6vw, 1.05rem);
+      padding:clamp(.4rem, 1.4vw, .95rem) clamp(.55rem, 1.8vw, 1.2rem);
       border-radius:12px;
       box-shadow:0 6px 16px rgba(0,0,0,.18);
       gap:.2rem;
       min-height:100%;
+      box-sizing:border-box;
     }
     .statLabel {
-      font-size:clamp(.65rem,1.1vw,.9rem);
+      font-size:clamp(.48rem,.95vw,.85rem);
       text-transform:uppercase;
       letter-spacing:.18em;
       opacity:.7;
     }
     .statValue {
-      font-size:clamp(.85rem, 1.8vw, 1.35rem);
+      font-size:clamp(.65rem, 2.1vw, 1.45rem);
       font-weight:700;
       line-height:1.1;
     }
     .statPill-apc {
       background:linear-gradient(140deg, rgba(255,140,82,.25), rgba(255,200,160,.18));
+      grid-area:apc;
     }
     .statPill-aps {
       background:linear-gradient(140deg, rgba(0,210,255,.25), rgba(120,255,220,.18));
+      grid-area:aps;
     }
 
     /* Icône atome */
@@ -1077,11 +1088,19 @@
         gap:clamp(.45rem,3vw,.85rem);
       }
       #themeControls button { width:clamp(2.4rem,10vw,3rem); height:clamp(2.4rem,10vw,3rem); }
-      .atomsCluster { grid-template-columns:1fr; }
-      .atomsBox { max-width:100%; }
-      .statPill { width:100%; flex-direction:row; justify-content:space-between; }
+      .atomsCluster {
+        grid-template-columns:minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr);
+        gap:clamp(.3rem, 2.4vw, .9rem);
+      }
+      .atomsBox {
+        font-size:clamp(.7rem, 4.6vw, 1.9rem);
+        padding:clamp(.45rem, 3vw, 1rem) clamp(.6rem, 5vw, 1.6rem);
+      }
+      .statPill {
+        padding:clamp(.35rem, 2.6vw, .85rem) clamp(.45rem, 4vw, 1.1rem);
+      }
       .statLabel { letter-spacing:.12em; }
-      .statValue { font-size:clamp(1rem,5.5vw,1.6rem); }
+      .statValue { font-size:clamp(.6rem,4.8vw,1.4rem); }
       #shopPage { padding-left:clamp(.75rem,4vw,1.4rem); padding-right:clamp(.75rem,4vw,1.4rem); }
       .shop-grid { grid-template-columns:1fr; }
       .shop-card { gap:clamp(.6rem, 2vh, 1rem); }
