@@ -1590,7 +1590,7 @@
 
     // Familles & poids de tirage
     const FAMILIES = {
-      ALK: { label:"Alcalins", weight:7, bonusDesc:"+1% chance de crit (max 50%), puis +10% dégâts critiques / bonus (set +5% chance)", bonusType:"crit" },
+      ALK: { label:"Alcalins", weight:7, bonusDesc:"+1% chance de crit (max 50%), puis +1% dégâts critiques / bonus (set +5% chance)", bonusType:"crit" },
       HAL: { label:"Halogènes", weight:7, bonusDesc:"+1% APC / unique (set +10%)", bonusType:"apc" },
       NG : { label:"Gaz nobles", weight:7, bonusDesc:"+2% APS / unique (set +10%)", bonusType:"aps" },
       C  : { label:"Métaux de transition", weight:40, bonusDesc:"+1 APC & APS / élément unique (set +5)", bonusType:"flat" },
@@ -1808,8 +1808,8 @@
     }
     let last = S0.last ?? null;
     let sessionStartTime = Date.now();
-    let sessionAtomsBaseline = totalAtoms;
     let sessionManualClicks = 0;
+    let sessionAtomsGained = 0;
     let apcFrenzyEffects = [];
     let apsFrenzyEffects = [];
     let currentFrenzyMultiplierBase = 5;
@@ -2110,6 +2110,8 @@
       atoms = Math.max(0, atoms + gain);
       totalAtoms = Math.max(0, totalAtoms + gain);
       reviveRunAtoms = Math.max(0, reviveRunAtoms + gain);
+      const nextSessionGain = sessionAtomsGained + gain;
+      sessionAtomsGained = nextSessionGain >= Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : nextSessionGain;
       checkReviveUnlock();
       checkTrophies({ silent });
       return true;
@@ -2885,7 +2887,7 @@
 
       const critChance = Math.min(500, critUnits * 10);
       const extraCritUnits = Math.max(0, critUnits - 50);
-      const critDamagePercent = 100 + extraCritUnits * 10;
+      const critDamagePercent = 100 + extraCritUnits;
 
       return { critChance, critDamagePercent, apcMul, apsMul, apcFlat, apsFlat, inflRed, offlineBonus, globalMul, isoDiscount, hybridAPC, hybridAPS, frenzyBase };
     }
@@ -3494,7 +3496,7 @@
       last = now;
       sessionStartTime = now;
       sessionManualClicks = 0;
-      sessionAtomsBaseline = totalAtoms;
+      sessionAtomsGained = 0;
       reviveRunAtoms = 0;
       reviveRunClicks = 0;
       currentElement = null;
@@ -3542,7 +3544,7 @@
       last = Date.now();
       manualClicksTotal = 0;
       sessionManualClicks = 0;
-      sessionAtomsBaseline = totalAtoms;
+      sessionAtomsGained = 0;
       sessionStartTime = Date.now();
       gameStart = sessionStartTime;
       gacha = createDefaultGachaState();
@@ -4052,11 +4054,9 @@
         }
       }
 
-      if (totalAtoms < sessionAtomsBaseline) sessionAtomsBaseline = totalAtoms;
       const now = Date.now();
       if (infosSessionAtomsEl){
-        const sessionGain = Math.max(0, totalAtoms - sessionAtomsBaseline);
-        infosSessionAtomsEl.textContent = formatNumber(sessionGain);
+        infosSessionAtomsEl.textContent = formatNumber(sessionAtomsGained);
       }
       if (infosSessionClicksEl) infosSessionClicksEl.textContent = formatNumber(sessionManualClicks);
       if (infosSessionDurationEl) infosSessionDurationEl.textContent = formatSessionDuration(now - sessionStartTime);
