@@ -1596,8 +1596,8 @@
     const AWAKEN_MAX = 100;
     const AWAKEN_FINAL_COST = 1_000_000;
     const AWAKEN_BASE_COSTS = [5,10,25,50];
-    const AWAKEN_DISCOUNT_STEP = 50;
-    const AWAKEN_DISCOUNT_RATIO = 0.9;
+    const AWAKEN_DISCOUNT_STEP = 50; // Éveils nécessaires avant chaque réduction
+    const AWAKEN_DISCOUNT_RATIO = 0.99; // Réduction composée de 1% par palier pour garder un coût élevé
     const AWAKEN_COSTS = (()=>{
       const costs = AWAKEN_BASE_COSTS.slice(0, AWAKEN_MAX);
       if (costs.length === 0) costs.push(5);
