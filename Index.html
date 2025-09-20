@@ -810,29 +810,42 @@
       font-size:clamp(.66rem,.9vw,.85rem); opacity:.95; text-align:left;
     }
     .awaken-box {
+      display:contents;
+    }
+    .awaken-card {
       background:var(--card);
       border-radius:12px;
       padding:clamp(.45rem,1.2vh,.75rem);
       display:flex;
       flex-direction:column;
-      align-items:stretch;
+      align-items:center;
       justify-content:center;
       gap:clamp(.4rem,1vh,.65rem);
-      grid-column:13 / 18;
-      grid-row:1 / 2;
-      min-height:clamp(48px,3.4vw,56px);
       box-shadow:0 12px 24px rgba(0,0,0,.18);
       width:100%;
       box-sizing:border-box;
+      height:100%;
     }
-    .awaken-box .awaken-btn {
+    .awaken-card-single {
+      grid-column:1 / 4;
+      grid-row:8 / 10;
+      align-self:stretch;
+      justify-self:stretch;
+    }
+    .awaken-card-all {
+      grid-column:13 / 18;
+      grid-row:1 / 2;
+      min-height:clamp(48px,3.4vw,56px);
+    }
+    .awaken-card .awaken-btn {
       width:100%;
       max-width:clamp(11rem, 26vw, 18rem);
       margin:0 auto;
       text-align:center;
     }
     @media (max-width: 900px) {
-      .awaken-box {
+      .awaken-card-single,
+      .awaken-card-all {
         grid-column:1 / -1;
         grid-row:auto;
       }
@@ -1412,8 +1425,12 @@
             </div>
           </div>
           <div id="awakenWrapper" class="awaken-box hidden">
-            <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
-            <button id="awakenAllBtn" class="awaken-btn awaken-all-btn hidden" type="button">Éveiller tout</button>
+            <div id="awakenSingleCard" class="awaken-card awaken-card-single hidden">
+              <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
+            </div>
+            <div id="awakenAllCard" class="awaken-card awaken-card-all hidden">
+              <button id="awakenAllBtn" class="awaken-btn awaken-all-btn hidden" type="button">Éveiller tout</button>
+            </div>
           </div>
           <div id="awakenDiscountCounter" class="awaken-discount-counter">Rabais éveil : 0</div>
         </div>
@@ -1909,6 +1926,8 @@
     const awakenBtn = document.getElementById("awakenBtn");
     const awakenAllBtn = document.getElementById("awakenAllBtn");
     const awakenWrapper = document.getElementById("awakenWrapper");
+    const awakenSingleCard = document.getElementById("awakenSingleCard");
+    const awakenAllCard = document.getElementById("awakenAllCard");
     if (awakenAllBtn) awakenAllBtn.setAttribute("aria-label", "Éveiller tous les éléments possédés");
 
     const bonusList = document.getElementById("bonusList");
@@ -2719,10 +2738,12 @@
         awakenAllBtn.classList.add("hidden");
         awakenAllBtn.disabled = true;
         awakenAllBtn.removeAttribute("title");
+        if (awakenAllCard) awakenAllCard.classList.add("hidden");
         updateAwakenWrapperVisibility();
         return;
       }
       awakenAllBtn.classList.remove("hidden");
+      if (awakenAllCard) awakenAllCard.classList.remove("hidden");
       const hasUpgrade = canAnyAwaken();
       awakenAllBtn.disabled = !hasUpgrade;
       if (!hasUpgrade){
@@ -3108,12 +3129,14 @@
         gridMain.appendChild(awakenWrapper);
         awakenWrapper.classList.add("hidden");
       }
+      if (awakenSingleCard) awakenSingleCard.classList.add("hidden");
       if (awakenBtn){
         awakenBtn.textContent = "Éveil";
         awakenBtn.disabled = true;
         awakenBtn.classList.add("hidden");
         awakenBtn.removeAttribute("title");
       }
+      if (awakenAllCard) awakenAllCard.classList.add("hidden");
       if (awakenAllBtn){
         awakenAllBtn.classList.add("hidden");
         awakenAllBtn.disabled = true;
@@ -3202,6 +3225,7 @@
           awakenBtn.classList.add("hidden");
           awakenBtn.removeAttribute("title");
         }
+        if (awakenSingleCard) awakenSingleCard.classList.add("hidden");
         updateAwakenAllButton();
         return;
       }
@@ -3221,6 +3245,7 @@
       if (elementIsoCount) elementIsoCount.textContent = formatNumber(isoAmount);
       if (!awakenWrapper || !awakenBtn) return;
       awakenBtn.classList.remove("hidden");
+      if (awakenSingleCard) awakenSingleCard.classList.remove("hidden");
       const progressText = `(${awakenLevel}/${maxLevel})`;
       const baseCost = getDiscountedAwakenCost(awakenLevel, currentIsoDiscount);
       const costText = baseCost != null ? `${formatNumber(baseCost)} iso` : "—";
