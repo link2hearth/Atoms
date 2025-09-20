@@ -241,49 +241,76 @@
       opacity:.8;
     }
 
-    .info-grid {
+    .infos-wrapper {
       width:min(100%, var(--grid-max));
       margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:clamp(1rem, 2.6vh, 1.8rem);
+    }
+    .info-breakdown-grid,
+    .info-bubble-grid {
       display:grid;
-      gap:clamp(.9rem, 2.4vh, 1.6rem);
+      width:100%;
+      gap:clamp(.75rem, 2.2vh, 1.2rem);
+    }
+    .info-breakdown-grid {
+      grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .info-bubble-grid {
+      grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
     }
     .info-card {
       background:var(--card);
       border-radius:18px;
-      padding:clamp(1rem, 2.4vh, 1.6rem) clamp(1.2rem, 3vw, 2.1rem);
-      box-shadow:0 12px 26px rgba(0,0,0,.24);
+      padding:clamp(.85rem, 2vh, 1.35rem) clamp(1rem, 2.4vw, 1.8rem);
+      box-shadow:0 10px 22px rgba(0,0,0,.22);
       display:flex;
       flex-direction:column;
-      gap:clamp(.6rem, 1.6vh, 1rem);
+      gap:clamp(.55rem, 1.6vh, .95rem);
     }
     .info-card h2 {
       margin:0;
-      font-size:clamp(.85rem, 1.3vw, 1.05rem);
+      font-size:clamp(.82rem, 1.25vw, 1rem);
       letter-spacing:.18em;
       text-transform:uppercase;
-      opacity:.85;
+      opacity:.82;
+    }
+    .info-card--compact {
+      gap:clamp(.45rem, 1.4vh, .8rem);
     }
     .info-metrics {
       display:flex;
       flex-direction:column;
-      gap:clamp(.5rem, 1.4vh, .85rem);
+      gap:clamp(.45rem, 1.4vh, .75rem);
     }
     .info-row {
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:clamp(.75rem, 2vw, 1.2rem);
-      font-size:clamp(.78rem, 1.1vw, .95rem);
+      gap:clamp(.6rem, 1.6vw, 1rem);
+      font-size:clamp(.75rem, 1.05vw, .9rem);
       flex-wrap:wrap;
+    }
+    .info-card--compact .info-row {
+      background:var(--pill);
+      border-radius:14px;
+      padding:clamp(.4rem, 1.2vh, .65rem) clamp(.65rem, 2vw, .95rem);
+      box-shadow:0 8px 18px rgba(0,0,0,.16);
+    }
+    .info-card--breakdown .info-row {
+      padding:0;
+      background:transparent;
+      box-shadow:none;
     }
     .info-row span {
       text-transform:uppercase;
       letter-spacing:.14em;
-      opacity:.7;
+      opacity:.72;
       flex:1 1 auto;
     }
     .info-row strong {
-      font-size:clamp(.95rem, 1.6vw, 1.3rem);
+      font-size:clamp(.92rem, 1.5vw, 1.25rem);
       font-weight:700;
       letter-spacing:.08em;
       margin-left:auto;
@@ -291,8 +318,12 @@
     }
     .info-row.total {
       border-top:1px solid rgba(255,255,255,.12);
-      padding-top:clamp(.45rem, 1.2vh, .75rem);
-      margin-top:clamp(.45rem, 1.2vh, .75rem);
+      padding-top:clamp(.45rem, 1.2vh, .7rem);
+      margin-top:clamp(.45rem, 1.2vh, .7rem);
+    }
+    .info-card--compact .info-row.total {
+      border-top:none;
+      margin-top:0;
     }
     .info-row-multi {
       align-items:flex-start;
@@ -314,12 +345,16 @@
       align-items:center;
       justify-content:space-between;
       gap:.75rem;
-      font-size:clamp(.75rem, 1.05vw, .9rem);
+      font-size:clamp(.72rem, 1.05vw, .88rem);
+      background:var(--pill);
+      border-radius:12px;
+      padding:clamp(.4rem, 1.2vh, .6rem) clamp(.6rem, 1.8vw, .9rem);
+      box-shadow:0 6px 16px rgba(0,0,0,.16);
     }
     .multiplier-item span {
       text-transform:uppercase;
       letter-spacing:.12em;
-      opacity:.68;
+      opacity:.72;
     }
     .multiplier-item strong {
       font-size:clamp(.9rem, 1.4vw, 1.1rem);
@@ -968,44 +1003,26 @@
 
     .loot-detail { flex:1; }
 
-    /* BONUS PAGE */
-    #bonusPage.page.active { justify-content:flex-start; }
-    #bonusPage .bonus-wrap {
-      order:2;
-      width:min(100%, 720px);
-      display:flex;
-      flex-direction:column;
-      gap:clamp(.6rem, 1.6vh, 1rem);
-      background:var(--card);
-      padding:clamp(.85rem, 2.2vh, 1.3rem) clamp(1rem, 2.6vw, 1.6rem);
-      border-radius:16px;
-      box-shadow:0 10px 22px rgba(0,0,0,.18);
-    }
-    #bonusPage .bonus-title {
+    .info-empty {
       margin:0;
-      font-size:clamp(1rem, 2vw, 1.4rem);
-      text-transform:uppercase;
-      letter-spacing:.16em;
+      font-size:clamp(.72rem, 1.05vw, .88rem);
+      opacity:.7;
     }
-    #bonusList ul {
+    .bonus-lines {
+      list-style:none;
       margin:0;
-      padding-left:1.25rem;
-      display:flex;
-      flex-direction:column;
-      gap:.45rem;
-    }
-    #bonusList li { line-height:1.4; }
-    #bonusList p { margin:0; }
-    #bonusList .bonus-section {
+      padding:0;
       display:flex;
       flex-direction:column;
       gap:clamp(.45rem, 1.3vh, .75rem);
     }
-    #bonusList .bonus-section + .bonus-section {
-      margin-top:clamp(.8rem, 2vh, 1.2rem);
-    }
-    #bonusList .bonus-section-trophies {
-      width:100%;
+    .bonus-lines li {
+      background:var(--pill);
+      border-radius:14px;
+      padding:clamp(.45rem, 1.3vh, .75rem) clamp(.7rem, 2vw, 1.1rem);
+      box-shadow:0 8px 18px rgba(0,0,0,.16);
+      line-height:1.4;
+      font-size:clamp(.7rem, 1.05vw, .9rem);
     }
     .trophy-list {
       list-style:none;
@@ -1055,24 +1072,17 @@
       opacity:.75;
       text-align:right;
     }
-    .bonus-subtitle {
-      margin:0;
-      font-size:clamp(.85rem, 1.8vw, 1.1rem);
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      opacity:.85;
-    }
     .set-status-grid {
-      display:flex;
-      flex-direction:column;
-      gap:clamp(.35rem, 1.2vh, .65rem);
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+      gap:clamp(.45rem, 1.4vh, .85rem);
     }
     .set-status-card {
       display:flex;
       justify-content:space-between;
       align-items:center;
       gap:clamp(.45rem, 1.2vw, .85rem);
-      padding:clamp(.55rem, 1.4vh, .9rem) clamp(.75rem, 2vw, 1.25rem);
+      padding:clamp(.55rem, 1.4vh, .9rem) clamp(.75rem, 2vw, 1.1rem);
       border-radius:12px;
       background:var(--pill);
       box-shadow:0 6px 16px rgba(0,0,0,.14);
@@ -1102,10 +1112,6 @@
     }
     .set-status-card.set-incomplete .set-status-state {
       opacity:.7;
-    }
-
-    @media (min-width: 960px) {
-      .info-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
     }
 
     @media (max-width: 900px) {
@@ -1249,8 +1255,8 @@
       <button class="nav-button" type="button" data-page-target="gachaPage">
         <span class="nav-label">Table</span>
       </button>
-      <button class="nav-button" type="button" data-page-target="bonusPage">
-        <span class="nav-label">Bonus</span>
+      <button class="nav-button" type="button" data-page-target="moleculesPage">
+        <span class="nav-label">Molécules</span>
       </button>
       <button class="nav-button" type="button" data-page-target="infosPage">
         <span class="nav-label">Infos</span>
@@ -1437,64 +1443,79 @@
       </div>
     </section>
 
-    <!-- PAGE BONUS -->
-    <section id="bonusPage" class="page" aria-labelledby="bonusTitle">
-      <h1 id="bonusTitle" class="sr-only">Bonus</h1>
-      <div class="bonus-wrap">
-        <h2 class="bonus-title">Bonus débloqués</h2>
-        <div id="bonusList"><p>Aucun bonus actif pour le moment.</p></div>
-      </div>
+    <!-- PAGE MOLECULES -->
+    <section id="moleculesPage" class="page" aria-labelledby="moleculesTitle">
+      <h1 id="moleculesTitle" class="sr-only">Molécules</h1>
     </section>
 
     <!-- PAGE INFOS -->
     <section id="infosPage" class="page" aria-labelledby="infosTitle">
       <h1 id="infosTitle" class="sr-only">Infos</h1>
-      <div class="info-grid">
-        <article class="info-card">
-          <h2>Session en cours</h2>
-          <div class="info-metrics">
-            <div class="info-row"><span>Total d'Atoms gagnés</span><strong id="infosSessionAtoms">0</strong></div>
-            <div class="info-row"><span>Clics manuels</span><strong id="infosSessionClicks">0</strong></div>
-            <div class="info-row"><span>Durée en ligne</span><strong id="infosSessionDuration">00:00:00</strong></div>
-          </div>
-        </article>
-        <article class="info-card">
-          <h2>Progression globale</h2>
-          <div class="info-metrics">
-            <div class="info-row"><span>Atoms (revive en cours)</span><strong id="infosReviveAtoms">0</strong></div>
-            <div class="info-row"><span>Total d'Atoms</span><strong id="infosLifetimeAtoms">0</strong></div>
-            <div class="info-row"><span>Clics (revive en cours)</span><strong id="infosReviveClicks">0</strong></div>
-            <div class="info-row"><span>Clics totaux</span><strong id="infosLifetimeClicks">0</strong></div>
-            <div class="info-row"><span>Revives complétés</span><strong id="infosReviveCount">0</strong></div>
-            <div class="info-row"><span>Temps depuis le début</span><strong id="infosTotalRuntime">0 h 0 min</strong></div>
-          </div>
-        </article>
-        <article class="info-card">
-          <h2>Détails APC</h2>
-          <div class="info-metrics">
-            <div class="info-row"><span>Base</span><strong id="infosApcBase">0</strong></div>
-            <div class="info-row"><span>Bonus plat</span><strong id="infosApcFlat">0</strong></div>
-            <div class="info-row"><span>Après bonus</span><strong id="infosApcAfterFlat">0</strong></div>
-            <div class="info-row info-row-multi">
-              <span>Multiplicateurs</span>
-              <ul class="multiplier-list" id="infosApcMultipliers"></ul>
+      <div class="infos-wrapper">
+        <div class="info-breakdown-grid">
+          <article class="info-card info-card--breakdown">
+            <h2>Détails APC</h2>
+            <div class="info-metrics">
+              <div class="info-row"><span>Base</span><strong id="infosApcBase">0</strong></div>
+              <div class="info-row"><span>Bonus plat</span><strong id="infosApcFlat">0</strong></div>
+              <div class="info-row"><span>Après bonus</span><strong id="infosApcAfterFlat">0</strong></div>
+              <div class="info-row info-row-multi">
+                <span>Multiplicateurs</span>
+                <ul class="multiplier-list" id="infosApcMultipliers"></ul>
+              </div>
+              <div class="info-row total"><span>Total APC</span><strong id="infosApcTotal">0</strong></div>
             </div>
-            <div class="info-row total"><span>Total APC</span><strong id="infosApcTotal">0</strong></div>
-          </div>
-        </article>
-        <article class="info-card">
-          <h2>Détails APS</h2>
-          <div class="info-metrics">
-            <div class="info-row"><span>Base</span><strong id="infosApsBase">0</strong></div>
-            <div class="info-row"><span>Bonus plat</span><strong id="infosApsFlat">0</strong></div>
-            <div class="info-row"><span>Après bonus</span><strong id="infosApsAfterFlat">0</strong></div>
-            <div class="info-row info-row-multi">
-              <span>Multiplicateurs</span>
-              <ul class="multiplier-list" id="infosApsMultipliers"></ul>
+          </article>
+          <article class="info-card info-card--breakdown">
+            <h2>Détails APS</h2>
+            <div class="info-metrics">
+              <div class="info-row"><span>Base</span><strong id="infosApsBase">0</strong></div>
+              <div class="info-row"><span>Bonus plat</span><strong id="infosApsFlat">0</strong></div>
+              <div class="info-row"><span>Après bonus</span><strong id="infosApsAfterFlat">0</strong></div>
+              <div class="info-row info-row-multi">
+                <span>Multiplicateurs</span>
+                <ul class="multiplier-list" id="infosApsMultipliers"></ul>
+              </div>
+              <div class="info-row total"><span>Total APS</span><strong id="infosApsTotal">0</strong></div>
             </div>
-            <div class="info-row total"><span>Total APS</span><strong id="infosApsTotal">0</strong></div>
-          </div>
-        </article>
+          </article>
+        </div>
+        <div class="info-bubble-grid">
+          <article class="info-card info-card--compact">
+            <h2>Session en cours</h2>
+            <div class="info-metrics">
+              <div class="info-row"><span>Total d'Atoms gagnés</span><strong id="infosSessionAtoms">0</strong></div>
+              <div class="info-row"><span>Clics manuels</span><strong id="infosSessionClicks">0</strong></div>
+              <div class="info-row"><span>Durée en ligne</span><strong id="infosSessionDuration">00:00:00</strong></div>
+            </div>
+          </article>
+          <article class="info-card info-card--compact">
+            <h2>Progression globale</h2>
+            <div class="info-metrics">
+              <div class="info-row"><span>Atoms (revive en cours)</span><strong id="infosReviveAtoms">0</strong></div>
+              <div class="info-row"><span>Total d'Atoms</span><strong id="infosLifetimeAtoms">0</strong></div>
+              <div class="info-row"><span>Clics (revive en cours)</span><strong id="infosReviveClicks">0</strong></div>
+              <div class="info-row"><span>Clics totaux</span><strong id="infosLifetimeClicks">0</strong></div>
+              <div class="info-row"><span>Revives complétés</span><strong id="infosReviveCount">0</strong></div>
+              <div class="info-row"><span>Temps depuis le début</span><strong id="infosTotalRuntime">0 h 0 min</strong></div>
+            </div>
+          </article>
+          <article class="info-card info-card--compact">
+            <h2>Trophées</h2>
+            <p class="info-empty" id="infosTrophyEmpty">Aucun trophée débloqué pour le moment.</p>
+            <ul class="trophy-list hidden" id="infosTrophyList"></ul>
+          </article>
+          <article class="info-card info-card--compact">
+            <h2>Effets actifs</h2>
+            <p class="info-empty" id="infosBonusEmpty">Aucun bonus actif pour le moment.</p>
+            <ul class="bonus-lines hidden" id="infosBonusLines"></ul>
+          </article>
+          <article class="info-card info-card--compact">
+            <h2>Bonus de set</h2>
+            <p class="info-empty" id="infosSetEmpty">Découvre des éléments pour activer les bonus de set.</p>
+            <div class="set-status-grid hidden" id="infosSetStatus"></div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -1867,7 +1888,7 @@
     const mainPageEl = document.getElementById("mainPage");
     const shopPageEl = document.getElementById("shopPage");
     const gachaPageEl = document.getElementById("gachaPage");
-    const bonusPageEl = document.getElementById("bonusPage");
+    const moleculesPageEl = document.getElementById("moleculesPage");
     const infosPageEl = document.getElementById("infosPage");
     const revivePageEl = document.getElementById("revivePage");
     const optionsPageEl = document.getElementById("optionsPage");
@@ -1930,7 +1951,12 @@
     const awakenAllCard = document.getElementById("awakenAllCard");
     if (awakenAllBtn) awakenAllBtn.setAttribute("aria-label", "Éveiller tous les éléments possédés");
 
-    const bonusList = document.getElementById("bonusList");
+    const infosBonusLinesEl = document.getElementById("infosBonusLines");
+    const infosBonusEmptyEl = document.getElementById("infosBonusEmpty");
+    const infosSetStatusEl = document.getElementById("infosSetStatus");
+    const infosSetEmptyEl = document.getElementById("infosSetEmpty");
+    const infosTrophyListEl = document.getElementById("infosTrophyList");
+    const infosTrophyEmptyEl = document.getElementById("infosTrophyEmpty");
 
     const infosSessionAtomsEl = document.getElementById("infosSessionAtoms");
     const infosSessionClicksEl = document.getElementById("infosSessionClicks");
@@ -3007,49 +3033,67 @@
       });
     }
 
-    function renderTrophySection(){
+    function renderTrophyItems(){
       const statuses = getTrophyStatuses();
-      const unlockedStatuses = statuses.filter(status => status.unlocked);
-      if (!unlockedStatuses.length) return "";
-      const items = unlockedStatuses.map(status => {
-        const progressPercent = Math.min(100, Math.floor(status.progress * 100));
-        const currentText = formatNumber(status.currentValue);
-        const targetText = formatNumber(status.threshold);
-        const stateLabel = status.unlocked ? "Débloqué" : `${progressPercent}%`;
-        const itemClass = status.unlocked ? "trophy-unlocked" : "trophy-locked";
-        return `<li class="${itemClass}"><div class="trophy-name">${status.name}</div><div class="trophy-desc">${status.description}</div><div class="trophy-progress"><span class="trophy-progress-value">${stateLabel}</span><span class="trophy-progress-target">${currentText} / ${targetText} Atoms</span></div></li>`;
-      }).join("");
-      return `<div class="bonus-section bonus-section-trophies"><h3 class="bonus-subtitle">Trophées</h3><ul class="trophy-list">${items}</ul></div>`;
-    }
-
-    function renderBonusHtml(){
-      const lines = getBonusLines();
-      const sections = [];
-      const trophySection = renderTrophySection();
-      if (trophySection) sections.push(trophySection);
-      if (lines.length === 0){
-        sections.push('<div class="bonus-section"><p>Aucun bonus actif pour le moment.</p></div>');
-      } else {
-        sections.push(`<div class="bonus-section"><h3 class="bonus-subtitle">Effets actifs</h3><ul>${lines.map(line => `<li>${line}</li>`).join("")}</ul></div>`);
-      }
-
-      const setStatuses = getFamilySetStatuses();
-      if (setStatuses.length > 0){
-        const cards = setStatuses.map(status => {
-          const progress = status.required > 0 ? `${status.owned} / ${status.required}` : `${status.owned}`;
-          const stateText = status.complete ? "Bonus de set activé" : "Bonus de set inactif";
-          const statusClass = status.complete ? "set-status-card set-complete" : "set-status-card set-incomplete";
-          return `<div class="${statusClass}"><span class="set-status-name">${status.label}</span><span class="set-status-info"><span class="set-status-progress">${progress}</span><span class="set-status-state">${stateText}</span></span></div>`;
+      return statuses
+        .filter(status => status.unlocked)
+        .map(status => {
+          const currentText = formatNumber(status.currentValue);
+          const targetText = formatNumber(status.threshold);
+          return `<li class="trophy-unlocked"><div class="trophy-name">${status.name}</div><div class="trophy-desc">${status.description}</div><div class="trophy-progress"><span class="trophy-progress-value">Débloqué</span><span class="trophy-progress-target">${currentText} / ${targetText} Atoms</span></div></li>`;
         }).join("");
-        sections.push(`<div class="bonus-section bonus-section-sets"><h3 class="bonus-subtitle">Bonus de set</h3><div class="set-status-grid">${cards}</div></div>`);
-      }
-
-      return sections.join("");
     }
 
     function refreshBonusList(){
-      if (!bonusList) return;
-      bonusList.innerHTML = renderBonusHtml();
+      if (infosBonusLinesEl && infosBonusEmptyEl){
+        const lines = getBonusLines();
+        if (!lines.length){
+          infosBonusLinesEl.innerHTML = "";
+          infosBonusLinesEl.classList.add("hidden");
+          infosBonusEmptyEl.classList.remove("hidden");
+        } else {
+          infosBonusLinesEl.innerHTML = lines.map(line => `<li>${line}</li>`).join("");
+          infosBonusLinesEl.classList.remove("hidden");
+          infosBonusEmptyEl.classList.add("hidden");
+        }
+      }
+
+      if (infosTrophyListEl && infosTrophyEmptyEl){
+        const trophyItems = renderTrophyItems();
+        if (trophyItems){
+          infosTrophyListEl.innerHTML = trophyItems;
+          infosTrophyListEl.classList.remove("hidden");
+          infosTrophyEmptyEl.classList.add("hidden");
+        } else {
+          infosTrophyListEl.innerHTML = "";
+          infosTrophyListEl.classList.add("hidden");
+          infosTrophyEmptyEl.classList.remove("hidden");
+        }
+      }
+
+      if (infosSetStatusEl && infosSetEmptyEl){
+        const setStatuses = getFamilySetStatuses();
+        if (setStatuses.length){
+          const cards = setStatuses.map(status => {
+            const progress = status.required > 0 ? `${status.owned} / ${status.required}` : `${status.owned}`;
+            const stateText = status.complete ? "Bonus de set activé" : "Bonus de set inactif";
+            const statusClass = status.complete ? "set-status-card set-complete" : "set-status-card set-incomplete";
+            return `<div class="${statusClass}"><span class="set-status-name">${status.label}</span><span class="set-status-info"><span class="set-status-progress">${progress}</span><span class="set-status-state">${stateText}</span></span></div>`;
+          }).join("");
+          infosSetStatusEl.innerHTML = cards;
+          infosSetStatusEl.classList.remove("hidden");
+          const hasProgress = setStatuses.some(status => status.owned > 0 || status.complete);
+          if (hasProgress){
+            infosSetEmptyEl.classList.add("hidden");
+          } else {
+            infosSetEmptyEl.classList.remove("hidden");
+          }
+        } else {
+          infosSetStatusEl.innerHTML = "";
+          infosSetStatusEl.classList.add("hidden");
+          infosSetEmptyEl.classList.remove("hidden");
+        }
+      }
     }
 
     function refreshAwakenHighlights(){
@@ -3760,7 +3804,7 @@
       ["mainPage", mainPageEl],
       ["shopPage", shopPageEl],
       ["gachaPage", gachaPageEl],
-      ["bonusPage", bonusPageEl],
+      ["moleculesPage", moleculesPageEl],
       ["infosPage", infosPageEl],
       ["revivePage", revivePageEl],
       ["optionsPage", optionsPageEl]
