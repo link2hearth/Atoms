@@ -814,8 +814,10 @@
       border-radius:12px;
       padding:clamp(.45rem,1.2vh,.75rem);
       display:flex;
-      align-items:center;
+      flex-direction:column;
+      align-items:stretch;
       justify-content:center;
+      gap:clamp(.4rem,1vh,.65rem);
       grid-column:13 / 18;
       grid-row:1 / 2;
       min-height:clamp(48px,3.4vw,56px);
@@ -826,6 +828,7 @@
     .awaken-box .awaken-btn {
       width:100%;
       max-width:clamp(11rem, 26vw, 18rem);
+      margin:0 auto;
       text-align:center;
     }
     @media (max-width: 900px) {
@@ -859,6 +862,11 @@
       opacity:.55;
       filter:grayscale(.2);
       box-shadow:none;
+    }
+
+    .awaken-all-btn {
+      background:linear-gradient(135deg, rgba(255,196,99,.55), rgba(255,120,0,.7));
+      box-shadow:0 6px 18px rgba(0,0,0,.22);
     }
 
     .gacha-grid {
@@ -1254,7 +1262,7 @@
       <button id="apsFrenzyOrb" class="frenzyOrb" type="button" aria-label="Activer la Frénésie APS" disabled></button>
 
       <div id="autoGachaPanel" class="auto-gacha-panel hidden" aria-live="polite">
-        <div id="autoGachaHeader" class="auto-gacha-header">Tirage auto</div>
+        <div id="autoGachaHeader" class="auto-gacha-header" aria-label="Prochain tirage gratuit">—</div>
         <div class="auto-gacha-content">
           <span id="autoGachaName" class="auto-gacha-name">—</span>
           <span id="autoGachaResult" class="loot-result auto-gacha-result" data-base-class="loot-result auto-gacha-result">—</span>
@@ -1389,6 +1397,7 @@
           </div>
           <div id="awakenWrapper" class="awaken-box hidden">
             <button id="awakenBtn" class="awaken-btn" type="button">Éveil</button>
+            <button id="awakenAllBtn" class="awaken-btn awaken-all-btn hidden" type="button">Éveiller tout</button>
           </div>
         </div>
       </div>
@@ -1868,7 +1877,9 @@
     const elementIsoCount = document.getElementById("elementIsoCount");
     const elementFamily = document.getElementById("elementFamily");
     const awakenBtn = document.getElementById("awakenBtn");
+    const awakenAllBtn = document.getElementById("awakenAllBtn");
     const awakenWrapper = document.getElementById("awakenWrapper");
+    if (awakenAllBtn) awakenAllBtn.setAttribute("aria-label", "Éveiller tous les éléments possédés");
 
     const bonusList = document.getElementById("bonusList");
 
@@ -2280,6 +2291,17 @@
       return Math.max(1, 10 - extra);
     }
 
+    function formatAutoGachaCountdown(value){
+      const totalSeconds = Math.max(0, Math.ceil(Number(value) || 0));
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (hours > 0){
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
     function resetAutoGachaCooldown(){
       const interval = getAutoGachaInterval();
       if (interval){
@@ -2291,18 +2313,24 @@
       } else {
         autoGachaCooldown = 0;
       }
+      updateAutoGachaHeader();
     }
 
     function updateAutoGachaHeader(){
       if (!autoGachaHeader) return;
-      const interval = getAutoGachaInterval();
-      autoGachaHeader.textContent = interval ? `Tirage auto (${interval}s)` : "Tirage auto";
+      if (!hasAutoGachaUnlocked()){
+        autoGachaHeader.textContent = "—";
+        return;
+      }
+      autoGachaHeader.textContent = autoGachaCooldown <= 0
+        ? "00:00"
+        : formatAutoGachaCountdown(autoGachaCooldown);
     }
 
     function updateAutoGachaPanel(){
       if (!autoGachaPanel) return;
       const isMainActive = !!(mainPageEl && mainPageEl.classList.contains('active'));
-      const shouldShow = hasAutoGachaUnlocked() && lastAutoResult && isMainActive;
+      const shouldShow = hasAutoGachaUnlocked() && isMainActive;
       autoGachaPanel.classList.toggle('hidden', !shouldShow);
     }
 
@@ -2324,6 +2352,7 @@
         }
       }
       updateAutoGachaPanel();
+      updateAutoGachaHeader();
     }
 
     function checkTrophies({ silent = false } = {}){
@@ -2356,15 +2385,18 @@
       const interval = getAutoGachaInterval();
       if (!interval){
         autoGachaCooldown = 0;
+        updateAutoGachaHeader();
         return;
       }
       if (!(mainPageEl && mainPageEl.classList.contains('active'))) return;
       autoGachaCooldown = Math.max(0, autoGachaCooldown - deltaSeconds);
+      updateAutoGachaHeader();
       if (autoGachaCooldown > 0) return;
       if (!performAutoGachaRoll()){
         // Si le tirage échoue, on retente après un intervalle complet.
       }
       autoGachaCooldown = interval;
+      updateAutoGachaHeader();
     }
 
     function pruneApcFrenzyEffects(now = Date.now()){
@@ -2584,6 +2616,61 @@
       const discount = Math.max(0, Math.min(isoDiscountScaled || 0, MULTIPLIER_SCALE));
       const numerator = (MULTIPLIER_SCALE - discount) * baseCost + (MULTIPLIER_SCALE - 1);
       return Math.max(1, Math.floor(numerator / MULTIPLIER_SCALE));
+    }
+
+    function getOwnedElementCount(){
+      if (!gacha.owned) return 0;
+      let count = 0;
+      for (const symbol of ORDERED_SYMBOLS){
+        if (gacha.owned[symbol]) count++;
+      }
+      return count;
+    }
+
+    function hasFullCollection(){
+      return getOwnedElementCount() >= ORDERED_SYMBOLS.length;
+    }
+
+    function canAnyAwaken(discount = currentIsoDiscount){
+      if (!gacha.owned) return false;
+      for (const symbol of ORDERED_SYMBOLS){
+        if (!gacha.owned[symbol]) continue;
+        const level = getAwakenLevel(symbol);
+        if (level >= AWAKEN_MAX) continue;
+        const cost = getDiscountedAwakenCost(level, discount);
+        if (cost == null) continue;
+        if (getIsoStock(symbol) >= cost) return true;
+      }
+      return false;
+    }
+
+    function updateAwakenWrapperVisibility(){
+      if (!awakenWrapper) return;
+      const singleVisible = awakenBtn && !awakenBtn.classList.contains("hidden");
+      const allVisible = awakenAllBtn && !awakenAllBtn.classList.contains("hidden");
+      const shouldShow = singleVisible || allVisible;
+      awakenWrapper.classList.toggle("hidden", !shouldShow);
+    }
+
+    function updateAwakenAllButton(){
+      if (!awakenAllBtn) return;
+      const fullCollection = hasFullCollection();
+      if (!fullCollection){
+        awakenAllBtn.classList.add("hidden");
+        awakenAllBtn.disabled = true;
+        awakenAllBtn.removeAttribute("title");
+        updateAwakenWrapperVisibility();
+        return;
+      }
+      awakenAllBtn.classList.remove("hidden");
+      const hasUpgrade = canAnyAwaken();
+      awakenAllBtn.disabled = !hasUpgrade;
+      if (!hasUpgrade){
+        awakenAllBtn.title = "Pas assez d'isotopes pour éveiller d'autres éléments.";
+      } else {
+        awakenAllBtn.removeAttribute("title");
+      }
+      updateAwakenWrapperVisibility();
     }
 
     // Probabilités familiales (pondérées)
@@ -2899,6 +2986,7 @@
         }
         cell.classList.toggle("awaken-ready", !!canAwaken);
       }
+      updateAwakenAllButton();
     }
 
     function clampRollDiscount(value){
@@ -2952,7 +3040,13 @@
       if (awakenBtn){
         awakenBtn.textContent = "Éveil";
         awakenBtn.disabled = true;
+        awakenBtn.classList.add("hidden");
         awakenBtn.removeAttribute("title");
+      }
+      if (awakenAllBtn){
+        awakenAllBtn.classList.add("hidden");
+        awakenAllBtn.disabled = true;
+        awakenAllBtn.removeAttribute("title");
       }
       if (elementName) elementName.textContent = "Clique un élément dans la grille";
       if (elementIsoCount) elementIsoCount.textContent = "—";
@@ -3030,12 +3124,13 @@
         if (elementName) elementName.textContent = "Clique un élément dans la grille";
         if (elementIsoCount) elementIsoCount.textContent = "—";
         if (elementFamily) elementFamily.textContent = "Famille : —";
-        if (awakenWrapper) awakenWrapper.classList.add("hidden");
         if (awakenBtn){
           awakenBtn.textContent = "Éveil";
           awakenBtn.disabled = true;
+          awakenBtn.classList.add("hidden");
           awakenBtn.removeAttribute("title");
         }
+        updateAwakenAllButton();
         return;
       }
       const el = currentElement;
@@ -3053,23 +3148,21 @@
       }
       if (elementIsoCount) elementIsoCount.textContent = formatNumber(isoAmount);
       if (!awakenWrapper || !awakenBtn) return;
+      awakenBtn.classList.remove("hidden");
       const progressText = `(${awakenLevel}/${maxLevel})`;
       const baseCost = getDiscountedAwakenCost(awakenLevel, currentIsoDiscount);
       const costText = baseCost != null ? `${formatNumber(baseCost)} iso` : "—";
       if (!owned){
-        awakenWrapper.classList.remove("hidden");
         awakenBtn.textContent = `Éveil : ${costText} ${progressText}`;
         awakenBtn.disabled = true;
         awakenBtn.title = "Obtiens cet élément pour l'éveiller";
       } else if (awakenLevel >= maxLevel){
-        awakenWrapper.classList.remove("hidden");
         awakenBtn.textContent = `Éveil max ${progressText}`;
         awakenBtn.disabled = true;
         awakenBtn.removeAttribute("title");
       } else {
         const discountLabel = currentIsoDiscount > 0 ? ` (-${scaledToPercent(currentIsoDiscount)}%)` : "";
         const isoText = baseCost != null ? `${formatNumber(baseCost)} iso${discountLabel}` : costText;
-        awakenWrapper.classList.remove("hidden");
         awakenBtn.textContent = `Éveil : ${isoText} ${progressText}`;
         awakenBtn.disabled = baseCost == null || isoAmount < baseCost;
         if (awakenBtn.disabled && baseCost != null){
@@ -3078,6 +3171,7 @@
           awakenBtn.removeAttribute("title");
         }
       }
+      updateAwakenAllButton();
       if (forceRecompute) refreshAwakenHighlights();
     }
 
@@ -3111,6 +3205,46 @@
       setAwakenLevel(el.symbol, level + 1);
       saveAndUpdate();
       refreshElementPanel();
+    }
+
+    function attemptAwakenAll(){
+      if (!hasFullCollection()) return;
+      const derived = computeDerivedStats();
+      currentIsoDiscount = derived.isoDiscount || 0;
+      currentRollDiscount = clampRollDiscount(derived.inflRed || 0);
+      if (!canAnyAwaken(currentIsoDiscount)){
+        updateAwakenAllButton();
+        return;
+      }
+      let upgraded = 0;
+      let guard = 0;
+      const maxLoops = AWAKEN_MAX * ORDERED_SYMBOLS.length;
+      let progress = true;
+      while (progress && guard < maxLoops){
+        progress = false;
+        guard++;
+        for (const symbol of ORDERED_SYMBOLS){
+          if (!gacha.owned[symbol]) continue;
+          while (true){
+            const level = getAwakenLevel(symbol);
+            if (level >= AWAKEN_MAX) break;
+            const cost = getDiscountedAwakenCost(level, currentIsoDiscount);
+            if (cost == null) break;
+            if (!spendIsotopes(symbol, cost)) break;
+            setAwakenLevel(symbol, level + 1);
+            upgraded++;
+            progress = true;
+            const nextDerived = computeDerivedStats();
+            currentIsoDiscount = nextDerived.isoDiscount || 0;
+            currentRollDiscount = clampRollDiscount(nextDerived.inflRed || 0);
+          }
+        }
+      }
+      if (upgraded > 0){
+        saveAndUpdate();
+      } else {
+        updateAwakenAllButton();
+      }
     }
 
     /* ===================== Tirage Gacha ===================== */
@@ -3339,6 +3473,9 @@
 
     if (awakenBtn){
       awakenBtn.addEventListener("click", attemptAwaken);
+    }
+    if (awakenAllBtn){
+      awakenAllBtn.addEventListener("click", attemptAwakenAll);
     }
 
     // Améliorations de base
